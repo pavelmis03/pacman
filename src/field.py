@@ -46,7 +46,5 @@ class Field(DrawableObject):
                 x = self.offset[0] + j*self.cell_size
                 y = self.offset[1] + i*self.cell_size
                 if self.cells[i][j] == self.WALL:
-                    color = Color.BLUE
-                else:
-                    color = Color.BLACK
-                pygame.draw.rect(self.game_object.screen, color, (x, y, self.cell_size, self.cell_size), self.bump)
+                    pygame.draw.rect(self.game_object.screen, Color.DBLUE, (x, y, self.cell_size, self.cell_size), self.bump)
+                    pygame.draw.rect(self.game_object.screen, Color.BLUE, (x+self.bump, y+self.bump, self.cell_size-self.bump, self.cell_size-self.bump))
