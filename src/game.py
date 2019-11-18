@@ -5,6 +5,7 @@ from src.ball import Ball
 from src.board import Board
 from src.constants import Color
 from src.field import Field
+from src.food import Food
 
 
 class Game:
@@ -22,6 +23,7 @@ class Game:
         #     self.objects.append(Ball(self))
         # self.objects.append(Board(self))
         self.objects.append(Field(self))
+        self.objects.append(Food(self, 10, 10))
 
     def library_init(self):
         pygame.init()  # Инициализация библиотеки

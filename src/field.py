@@ -38,6 +38,7 @@ class Field(DrawableObject):
             "#######################################"
         ]
         self.WALL = '#'
+        self.FOOD = '.'
         self.bump = 2 # выпуклость стен, сделай больше и посмотри что выйдет))
 
     def process_draw(self):
@@ -48,3 +49,5 @@ class Field(DrawableObject):
                 if self.cells[i][j] == self.WALL:
                     pygame.draw.rect(self.game_object.screen, Color.DBLUE, (x, y, self.cell_size, self.cell_size), self.bump)
                     pygame.draw.rect(self.game_object.screen, Color.BLUE, (x+self.bump, y+self.bump, self.cell_size-self.bump, self.cell_size-self.bump))
+                elif self.cells[i][j] == self.FOOD:
+                    pass
