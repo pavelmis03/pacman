@@ -21,7 +21,8 @@ class Game:
         # for i in range(5):
         #     self.objects.append(Ball(self))
         # self.objects.append(Board(self))
-        self.objects.append(Field(self))
+        f = Field(self)
+        self.field = f
 
     def library_init(self):
         pygame.init()  # Инициализация библиотеки
@@ -39,12 +40,14 @@ class Game:
         self.screen.fill(Color.BLACK)  # Заливка цветом
         for item in self.objects:
             item.process_draw()
+        self.field.process_draw()
         pygame.display.flip()  # Double buffering
         pygame.time.wait(5)  # Ждать 10 миллисекунд
 
     def process_logic(self):
         for item in self.objects:
             item.process_logic()
+        self.field.process_logic()
 
     def process_events(self):
         for event in pygame.event.get():  # Обработка всех событий
