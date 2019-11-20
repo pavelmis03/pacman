@@ -1,46 +1,61 @@
-
-import sys, pygame
+import sys
+import pygame
 
 size = [1200, 800]
 screen = pygame.Surface(size)
-window = pygame.display.set_mode((size))
+window = pygame.display.set_mode(size)
+BG_COLOR = [15, 15, 15]
+TEXT_COLOR = [30, 250, 250]
+MENU_DISABLE_ITEM_COLOR = [0, 0, 200]
+MENU_ENABLE_ITEM_COLOR = [250, 210 ,0]
 pygame.font.init()
+FONT_PATH = 'menu/menu_font.ttf'
+PATH_HIGHSCORES = 'menu/highscores.ini'
+PATH_CREDITS = 'menu/credits.ini'
+PATH_CONTROLS = 'menu/controls.ini'
 
-def drawText(file, param, font_decor, table, x, y):
-    fnt = pygame.font.Font(None, 30)
+# Can display textt on screen
+def drawText(file, param, is_table, x, y, table_head1='', table_head2=''):
+    fnt = pygame.font.Font(FONT_PATH, 30)
     file = open(file, param)
     text = file.readlines()
     text = [line.rstrip() for line in text]
-    if (table):
+    if is_table:
         ts = []
         for i in range(len(text)):
-            ts.append(text[i].split())
+            ts.append(text[i].split(':'))
         for i in range(len(text)):
-            for j in range(i + 1, len(text)):
-                if (float(ts[i][1]) >= float(ts[j][1])):
-                    t = ts[i];
-                    ts[i] = ts[j]
-                    ts[j] = t
-        new_s = []
-        new_s.append("Name                                              Score")
-        for i in range(1, len(ts)):
-            new_s.append(ts[i][0] + ' ' * (55 - len(ts[i][0]) - len(ts[i][1])) + ts[i][1])
+            for j in range(len(text)):
+                try:
+                    a = float(ts[i][1])
+                    b = float(ts[j][1])
+                    if a >= b:
+                        t = ts[i]
+                        ts[i] = ts[j]
+                        ts[j] = t
+                except ValueError:
+                    pass
+        new_s = ['{:<7}                {:^5}'.format(str(table_head1), str(table_head2))]
+        for i in range(len(ts)):
+            new_s.append('{:<7}                {:^5}'.format(ts[i][0], ts[i][1]))
         text = []
         for i in range(len(new_s)):
             text.append(new_s[i])
     for i in range(len(text)):
-        temp_text = fnt.render(text[i], 1, (0, 0, 0))
+        temp_text = fnt.render(text[i], 1, TEXT_COLOR)
         screen.blit(temp_text, (x, y + 40 * i))
     file.close()
 
+
 class Menu:
     def __init__(self, punkts_name, punkts_act, punkts_settings, text_file):
+        self.done = False
         self.punkts_act = punkts_act
         self.punkts_name = punkts_name
         self.punkts = []
         self.text_file = text_file
         for i in range(len(self.punkts_name)):
-            self.punkts.append((size[0] // punkts_settings[0] - punkts_settings[1], (size[1] - punkts_settings[2] + i * 80) // punkts_settings[3], self.punkts_name[i], (11, 0, 77), (250, 250, 30), i))
+            self.punkts.append((size[0] // punkts_settings[0] - punkts_settings[1], (size[1] - punkts_settings[2] + i * 80) // punkts_settings[3], self.punkts_name[i], MENU_DISABLE_ITEM_COLOR, MENU_ENABLE_ITEM_COLOR, i))
 
     def render(self, screen, font, punkt):
         for i in self.punkts:
@@ -51,17 +66,18 @@ class Menu:
 
     def menu(self):
         self.done = True
-        font_menu = pygame.font.Font(None, 50)
+        font_menu = pygame.font.Font(FONT_PATH, 40)
         pygame.key.set_repeat(0, 0)
         pygame.mouse.set_visible(True)
         punkt = 0
         while self.done:
-            screen.fill((0, 100, 200))
+            screen.fill(BG_COLOR)
             mp = pygame.mouse.get_pos()
             for i in self.punkts:
-                if ((mp[0] > i[0] and mp[0] < i[0] + 155) and (mp[1] > i[1] - 30 and mp[1] < i[1] + 30)):
+                if i[0] < mp[0] < i[0] + 155 and i[1] - 30 < mp[1] < i[1] + 30:
                     punkt = i[5]
             self.render(screen, font_menu, punkt)
+            # Event handler
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     sys.exit()
@@ -80,42 +96,43 @@ class Menu:
                         exec(self.punkts_act[punkt])
                 mp = pygame.mouse.get_pos()
                 for i in self.punkts:
-                    if ((mp[0] > i[0] and mp[0] < i[0] + 155) and (mp[1] > i[1] - 30 and mp[1] < i[1] + 30)):
-                        if (e.type == pygame.MOUSEBUTTONDOWN and e.button == 1):
+                    if (i[0] < mp[0] < i[0] + 155) and (i[1] - 30 < mp[1] < i[1] + 30):
+                        if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                             exec(self.punkts_act[punkt])
-            if (self.text_file != ''):
-                drawText(self.text_file[0], self.text_file[1], self.text_file[2], self.text_file[3], self.text_file[4], self.text_file[5])
+            if self.text_file != '':
+                drawText(self.text_file[0], self.text_file[1], self.text_file[2], self.text_file[3], self.text_file[4], self.text_file[5], self.text_file[6])
             window.blit(screen, (0, 0))
             pygame.display.flip()
 
+# Menu Items Discription
 def mainMenu():
-    punkts_name = [u'Играть', u'Уравление', u'Таблица рекордов', u'О нас', u'Выход']
-    punkts_act = ['self.done = False', 'keyInfo()', 'records()', 'ourInfo()', 'exit()']
+    punkts_name = [u'ИГРАТЬ', u'УПРАВЛЕНИЕ', u'РЕКОРДЫ', u'О НАС', u'ВЫХОД']
+    punkts_act = ['self.done = False', 'controls()', 'records()', 'credits()', 'exit()']
     punkts_settings = (2, 100, 160, 2)
     main_menu = Menu(punkts_name, punkts_act, punkts_settings, '')
     main_menu.menu()
 
-def ourInfo():
-    punkts_name = ['Назад']
+def credits():
+    punkts_name = ['НАЗАД']
     punkts_act = ['mainMenu()']
     punkts_settings = (1, size[0] - 50, 50, 1)
-    text = ('/home/prom/PycharmProjects/first_big_project/our_info.txt', 'r', 'None', False, 100, 50)
+    text = (PATH_CREDITS, 'r', False, 100, 50, '', '')
     info_menu = Menu(punkts_name, punkts_act, punkts_settings, text)
     info_menu.menu()
 
-def keyInfo():
-    punkts_name = ['Назад']
+def controls():
+    punkts_name = ['НАЗАД']
     punkts_act = ['mainMenu()']
     punkts_settings = (1, size[0] - 50, 50, 1)
-    text = ('/home/prom/PycharmProjects/first_big_project/key_info.txt', 'r', 'None', False, 100, 50)
+    text = (PATH_CONTROLS, 'r', True, 100, 50, 'KEY', 'VALUE')
     info_menu = Menu(punkts_name, punkts_act, punkts_settings, text)
     info_menu.menu()
 
 def records():
-    punkts_name = ['Назад']
+    punkts_name = ['НАЗАД']
     punkts_act = ['mainMenu()']
     punkts_settings = (1, size[0] - 50, 50, 1)
-    text = ('/home/prom/PycharmProjects/first_big_project/highscores.txt', 'r', 'None', True, 100, 50)
+    text = (PATH_HIGHSCORES, 'r', True, 100, 50, 'NAME', 'SCORE')
     info_menu = Menu(punkts_name, punkts_act, punkts_settings, text)
     info_menu.menu()
 
