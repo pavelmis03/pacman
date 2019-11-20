@@ -1,9 +1,7 @@
 import sys
 import pygame
 
-from src.ball import Ball
-from src.board import Board
-from src.constants import Color
+from src.constants import *
 
 
 class Game:
@@ -17,13 +15,13 @@ class Game:
 
     def create_game_objects(self):
         self.objects = []
-        for i in range(5):
-            self.objects.append(Ball(self))
-        self.objects.append(Board(self))
 
     def library_init(self):
         pygame.init()  # Инициализация библиотеки
         pygame.font.init()
+        pygame.display.set_caption('Pacman')
+        icon = pygame.image.load(IMAGES_DIR + '/icon.png')
+        pygame.display.set_icon(icon)
         self.screen = pygame.display.set_mode(self.size)  # Создание окна (установка размера)
 
     def main_loop(self):
