@@ -1,10 +1,6 @@
 import pygame
 import sys
 
-width = 800
-height = 600
-size = [width, height]
-
 class Object:
 
     def __init__(self, x, y):
@@ -51,11 +47,11 @@ class Pacman(Object):
                 self.key_down = 0  # положене "0"
 
     def smooth_move(self, move_left, move_right, move_up, move_down):
-        self.move_left = move_left     # флаг анимации движеия влево
+        self.move_left = move_left      # флаг анимации движеия влево
         self.move_right = move_right    # флаг анимации движеия вправо
-        self.move_up = move_up       # флаг анимации движеия вверх
-        self.move_down = move_down     # флаг анимации движеия вниз
-
+        self.move_up = move_up          # флаг анимации движеия вверх
+        self.move_down = move_down      # флаг анимации движеия вниз
+        
         if self.key_down == 1:
             self.pacman_in_rect.x -= 2      # шаг влево
             if self.move_left:
@@ -88,59 +84,73 @@ class Pacman(Object):
         screen.blit(self.pacman, self.pacman_in_rect)  # отобразить объект
 
 
-def main():
-    # начало -----------------------
-    pygame.init()  # иницилизация библиотеки
-    screen = pygame.display.set_mode(size)  # создание окна и установка размера
-    game_over = False #флаг - проверка на выход
-    # ------------------------------
+class Game:
+    def __init__(self, width = 800, height = 600):
+        self.width = width
+        self.height = height
+        self.size = [self.width, self.height]
+        self.library_init()
+        self.game_over = False
+        self.create_game_objects()
 
-    # создать объект ---------------
-    A = Pacman(50, 50)
-    # ------------------------------
+        # разные параметры -------------
+        self.move_left = False   # флаг анимации движеия влево
+        self.move_right = False  # флаг анимации движеия вправо
+        self.move_up = False     # флаг анимации движеия вверх
+        self.move_down = False   # флаг анимации движеия вниз
+                                 # есть по две разные картинки на каждое направление (всего 8)
+                                 # в цикле значение меняется
+                                 # если флаг False, то рисуется 1 изображение
+                                 # если флаг True, то рисуется 2 изображени
+        # ------------------------------
 
-    # разные параметры -------------
-    move_left = False       # флаг анимации движеия влево
-    move_right = False      # флаг анимации движеия вправо
-    move_up = False         # флаг анимации движеия вверх
-    move_down = False       # флаг анимации движеия вниз
-                            # есть по две разные картинки на каждое направление (всего 8)
-                            # в цикле значение меняется
-                            # если флаг False, то рисуется 1 изображение
-                            # если флаг True, то рисуется 2 изображени
-    # ------------------------------
-    
-    # главный цикл ------------------------------------------------------
-    while not game_over:                        # основной цикл программы
+    def create_game_objects(self):
+        self.A = Pacman(50, 50)
 
-        # цикл событий --------------------------------------------------
-        for event in pygame.event.get():        # получение всех событий
-            # проверка события выхода ---------
+    def library_init(self):
+        pygame.init()  # Инициализация библиотеки
+        pygame.font.init()
+        self.screen = pygame.display.set_mode(self.size)  # Создание окна (установка размера)
+
+    def main_loop(self):
+        while not self.game_over:  # Основной цикл работы программы
+            self.process_events()
+            self.process_logic()
+            self.process_draw()
+        sys.exit(0)  # Выход из программы
+
+    def process_events(self):
+        # Обработка всех событий -------------------------------
+        for event in pygame.event.get():
+            # Обработка события выхода--------------------------
             if event.type == pygame.QUIT:
-                game_over = True
-            # ---------------------------------
-
-            # реализация плавного движения ---
-            A.process_event(event)
-            # --------------------------------
-        # ---------------------------------------------------------------
-        
+                 self.game_over = True
+            # --------------------------------------------------
+            
+            # логика движения ----------------------------------
+            self.A.process_event(event)
+            # --------------------------------------------------
+    
+    def process_logic(self):  # логика объектов
         # действие движение --------------
-        move_left = not move_left       # изменение значения флага
-        move_right = not move_right     # изменение значения флага
-        move_up = not move_up           # изменение значения флага
-        move_down = not move_down       # изменение значения флага
-        A.smooth_move(move_left, move_right, move_up, move_down)
+        self.move_left = not self.move_left     # изменение значения флага
+        self.move_right = not self.move_right   # изменение значения флага
+        self.move_up = not self.move_up         # изменение значения флага
+        self.move_down = not self.move_down     # изменение значения флага
+        self.A.smooth_move(self.move_left, self.move_right, self.move_up, self.move_down)
         # --------------------------------
 
-        # отображение ------------------------
-        screen.fill((0, 0, 0))
-        A.draw_object(screen)
-        pygame.display.flip()  # double buffering
-        pygame.time.wait(100)  # ждать 100 миллисекунд
-        # ------------------------------------
-
-    sys.exit()
+    def process_draw(self):
+        self.screen.fill((0, 0, 0))
+        self.A.draw_object(self.screen)
+        pygame.display.flip()  # Double buffering
+        pygame.time.wait(100)  # Ждать 100 миллисекунд
+        
+        
+def main():
+    pygame.font.init()  # ???
+    g = Game()  # создания понятия как игра
+    g.main_loop()  # запуск игры
 
 
 if __name__ == '__main__':
