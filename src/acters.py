@@ -10,26 +10,36 @@ def main():
     # начало -----------------------
     pygame.init()  # иницилизация библиотеки
     screen = pygame.display.set_mode(size)  # создание окна и установка размера
-    game_over = False  # флаг - проверка на выход
+    game_over = False #флаг - проверка на выход
     # ------------------------------
 
     # создать объект ---------------
-    square = pygame.Surface((20, 20))
-    square.fill((255, 211, 0))
+    pacman = pygame.image.load("pm.png")
+    pacman_in_rect = pacman.get_rect()
     # ------------------------------
 
     # разные параметры -------------
-    square_x = 50
-    square_y = 50
-
+    pacman_in_rect.x = 50
+    pacman_in_rect.y = 50
+    
     key_down = 0  # флаг на нажатие одной из 4-х кнопок
                   # 0 -> кнопка отжата - стоп
                   # 1 -> нажата кнопка влево
                   # 2 -> нажата кнопка вправо
                   # 3 -> нажата кнопка ввер
                   # 4 -> нажата кнопка вниз
-    # ------------------------------
+                  
+    move_left = 0   # флаг анимации движеия влево
+    move_right = 0  # флаг анимации движеия вправо
+    move_up = 0     # флаг анимации движеия вверх
+    move_down = 0   # флаг анимации движеия вниз
+                    # есть по две разные картинки на каждое направление (всего 8)
+                    # в цикле значение меняется
+                    # если флаг четный, то рисуется 1 изображение
+                    # если флаг нечетный, то рисуется 2 изображени
 
+    # ------------------------------
+    
     # главный цикл ------------------------------------------------------
     while not game_over:                        # основной цикл программы
 
@@ -59,18 +69,41 @@ def main():
 
         # действие движение --------------
         if key_down == 1:
-            square_x -= 2  # шаг влево
+            pacman_in_rect.x -= 2      # шаг влево
+            move_left += 1             # увеличение флага
+            if move_left % 2 == 0:
+                pacman = pygame.image.load("pm-left-big.png")
+            else:
+                pacman = pygame.image.load("pm-left-small.png")
+            # -------------------------
         elif key_down == 2:
-            square_x += 2  # шаг вправо
+            pacman_in_rect.x += 2      # шаг вправо
+            move_right += 1            # увеличение флага
+            if move_right % 2 == 0:
+                pacman = pygame.image.load("pm-right-big.png")
+            else:
+                pacman = pygame.image.load("pm-right-small.png")
+            # -------------------------
         elif key_down == 3:
-            square_y -= 2  # шаг вверх
+            pacman_in_rect.y -= 2      # шаг вверх
+            move_up += 1               # увеличение флага
+            if move_up % 2 == 0:
+                pacman = pygame.image.load("pm-up-big.png")
+            else:
+                pacman = pygame.image.load("pm-up-small.png")
+            # -------------------------
         elif key_down == 4:
-            square_y += 2  # шаг вниз
+            pacman_in_rect.y += 2      # шаг вниз
+            move_down += 1             # увеличение флага
+            if move_down % 2 == 0:
+                pacman = pygame.image.load("pm-down-big.png")
+            else:
+                pacman = pygame.image.load("pm-down-small.png")
         # --------------------------------
 
         # отображение ------------------------
         screen.fill((0, 0, 0))
-        screen.blit(square, (square_x, square_y))  # отобразить объект
+        screen.blit(pacman, pacman_in_rect)  # отобразить объект
         pygame.display.flip()  # double buffering
         pygame.time.wait(50)  # ждать 50 миллисекунд
         # ------------------------------------
@@ -80,5 +113,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-
 
