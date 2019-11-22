@@ -2,6 +2,7 @@ import sys
 import pygame
 
 from src.constants import *
+from src.sound_engine import *
 
 
 class Game:
@@ -12,6 +13,17 @@ class Game:
         self.library_init()
         self.game_over = False
         self.create_game_objects()
+
+        self.mixer = SoundMixer()  # Initialization of sound mixer
+
+        # region Sound Mixer Text()
+        self.mixer.add_sound_to_query('SOUND_EAT_FRUIT')
+        self.mixer.add_sound_to_query('SOUND_EAT_GHOST')
+        self.mixer.play_sound('SOUND_DEATH')
+        self.mixer.add_sound_to_query('SOUND_START')
+        self.mixer.stop_all_sounds()
+        self.mixer.add_sound_to_query('SOUND_EAT_FINAL')
+        # endregion Sound Mixer Text()
 
     def create_game_objects(self):
         self.objects = []
@@ -26,6 +38,7 @@ class Game:
 
     def main_loop(self):
         while not self.game_over:  # Основной цикл работы программы
+            self.mixer.process_query_of_sounds()  # need to process the query of sounds if it used
             self.process_events()
             self.process_logic()
             self.process_draw()
@@ -36,7 +49,7 @@ class Game:
         for item in self.objects:
             item.process_draw()
         pygame.display.flip()  # Double buffering
-        pygame.time.wait(5)  # Ждать 10 миллисекунд
+        pygame.time.wait(SCREEN_RESPONCE)  # Ждать SCREEN_RESPONCE миллисекунд
 
     def process_logic(self):
         for item in self.objects:
