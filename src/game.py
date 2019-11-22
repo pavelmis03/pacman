@@ -2,19 +2,23 @@ import sys
 import pygame
 
 from src.constants import *
+from src.hud import *
 
 
 class Game:
-    def __init__(self, width=800, height=600):
+    def __init__(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT):
         self.width = width
         self.height = height
         self.size = [self.width, self.height]
         self.library_init()
         self.game_over = False
+        self.hud = HUD(self)
+        self.lifes = 3
+
         self.create_game_objects()
 
     def create_game_objects(self):
-        self.objects = []
+        self.objects = [self.hud]
 
     def library_init(self):
         pygame.init()  # Инициализация библиотеки

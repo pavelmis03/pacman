@@ -3,6 +3,20 @@ class Color:
     RED = [255, 0, 0]
     GREEN = [0, 255, 0]
     BLUE = [0, 0, 255]
+    WHITE = [255, 255, 255]
 
 
 IMAGES_DIR = 'images'
+
+SCREEN_SIZE = [672, 874]
+SCREEN_WIDTH = SCREEN_SIZE[0]
+SCREEN_HEIGHT = SCREEN_SIZE[1]
+SCREEN_CENTER = (SCREEN_SIZE[0] // 2, SCREEN_SIZE[1] // 2)
+
+# HUD TEST
+SCORES_HUD_FONT_SIZE = 30
+PATH_HEART_IMG = IMAGES_DIR + '/life.png'
+PATH_FONT = 'font'
+PACMAN_MAX_LIFES = 5
+
+FONT_PATH = 'menu/menu_font.ttf'
