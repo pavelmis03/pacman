@@ -26,9 +26,13 @@ class HUD(DrawableObject):
                             0, 0)  # width, height
             self.lifes_hud.append(r)
 
-        # Update scores of pacman
-        score_text = self.font.render(str(self.scores), 1, (Color.WHITE))
+        # Update scores of pacman and position of text dependences of its length
+        score_text = self.font.render('ОЧКИ: ' + str(self.game_object.scores), 1, (Color.WHITE))
+        self.score_position = score_text.get_rect()
+        self.score_position.right = SCREEN_WIDTH - 10
+        self.score_position.bottom = SCREEN_HEIGHT - 10
+
         # Blit on screen
         for life_obj in self.lifes_hud:
             self.game_object.screen.blit(self.lifes_hud_image, life_obj)
-            self.game_object.screen.blit(score_text, score_position)
+            self.game_object.screen.blit(score_text, self.score_position)

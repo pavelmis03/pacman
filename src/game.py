@@ -14,6 +14,7 @@ class Game:
         self.game_over = False
         self.hud = HUD(self)
         self.lifes = 3
+        self.scores = 1000
 
         self.create_game_objects()
 
