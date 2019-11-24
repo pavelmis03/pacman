@@ -50,7 +50,7 @@ class MainMenu:
         self.logo_rect = self.logo.get_rect()
         self.display_logo = True
 
-    def setup_elements(self, menu_names=None, menu_actions=None, x0=250, y0=300):
+    def setup_elements(self, menu_names=None, menu_actions=None, x0=SCREEN_CENTER[0] // 2, y0=300):
         # Add menu items(buttons)
         self.menu_items = []
         for i in range(len(menu_names)):
@@ -102,8 +102,8 @@ class MainMenu:
 
         # Logo
         if self.display_logo:
-            self.game.screen.blit(self.logo, (SCREEN_CENTER[0] - self.logo_rect.centerx,
-                                             SCREEN_CENTER[1] - self.logo_rect.centery - 150))
+            self.game.screen.blit(self.logo, (SCREEN_CENTER[0] - self.logo_rect.width // 2,
+                                              self.logo_rect.height // 2))
 
         pygame.display.flip()  # Double buffering
         pygame.time.wait(RESPONSE)  # Ждать 10 миллисекунд
@@ -157,7 +157,7 @@ def menu_action_exit(menu):
 # Can display text on screen
 def display_data(menu, file, param, is_table, x, y, table_head1='', table_head2=''):
     fnt = pygame.font.Font(FONT_PATH, 30)
-    file = open(file, param)
+    file = open(file, param, encoding="utf-8")
     text = file.readlines()
     text = [line.rstrip() for line in text]
     if is_table:
@@ -175,9 +175,9 @@ def display_data(menu, file, param, is_table, x, y, table_head1='', table_head2=
                         ts[j] = t
                 except ValueError:
                     pass
-        new_s = ['{:<7}                {:^5}'.format(str(table_head1), str(table_head2))]
+        new_s = ['{:<7}      {:^5}'.format(str(table_head1), str(table_head2))]
         for i in range(len(ts)):
-            new_s.append('{:<7}                {:^5}'.format(ts[i][0], ts[i][1]))
+            new_s.append('{:<7}      {:^5}'.format(ts[i][0], ts[i][1]))
         text = []
         for i in range(len(new_s)):
             text.append(new_s[i])

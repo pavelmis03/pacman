@@ -6,7 +6,7 @@ from src.menu import *
 
 
 class Game:
-    def __init__(self, width=800, height=600):
+    def __init__(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT):
         self.width = width
         self.height = height
         self.size = [self.width, self.height]
