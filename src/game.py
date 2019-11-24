@@ -22,8 +22,11 @@ class Game:
         # for i in range(5):
         #     self.objects.append(Ball(self))
         # self.objects.append(Board(self))
-        self.objects.append(Field(self))
-        self.objects.append(Food(self, 10, 10))
+        Field_t = Field(self)
+        self.objects.append(Field_t)
+        for i in Field_t.get_Food():
+            self.objects.append(i)
+
 
     def library_init(self):
         pygame.init()  # Инициализация библиотеки
