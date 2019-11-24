@@ -2,16 +2,23 @@ import sys
 import pygame
 
 from src.constants import *
+from src.menu import *
 
 
 class Game:
-    def __init__(self, width=800, height=600):
+    def __init__(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT):
         self.width = width
         self.height = height
         self.size = [self.width, self.height]
         self.library_init()
         self.game_over = False
+        self.start_game = False
         self.create_game_objects()
+
+    def init_menu(self):
+        # Start Main menu First
+        self.menu = MainMenu(self)
+        self.menu.menu_loop()
 
     def create_game_objects(self):
         self.objects = []
@@ -25,6 +32,12 @@ class Game:
         self.screen = pygame.display.set_mode(self.size)  # Создание окна (установка размера)
 
     def main_loop(self):
+        # Start Main menu First
+        self.init_menu()
+        while not self.start_game:
+            self.menu.menu_loop()
+
+        # If user click START - start game
         while not self.game_over:  # Основной цикл работы программы
             self.process_events()
             self.process_logic()
