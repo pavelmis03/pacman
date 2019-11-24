@@ -30,6 +30,10 @@ class SoundMixer:
             self.play_sound(self.query_of_sounds[0]['sound'], self.query_of_sounds[0]['loops'])
             self.query_of_sounds.remove(self.query_of_sounds[0])
 
+    def clear_query_of_sounds(self):
+        self.stop_all_sounds()
+        self.query_of_sounds = []
+
     @staticmethod
     def stop_all_sounds():
         pygame.mixer.stop()

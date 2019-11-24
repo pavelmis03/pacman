@@ -19,9 +19,15 @@ class Game:
         self.mixer = SoundMixer()  # Initialization of sound mixer
 
     def init_menu(self):
+        # Start sound
+        self.mixer.play_sound('SOUND_START', -1)
+
         # Start Main menu First
         self.menu = MainMenu(self)
         self.menu.menu_loop()
+
+        # Stop sound if we start game or close it
+        self.mixer.stop_all_sounds()
 
     def create_game_objects(self):
         self.objects = []
@@ -37,6 +43,7 @@ class Game:
     def main_loop(self):
         # Start Main menu First
         self.init_menu()
+
         while not self.start_game:
             self.menu.menu_loop()
 
@@ -53,7 +60,7 @@ class Game:
         for item in self.objects:
             item.process_draw()
         pygame.display.flip()  # Double buffering
-        pygame.time.wait(SCREEN_RESPONCE)  # Ждать SCREEN_RESPONCE миллисекунд
+        pygame.time.wait(RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
 
     def process_logic(self):
         for item in self.objects:
