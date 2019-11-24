@@ -1,0 +1,46 @@
+import pygame
+from src.constants import *
+
+
+class SoundMixer:
+    def __init__(self):
+        # Make list of sounds from SOUNDLIB
+        self.sounds = dict()
+        for i in range(len(SOUNDLIB.items())):
+            self.sounds[list(SOUNDLIB.items())[i][0]] = (pygame.mixer.Sound(list(SOUNDLIB.items())[i][1]))
+
+        # Initialize query of sounds
+        self.query_of_sounds = []
+
+    # Can play sound at any time
+    def play_sound(self, sound, loops_count=1):
+        self.sounds[sound].play(loops=loops_count - 1)  # For some reason plays 1 repeat more
+        s = self.sounds[sound].get_length()
+        if DEBUG_MIXER:
+            print("Plays sound: " + sound)
+
+    # Add sound to query with loops count
+    def add_sound_to_query(self, sound, loops_count=1):
+        request = dict(sound=sound, loops=loops_count)
+        self.query_of_sounds.append(request)
+
+    # Query of sounds - consecutive playing list of sounds
+    def process_query_of_sounds(self):
+        if pygame.mixer.get_busy() == 0 and len(self.query_of_sounds) > 0:
+            self.play_sound(self.query_of_sounds[0]['sound'], self.query_of_sounds[0]['loops'])
+            self.query_of_sounds.remove(self.query_of_sounds[0])
+
+    @staticmethod
+    def stop_all_sounds():
+        pygame.mixer.stop()
+        if DEBUG_MIXER:
+            print("All sounds stopped.")
+
+    @staticmethod
+    def pause_all_sounds(unpause=False):
+        if DEBUG_MIXER:
+            print("All sounds are paused/unpaused.")
+        if unpause:
+            pygame.mixer.unpause()
+        else:
+            pygame.mixer.pause()

@@ -11,6 +11,7 @@ SCREEN_HEIGHT = SCREEN_SIZE[1]
 SCREEN_CENTER = (SCREEN_SIZE[0] // 2, SCREEN_SIZE[1] // 2)
 
 IMAGES_DIR = 'images'
+SOUNDS_DIR = 'sounds'
 
 # User Interface(UI)
 BG_COLOR = [15, 15, 15]
@@ -31,3 +32,14 @@ PATH_CONTROLS = 'menu/controls.ini'
 PATH_LOGO = IMAGES_DIR + '/logo.png'
 
 RESPONSE = 5 # ms
+
+# Sound mixer constants
+DEBUG_MIXER = True
+SOUNDLIB = {
+'SOUND_START' : SOUNDS_DIR + '/pacman_beginning.wav',
+'SOUND_CHOMP' : SOUNDS_DIR + '/pacman_chomp.wav',
+'SOUND_DEATH' : SOUNDS_DIR + '/pacman_death.wav',
+'SOUND_EAT_FRUIT' : SOUNDS_DIR + '/pacman_eatfruit.wav',
+'SOUND_EAT_GHOST' : SOUNDS_DIR + '/pacman_eatghost.wav',
+'SOUND_EAT_FINAL' : SOUNDS_DIR + '/pacman_intermission.wav',
+}

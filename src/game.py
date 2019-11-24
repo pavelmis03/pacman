@@ -2,6 +2,7 @@ import sys
 import pygame
 
 from src.constants import *
+from src.sound_engine import *
 from src.menu import *
 
 
@@ -14,6 +15,8 @@ class Game:
         self.game_over = False
         self.start_game = False
         self.create_game_objects()
+
+        self.mixer = SoundMixer()  # Initialization of sound mixer
 
     def init_menu(self):
         # Start Main menu First
@@ -39,6 +42,7 @@ class Game:
 
         # If user click START - start game
         while not self.game_over:  # Основной цикл работы программы
+            self.mixer.process_query_of_sounds()  # need to process the query of sounds if it used
             self.process_events()
             self.process_logic()
             self.process_draw()
@@ -49,7 +53,7 @@ class Game:
         for item in self.objects:
             item.process_draw()
         pygame.display.flip()  # Double buffering
-        pygame.time.wait(5)  # Ждать 10 миллисекунд
+        pygame.time.wait(SCREEN_RESPONCE)  # Ждать SCREEN_RESPONCE миллисекунд
 
     def process_logic(self):
         for item in self.objects:
