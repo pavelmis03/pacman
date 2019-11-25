@@ -4,22 +4,23 @@ from os import environ
 
 from src.constants import *
 from src.sound_engine import *
+from src.food import *
 from src.menu import *
 from src.hud import *
 from src.field import Field
 
 
 class Game:
+    screen = field = food = menu = hud = objects = None
+
     def __init__(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT):
-        environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (1, 30)  # Move window to start coordinates
         self.width = width
         self.height = height
         self.size = [width, height]
         self.library_init()
         self.game_over = False
         self.start_game = False
-        self.hud = HUD(self)
-        self.lives = PACMAN_MAX_LIFES
+        self.lives = PACMAN_MAX_LIVES
         self.scores = 0
 
         self.create_game_objects()
@@ -38,17 +39,28 @@ class Game:
         self.mixer.stop_all_sounds()
 
     def create_game_objects(self):
-        self.objects = [self.hud]
-        f = Field(self)
-        self.field = f
+        self.hud = HUD(self)
+        self.field = Field(self)
+        self.food = self.field.get_food()
+
+        self.objects = [self.hud, self.field]
+
+        # Add all food to object list
+        for food in self.food:
+            self.objects.append(food)
 
     def library_init(self):
-        pygame.init()  # Инициализация библиотеки
+        # Initialize all libs
+        pygame.init()
         pygame.font.init()
+        # Create and move a window
+        self.screen = pygame.display.set_mode(self.size, flags=pygame.DOUBLEBUF)  # Create window
+        environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (1, 30)  # Move window to start coordinates
+        # Set window caption
         pygame.display.set_caption('Pacman')
+        # Setup the icon
         icon = pygame.image.load(IMAGES_DIR + '/icon.png')
         pygame.display.set_icon(icon)
-        self.screen = pygame.display.set_mode(self.size, flags=pygame.DOUBLEBUF)  # Создание окна (установка размера)
 
     def main_loop(self):
         # Start Main menu First
@@ -66,7 +78,7 @@ class Game:
         sys.exit(0)  # Выход из программы
 
     def process_draw(self):
-        self.screen.fill(Color.BLACK)  # Заливка цветом
+        self.screen.fill(BG_COLOR)  # Заливка цветом
         for item in self.objects:
             item.process_draw()
         self.field.process_draw()

@@ -10,7 +10,7 @@ class HUD(DrawableObject):
         super().__init__(game_object)
 
         self.hud_elements = []
-        self.lives_hud_image = pygame.image.load(PATH_HEART_IMG).convert()
+        self.lives_hud_image = pygame.image.load(PATH_HEART_IMG)
         self.font = pygame.font.Font(FONT_PATH, SCORES_HUD_FONT_SIZE)
         self.score_position = (SCREEN_WIDTH - 100, SCREEN_HEIGHT - 30)
         self.lives_hud_rect = self.lives_hud_image.get_rect()

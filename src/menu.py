@@ -31,15 +31,15 @@ class UI_Button:
             self.hovered = False
 
     def process_draw(self, screen):
-        self.text_surface = self.font.render(self.label, False, self.active_color if self.hovered else self.normal_color)
-        screen.blit(self.text_surface, (self.rect.x, self.rect.y))
+        text_surface = self.font.render(self.label, False, self.active_color if self.hovered else self.normal_color)
+        screen.blit(text_surface, (self.rect.x, self.rect.y))
 
 
 class MainMenu:
-    def __init__(self, game):
+    def __init__(self, game_object):
         # Default values
         self.curr_click_act = ''
-        self.game = game
+        self.game_object = game_object
         self.additional_text = None
 
         # Init font engine
@@ -78,31 +78,31 @@ class MainMenu:
         while self.curr_click_act not in ['PLAY', 'EXIT']:
             self.process_events()
             self.process_draw()
-        self.game.start_game = True
+        self.game_object.start_game = True
 
     def process_events(self):
         for event in pygame.event.get():  # Обработка всех событий
             if event.type == pygame.QUIT:  # Обработка события выхода
-                self.game.start_game = True
-                self.game.game_over = True
+                self.game_object.start_game = True
+                self.game_object.game_over = True
                 sys.exit()
             for item in self.menu_items:
                 item.procedure_events(event)
 
     def process_draw(self):
-        self.game.screen.fill(BG_COLOR)  # Заливка цветом
+        self.game_object.screen.fill(BG_COLOR)  # Заливка цветом
         for item in self.menu_items:
-            item.process_draw(self.game.screen)
+            item.process_draw(self.game_object.screen)
 
         # Additional text
         if self.additional_text:
             for i in range(len(self.additional_text[0])):
                 temp_text = self.additional_text[1].render(self.additional_text[0][i], 1, TEXT_COLOR)
-                self.game.screen.blit(temp_text, (self.additional_text[2], self.additional_text[3] + 40 * i))
+                self.game_object.screen.blit(temp_text, (self.additional_text[2], self.additional_text[3] + 40 * i))
 
         # Logo
         if self.display_logo:
-            self.game.screen.blit(self.logo, (SCREEN_CENTER[0] - self.logo_rect.width // 2,
+            self.game_object.screen.blit(self.logo, (SCREEN_CENTER[0] - self.logo_rect.width // 2,
                                               self.logo_rect.height // 2))
 
         pygame.display.flip()  # Double buffering
@@ -121,7 +121,7 @@ def menu_action_back(menu):
 def menu_action_play(menu):
     menu.curr_click_act = 'PLAY'
     menu.additional_text = None
-    menu.game.start_game = True
+    menu.game_object.start_game = True
     menu.display_logo = False
 
 
