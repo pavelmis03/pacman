@@ -66,9 +66,32 @@ class Game:
         for item in self.objects:
             item.process_logic()
 
+    def get_highscores(self):
+        f = open(PATH_HIGHSCORES, 'r', encoding="utf-8")
+        text = f.readlines()
+        text = [line.rstrip() for line in text]
+        f.close()
+        minscore = 100 # if future set in self.scores
+        name_of_min_scores = 'Player' #set name
+        glist = []
+        glist.append([minscore, name_of_min_scores])
+        for line in text:
+            st, a = map(str, line.split(':'))
+            glist.append([int(a), st])
+        glist.sort()
+        f = open(PATH_HIGHSCORES, 'w', encoding="utf-8")
+        for i in range(min(len(glist), 5)):
+            l = glist[len(glist) - i - 1]
+            f.write(str(l[1]) + ':' + str(l[0]) + '\n')
+        f.close()
+
+
+
+
     def process_events(self):
         for event in pygame.event.get():  # Обработка всех событий
             if event.type == pygame.QUIT:  # Обработка события выхода
+                self.get_highscores()
                 self.game_over = True
             for item in self.objects:
                 item.process_event(event)
