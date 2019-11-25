@@ -4,6 +4,7 @@ class Color:
     RED = [255, 0, 0]
     GREEN = [0, 255, 0]
     BLUE = [0, 0, 255]
+    WHITE = [255, 255, 255]
 
 SCREEN_SIZE = [560, 720]
 SCREEN_WIDTH = SCREEN_SIZE[0]
@@ -43,3 +44,7 @@ SOUNDLIB = {
 'SOUND_EAT_GHOST' : SOUNDS_DIR + '/pacman_eatghost.wav',
 'SOUND_EAT_FINAL' : SOUNDS_DIR + '/pacman_intermission.wav',
 }
+# HUD TEST
+SCORES_HUD_FONT_SIZE = 30
+PATH_HEART_IMG = IMAGES_DIR + '/life.png'
+PACMAN_MAX_LIFES = 5

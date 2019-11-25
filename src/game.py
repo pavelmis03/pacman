@@ -4,6 +4,7 @@ import pygame
 from src.constants import *
 from src.sound_engine import *
 from src.menu import *
+from src.hud import *
 
 
 class Game:
@@ -14,6 +15,10 @@ class Game:
         self.library_init()
         self.game_over = False
         self.start_game = False
+        self.hud = HUD(self)
+        self.lifes = 3
+        self.scores = 1000
+
         self.create_game_objects()
 
         self.mixer = SoundMixer()  # Initialization of sound mixer
@@ -30,7 +35,7 @@ class Game:
         self.mixer.stop_all_sounds()
 
     def create_game_objects(self):
-        self.objects = []
+        self.objects = [self.hud]
 
     def library_init(self):
         pygame.init()  # Инициализация библиотеки
