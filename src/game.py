@@ -43,14 +43,17 @@ class Game:
         self.hud = HUD(self)
         self.field = Field(self)
         self.food = self.field.get_food()
-        self.pacman = Pacman(self, 50, 50)
-        self.blinky = Ghost(self, 100, 100, 'blue')
 
-        self.objects = [self.hud, self.field, self.pacman, self.blinky]
+        self.objects = [self.hud, self.field]
 
         # Add all food to object list
         for food in self.food:
             self.objects.append(food)
+
+        self.pacman = Pacman(self, 10, 10)
+        self.blinky = Ghost(self, 100, 100, 'BLINKY')
+        self.objects.append(self.pacman)
+        self.objects.append(self.blinky)
 
     def library_init(self):
         # Initialize all libs

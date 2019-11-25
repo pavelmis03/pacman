@@ -86,3 +86,11 @@ FIELD_MAP = [
     "#..........................#",
     "############################",
 ]
+
+# CHARACTERS
+PACMAN_IMG_LIB = {
+    'CLOSE': IMAGES_DIR + 'characters/pacman_close.png',
+    'OPEN': IMAGES_DIR + 'characters/pacman_open.png',
+    'COOL': IMAGES_DIR + 'characters/pacman_cool.png',
+    'BLINKY': IMAGES_DIR + 'characters/blinky.png'
+}
