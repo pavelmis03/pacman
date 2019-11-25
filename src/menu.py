@@ -41,6 +41,8 @@ class MainMenu:
         self.curr_click_act = ''
         self.game_object = game_object
         self.additional_text = None
+        self.logo_shift = -1
+        self.logo_effect_counter = 1
 
         # Init font engine
         pygame.font.init()
@@ -65,11 +67,18 @@ class MainMenu:
             # Reference to self
             item.page = self
             # Button position
-            item.rect = pygame.Rect((x0, UI_BTN_SIZE[1] * item_num + y0), UI_BTN_SIZE)
+            item.rect = pygame.Rect((x0, (UI_BTN_SIZE[1] + MENU_ITEM_SPACE) * item_num + y0), UI_BTN_SIZE)  # 1.2 - space
+
+    def process_logic(self):
+        self.logo_effect_counter += 1
+        if not self.logo_effect_counter % 40:
+            self.logo_shift *= -1
+        self.logo_rect.y += self.logo_shift
+        pass
 
     def menu_loop(self):
         #Start
-        self.setup_elements(['ИГРАТЬ', 'УПРАВЛЕНИЕ', 'РЕКОРДЫ', 'СОЗДАТЕЛИ', 'ВЫХОД'],
+        self.setup_elements(['{:^10}'.format('ИГРАТЬ'), 'УПРАВЛЕНИЕ', '{:^10}'.format('РЕКОРДЫ'), '{:^10}'.format('СОЗДАТЕЛИ'), '{:^10}'.format('ВЫХОД')],
                            ['menu_action_play(self.page)', 'menu_action_controls(self.page)',
                             'menu_action_highscores(self.page)', 'menu_action_credits(self.page)',
                             'menu_action_exit(self.page)'])
@@ -77,6 +86,7 @@ class MainMenu:
         #Loop
         while self.curr_click_act not in ['PLAY', 'EXIT']:
             self.process_events()
+            self.process_logic()
             self.process_draw()
         self.game_object.start_game = True
 
@@ -102,8 +112,8 @@ class MainMenu:
 
         # Logo
         if self.display_logo:
-            self.game_object.screen.blit(self.logo, (SCREEN_CENTER[0] - self.logo_rect.width // 2,
-                                              self.logo_rect.height // 2))
+            self.game_object.screen.blit(self.logo, (SCREEN_CENTER[0] - self.logo_rect.width // 2 + self.logo_rect.x // 2,
+                                              self.logo_rect.height + self.logo_rect.y // 2))
 
         pygame.display.flip()  # Double buffering
         pygame.time.wait(RESPONSE)  # Ждать 10 миллисекунд
@@ -111,7 +121,7 @@ class MainMenu:
 
 def menu_action_back(menu):
     menu.additional_text = None
-    menu.setup_elements(['ИГРАТЬ', 'УПРАВЛЕНИЕ', 'РЕКОРДЫ', 'СОЗДАТЕЛИ', 'ВЫХОД'],
+    menu.setup_elements(['{:^10}'.format('ИГРАТЬ'), 'УПРАВЛЕНИЕ', '{:^10}'.format('РЕКОРДЫ'), '{:^10}'.format('СОЗДАТЕЛИ'), '{:^10}'.format('ВЫХОД')],
                        ['menu_action_play(self.page)', 'menu_action_controls(self.page)',
                         'menu_action_highscores(self.page)', 'menu_action_credits(self.page)',
                         'menu_action_exit(self.page)'])
@@ -134,7 +144,6 @@ def menu_action_controls(menu):
 
 
 def menu_action_highscores(menu):
-    menu.curr_click_act = 'HIGHSCORES'
     menu.setup_elements(['НАЗАД'], ['menu_action_back(self.page)'], x0=35, y0=SCREEN_HEIGHT - 100)
     menu.additional_text = None
     display_data(menu, PATH_HIGHSCORES, 'r', True, 50, 50, 'NAME', 'SCORE')
@@ -156,7 +165,7 @@ def menu_action_exit(menu):
 ####################################################################################################################################
 # Can display text on screen
 def display_data(menu, file, param, is_table, x, y, table_head1='', table_head2=''):
-    fnt = pygame.font.Font(FONT_PATH, 30)
+    fnt = pygame.font.Font(FONT_PATH, TITLE_SIZE)
     file = open(file, param, encoding="utf-8")
     text = file.readlines()
     text = [line.rstrip() for line in text]

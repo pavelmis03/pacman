@@ -18,6 +18,7 @@ class Field(DrawableObject):
         self.ENERGIZER_CODE = '@'
         self.POINT_CODE = '.'
         self.FRUIT_CODE = '$'
+        self.GHOSTS_ENTER_CODE = '-'
         self.bump = 2  # Wall bump
 
     def get_food(self):
@@ -47,3 +48,5 @@ class Field(DrawableObject):
                 # Draw wall
                 if self.cells[i][j] == self.WALL_CODE:
                     self.draw_wall(x, y)
+                if self.cells[i][j] == self.GHOSTS_ENTER_CODE:
+                    pygame.draw.line(self.game_object.screen, Color.POINTS_COLOR, (x, y + self.cell_size // 2), (x + self.cell_size, y + self.cell_size // 2), 4)
