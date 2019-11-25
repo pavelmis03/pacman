@@ -4,7 +4,7 @@ class Color:
     RED = [255, 0, 0]
     GREEN = [0, 255, 0]
     BLUE = [0, 0, 255]
-    WHITE = [255, 255, 255]
+
 
 SCREEN_SIZE = [560, 720]
 SCREEN_WIDTH = SCREEN_SIZE[0]
@@ -37,14 +37,14 @@ RESPONSE = 5 # ms
 # Sound mixer constants
 DEBUG_MIXER = True
 SOUNDLIB = {
-'SOUND_START' : SOUNDS_DIR + '/pacman_beginning.wav',
-'SOUND_CHOMP' : SOUNDS_DIR + '/pacman_chomp.wav',
-'SOUND_DEATH' : SOUNDS_DIR + '/pacman_death.wav',
-'SOUND_EAT_FRUIT' : SOUNDS_DIR + '/pacman_eatfruit.wav',
-'SOUND_EAT_GHOST' : SOUNDS_DIR + '/pacman_eatghost.wav',
-'SOUND_EAT_FINAL' : SOUNDS_DIR + '/pacman_intermission.wav',
+    'SOUND_START': SOUNDS_DIR + '/pacman_beginning.wav',
+    'SOUND_CHOMP': SOUNDS_DIR + '/pacman_chomp.wav',
+    'SOUND_DEATH': SOUNDS_DIR + '/pacman_death.wav',
+    'SOUND_EAT_FRUIT': SOUNDS_DIR + '/pacman_eatfruit.wav',
+    'SOUND_EAT_GHOST': SOUNDS_DIR + '/pacman_eatghost.wav',
+    'SOUND_EAT_FINAL': SOUNDS_DIR + '/pacman_intermission.wav',
 }
 # HUD TEST
 SCORES_HUD_FONT_SIZE = 30
 PATH_HEART_IMG = IMAGES_DIR + '/life.png'
-PACMAN_MAX_LIFES = 5
+PACMAN_MAX_LIFES = 3

@@ -10,29 +10,28 @@ class HUD(DrawableObject):
         super().__init__(game_object)
 
         self.hud_elements = []
-        self.lifes_hud_image = pygame.image.load(PATH_HEART_IMG).convert()
+        self.lives_hud_image = pygame.image.load(PATH_HEART_IMG).convert()
         self.font = pygame.font.Font(FONT_PATH, SCORES_HUD_FONT_SIZE)
         self.score_position = (SCREEN_WIDTH - 100, SCREEN_HEIGHT - 30)
-        self.lifes_hud_rect = self.lifes_hud_image.get_rect()
-        self.lifes_hud = []
-
+        self.lives_hud_rect = self.lives_hud_image.get_rect()
+        self.lives_hud = []
 
     def process_draw(self):
-        # Update amount of pacman lifes
-        for life in range(self.game_object.lifes):
+        # Update amount of pacman lives
+        for live in range(self.game_object.lives):
             # 1.2 - stretch coef of spacing between images
-            r = pygame.Rect(20 + (self.lifes_hud_rect.width * life * 1.2),  # x
-                            SCREEN_HEIGHT - self.lifes_hud_rect.height - 15,  # y
+            r = pygame.Rect(20 + (self.lives_hud_rect.width * live * 1.2),  # x
+                            SCREEN_HEIGHT - self.lives_hud_rect.height - 15,  # y
                             0, 0)  # width, height
-            self.lifes_hud.append(r)
+            self.lives_hud.append(r)
 
-        # Update scores of pacman and position of text dependences of its length
-        score_text = self.font.render('ОЧКИ: ' + str(self.game_object.scores), 1, (Color.WHITE))
+        # Update scores of pacman and position of text dependence of its length
+        score_text = self.font.render('ОЧКИ: ' + str(self.game_object.scores), 1, Color.WHITE)
         self.score_position = score_text.get_rect()
         self.score_position.right = SCREEN_WIDTH - 10
         self.score_position.bottom = SCREEN_HEIGHT - 10
 
-        # Blit on screen
-        for life_obj in self.lifes_hud:
-            self.game_object.screen.blit(self.lifes_hud_image, life_obj)
+        # Display on screen
+        for live_obj in self.lives_hud:
+            self.game_object.screen.blit(self.lives_hud_image, live_obj)
             self.game_object.screen.blit(score_text, self.score_position)

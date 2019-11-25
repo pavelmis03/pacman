@@ -1,5 +1,6 @@
 import sys
 import pygame
+from os import environ
 
 from src.constants import *
 from src.sound_engine import *
@@ -9,15 +10,16 @@ from src.hud import *
 
 class Game:
     def __init__(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT):
+        environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (1, 30)  # Move window to start coordinates
         self.width = width
         self.height = height
-        self.size = [self.width, self.height]
+        self.size = [width, height]
         self.library_init()
         self.game_over = False
         self.start_game = False
         self.hud = HUD(self)
-        self.lifes = 3
-        self.scores = 1000
+        self.lives = PACMAN_MAX_LIFES
+        self.scores = 0
 
         self.create_game_objects()
 
@@ -43,7 +45,7 @@ class Game:
         pygame.display.set_caption('Pacman')
         icon = pygame.image.load(IMAGES_DIR + '/icon.png')
         pygame.display.set_icon(icon)
-        self.screen = pygame.display.set_mode(self.size)  # Создание окна (установка размера)
+        self.screen = pygame.display.set_mode(self.size, flags=pygame.DOUBLEBUF)  # Создание окна (установка размера)
 
     def main_loop(self):
         # Start Main menu First
