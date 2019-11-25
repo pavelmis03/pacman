@@ -8,6 +8,7 @@ from src.food import *
 from src.menu import *
 from src.hud import *
 from src.field import Field
+from src.characters import *
 
 
 class Game:
@@ -42,8 +43,10 @@ class Game:
         self.hud = HUD(self)
         self.field = Field(self)
         self.food = self.field.get_food()
+        self.pacman = Pacman(self, 50, 50)
+        self.blinky = Ghost(self, 100, 100, 'blue')
 
-        self.objects = [self.hud, self.field]
+        self.objects = [self.hud, self.field, self.pacman, self.blinky]
 
         # Add all food to object list
         for food in self.food:
