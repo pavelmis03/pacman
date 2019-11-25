@@ -6,6 +6,7 @@ from src.constants import *
 from src.sound_engine import *
 from src.menu import *
 from src.hud import *
+from src.field import Field
 
 
 class Game:
@@ -38,6 +39,8 @@ class Game:
 
     def create_game_objects(self):
         self.objects = [self.hud]
+        f = Field(self)
+        self.field = f
 
     def library_init(self):
         pygame.init()  # Инициализация библиотеки
@@ -66,12 +69,14 @@ class Game:
         self.screen.fill(Color.BLACK)  # Заливка цветом
         for item in self.objects:
             item.process_draw()
+        self.field.process_draw()
         pygame.display.flip()  # Double buffering
         pygame.time.wait(RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
 
     def process_logic(self):
         for item in self.objects:
             item.process_logic()
+        self.field.process_logic()
 
     def process_events(self):
         for event in pygame.event.get():  # Обработка всех событий
