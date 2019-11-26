@@ -12,7 +12,12 @@ from src.characters import *
 
 
 class Game:
-    screen = field = food = menu = hud = None
+    screen: pygame.display
+    field: Field
+    food:[]
+    menu:MainMenu
+    hud:HUD
+    mixer:SoundMixer
 
     def __init__(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT):
         self.width = width
@@ -31,7 +36,7 @@ class Game:
 
     def init_menu(self):
         # Start sound
-        self.mixer.play_sound('SOUND_START', -1)
+        self.mixer.play_sound('START', -1)
 
         # Start Main menu First
         self.menu = MainMenu(self)
@@ -45,7 +50,7 @@ class Game:
         self.field = Field(self)
         self.food = self.field.get_food()
         pac_pos = self.field.get_cell_position(PACMAN_SPAWN_POS[0], PACMAN_SPAWN_POS[1])
-        self.pacman = Pacman(self, pac_pos[0] + 2, pac_pos[1] + 4)
+        self.pacman = Pacman(self, pac_pos[0] - 6, pac_pos[1] + 2)
         self.blinky = Ghost(self, 100, 100, 'BLINKY')
         self.pinky = Ghost(self, 100, 100, 'PINKY')
         self.inky = Ghost(self, 100, 100, 'INKY')
@@ -88,9 +93,10 @@ class Game:
 
     def process_draw(self):
         for item in self.objects:
-            item.process_draw()
+            if type(item) != type(Food):
+                item.process_draw()
         pygame.display.flip()  # Double buffering
-        pygame.time.wait(RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
+        pygame.time.wait(SCREEN_RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
 
     def process_logic(self):
         self.screen.fill(BG_COLOR)  # Заливка цветом

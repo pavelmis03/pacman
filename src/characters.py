@@ -107,12 +107,12 @@ class Pacman(DrawableObject):
         self.images = dict()
         for i in range(len(HEROES_IMG_LIB.items())):
             self.images[list(HEROES_IMG_LIB.items())[i][0]] = (pygame.image.load(list(HEROES_IMG_LIB.items())[i][1]))
-        # Init pacman image and rect
-        self.pacman_img = self.images['OPEN']
+        # Init pacman image and rect (DIRECTION = LEFT)
+        self.pacman_img = pygame.transform.rotate(self.images['OPEN'], -180)
         self.pacman_rect = pygame.Rect(self.pacman_img.get_rect().move(x, y))
         # Setup default variables
         self.move_dir = Direction.stop
-        self.speed = 2
+        self.speed = PACMAN_SPEED
 
     def process_event(self, event):
         if event.type == pygame.KEYDOWN:  # Check key down
@@ -126,14 +126,20 @@ class Pacman(DrawableObject):
                 self.move_dir = Direction.down
 
     def process_logic(self):  # логика объектов
+        for food in self.game_object.food:
+            if (self.check_collision_with(pygame.Rect(food.x, food.y, food.cell_size, food.cell_size))):
+                food.eat_up()
         self.smooth_move()
 
-    def check_collisions(self, pacman_speed):
+    def check_collision_with(self, rect : pygame.Rect):
+        return pygame.Rect(self.pacman_rect.x, self.pacman_rect.y, self.pacman_rect.width, self.pacman_rect.height)\
+            .colliderect(pygame.Rect(rect.x, rect.y, rect.width, rect.height))
+
+    def check_field_collisions(self, pacman_speed):
         field = self.game_object.field
         p_x = self.pacman_rect.left + (pacman_speed if self.move_dir in [Direction.left, Direction.right] else 0)
         p_y = self.pacman_rect.top + (pacman_speed if self.move_dir in [Direction.up, Direction.down] else 0)
         p_size = self.pacman_rect.width
-        print(p_size)
 
         for y in range(len(field.cells)):
             for x in range(len(field.cells[y])):
@@ -148,34 +154,37 @@ class Pacman(DrawableObject):
 
     def smooth_move(self):
         if self.move_dir == Direction.left:
-            if self.check_collisions(-self.speed):
+            if self.check_field_collisions(-self.speed):
                 self.pacman_rect.x -= self.speed  # шаг влево
                 # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], -180)
                 # ------------------------------------------------------
         # --------------------------------------------------------------
         elif self.move_dir == Direction.right:
-            if self.check_collisions(self.speed):
-                self.pacman_rect.x += self.speed  # шаг вправо
+            if self.check_field_collisions(self.speed):
+                self.pacman_rect.x += self.speed * 1.2  # шаг вправо
                 # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], 0)
                 # ------------------------------------------------------
         # --------------------------------------------------------------
         elif self.move_dir == Direction.up:
-            if self.check_collisions(-self.speed):
+            if self.check_field_collisions(-self.speed):
                 self.pacman_rect.y -= self.speed  # шаг вверх
                 # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], 90)
                 # ------------------------------------------------------
         # --------------------------------------------------------------
         elif self.move_dir == Direction.down:
-            if self.check_collisions(self.speed):
-                self.pacman_rect.y += self.speed  # шаг вниз
+            if self.check_field_collisions(self.speed):
+                self.pacman_rect.y += self.speed * 1.2  # шаг вниз
                 # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], -90)
                 # ------------------------------------------------------
 
     def process_draw(self):
+        # Задел на будущее(когда карта будет готова)
+        #img = pygame.transform.scale(self.pacman_img, (30, 30))
+        #rect = pygame.Rect(self.pacman_rect.x - 5, self.pacman_rect.y - 5, self.pacman_rect.width + 10, self.pacman_rect.height + 10)
         self.game_object.screen.blit(self.pacman_img, self.pacman_rect)  # отобразить объект
 
 """

@@ -1,6 +1,6 @@
 import pygame
 from src.base_classes import DrawableObject
-from src.constants import Color
+from src.constants import *
 from enum import  Enum
 
 
@@ -17,6 +17,15 @@ class Food(DrawableObject):
         self.x = x
         self.y = y
         self.type = food_type
+
+    def eat_up(self):
+        if self.type in [FoodType.FRUIT, FoodType.ENERGIZER]:
+            self.game_object.mixer.play_sound('ENERGIZER')
+        if self.type == FoodType.POINT:
+            self.game_object.mixer.play_sound('CHOMP')
+        self.game_object.scores += SCORE_FOR_POINT
+        self.game_object.food.remove(self.game_object.food[self.game_object.food.index(self)])
+        #self.game_object.food.remove(self)
 
     def draw_point(self):
         food_size = int(self.cell_size * 0.25)
@@ -37,9 +46,11 @@ class Food(DrawableObject):
         pygame.draw.circle(self.game_object.screen, Color.POINTS_COLOR, (x_space, y_space), food_size, 0)
 
     def process_draw(self):
-        if self.type == FoodType.POINT:
-            self.draw_point()
-        elif self.type == FoodType.ENERGIZER:
-            self.draw_energizer()
-        elif self.type == FoodType.FRUIT:
-            self.draw_fruit()
+        # Почему-то создаются копии всей еды на карте, скорее всего это связанно с конструктором копирования
+        if self in self.game_object.food:
+            if self.type == FoodType.POINT:
+                self.draw_point()
+            elif self.type == FoodType.ENERGIZER:
+                self.draw_energizer()
+            elif self.type == FoodType.FRUIT:
+                self.draw_fruit()
