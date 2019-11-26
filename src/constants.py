@@ -77,7 +77,7 @@ FIELD_MAP = [
     "#............##............#",
     "#.####.#####.##.#####.####.#",
     "#.####.#####.##.#####.####.#",
-    "#@..##................##..@#",
+    "#@..##........P......##..@#",
     "###.##.##.########.##.##.###",
     "###.##.##.########.##.##.###",
     "#......##....##....##......#",
@@ -88,9 +88,14 @@ FIELD_MAP = [
 ]
 
 # CHARACTERS
-PACMAN_IMG_LIB = {
-    'CLOSE': IMAGES_DIR + 'characters/pacman_close.png',
-    'OPEN': IMAGES_DIR + 'characters/pacman_open.png',
-    'COOL': IMAGES_DIR + 'characters/pacman_cool.png',
-    'BLINKY': IMAGES_DIR + 'characters/blinky.png'
+PACMAN_SPAWN_POS = (14, 22)
+CHARACTERS_IMG_DIR = IMAGES_DIR + 'characters/'
+HEROES_IMG_LIB = {
+    'CLOSE': CHARACTERS_IMG_DIR + 'pacman_close.png',
+    'OPEN': CHARACTERS_IMG_DIR + 'pacman_open.png',
+    'COOL': CHARACTERS_IMG_DIR + 'pacman_cool.png',
+    'BLINKY': CHARACTERS_IMG_DIR + 'blinky.png',
+    'PINKY': CHARACTERS_IMG_DIR + 'pinky.png',
+    'INKY': CHARACTERS_IMG_DIR + 'inky.png',
+    'CLYDE': CHARACTERS_IMG_DIR + 'clyde.png'
 }

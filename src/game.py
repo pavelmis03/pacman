@@ -43,17 +43,18 @@ class Game:
         self.hud = HUD(self)
         self.field = Field(self)
         self.food = self.field.get_food()
+        pac_pos = self.field.get_cell_position(PACMAN_SPAWN_POS[0], PACMAN_SPAWN_POS[1])
+        self.pacman = Pacman(self, pac_pos[0], pac_pos[1])
+        self.blinky = Ghost(self, 100, 100, 'BLINKY')
+        self.pinky = Ghost(self, 100, 100, 'PINKY')
+        self.inky = Ghost(self, 100, 100, 'INKY')
+        self.clyde = Ghost(self, 100, 100, 'CLYDE')
 
-        self.objects = [self.hud, self.field]
+        self.objects = [self.hud, self.field, self.pacman, self.blinky, self.pinky, self.inky, self.clyde]
 
         # Add all food to object list
         for food in self.food:
             self.objects.append(food)
-
-        self.pacman = Pacman(self, 10, 10)
-        self.blinky = Ghost(self, 100, 100, 'BLINKY')
-        self.objects.append(self.pacman)
-        self.objects.append(self.blinky)
 
     def library_init(self):
         # Initialize all libs
@@ -87,7 +88,6 @@ class Game:
         self.screen.fill(BG_COLOR)  # Заливка цветом
         for item in self.objects:
             item.process_draw()
-        self.field.process_draw()
         pygame.display.flip()  # Double buffering
         pygame.time.wait(RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
 

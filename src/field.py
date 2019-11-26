@@ -19,7 +19,12 @@ class Field(DrawableObject):
         self.POINT_CODE = '.'
         self.FRUIT_CODE = '$'
         self.GHOSTS_ENTER_CODE = '-'
+        self.PACMAN_CODE = 'P'
         self.bump = 2  # Wall bump
+
+    def get_cell_position(self, x, y):
+        pos = (self.offset[0] + self.cell_size * x, self.offset[1] + self.cell_size * y)
+        return pos
 
     def get_food(self):
         food_objects = []
@@ -48,5 +53,7 @@ class Field(DrawableObject):
                 # Draw wall
                 if self.cells[i][j] == self.WALL_CODE:
                     self.draw_wall(x, y)
+                if self.cells[i][j] == self.PACMAN_CODE:
+                    PACMAN_SPAWN_POS = (i, j)
                 if self.cells[i][j] == self.GHOSTS_ENTER_CODE:
                     pygame.draw.line(self.game_object.screen, Color.POINTS_COLOR, (x, y + self.cell_size // 2), (x + self.cell_size, y + self.cell_size // 2), 4)
