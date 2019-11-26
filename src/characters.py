@@ -162,7 +162,7 @@ class Pacman(DrawableObject):
         # --------------------------------------------------------------
         elif self.move_dir == Direction.right:
             if self.check_field_collisions(self.speed):
-                self.pacman_rect.x += self.speed  # шаг вправо
+                self.pacman_rect.x += self.speed * 1.2  # шаг вправо
                 # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], 0)
                 # ------------------------------------------------------
@@ -176,7 +176,7 @@ class Pacman(DrawableObject):
         # --------------------------------------------------------------
         elif self.move_dir == Direction.down:
             if self.check_field_collisions(self.speed):
-                self.pacman_rect.y += self.speed  # шаг вниз
+                self.pacman_rect.y += self.speed * 1.2  # шаг вниз
                 # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], -90)
                 # ------------------------------------------------------
