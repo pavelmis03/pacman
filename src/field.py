@@ -56,23 +56,22 @@ class Field(DrawableObject):
         topleft = [i-1, j-1]
         return [(coords if self.is_cell(coords) else False) for coords in [top, topright, right, bottomright, bottom, bottomleft, left, topleft]]
 
+    def check_wall(self, w):
+        return w and self.is_wall(w)
+
     def draw_wall(self, x, y, i, j):
         around = self.get_around(i, j)
         halfcell = self.cell_size // 2
         # centers:
         cx, cy = x + halfcell, y + halfcell
-        if around[0] and self.is_wall(around[0]):
-            # TOP
-            pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx, cy - halfcell), 2)
-        if around[2] and self.is_wall(around[2]):
-            # RIGHT
-            pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx + halfcell, cy), 2)
-        if around[4] and self.is_wall(around[4]):
-            # BOTTOM
-            pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx, cy + halfcell), 2)
-        if around[6] and self.is_wall(around[6]):
-            # LEFT
-            pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx - halfcell, cy), 2)
+        lenwalls = len([1 for i in around[::2] if i and self.is_wall(i)])
+        if lenwalls == 2:
+            if self.check_wall(around[0]) and self.check_wall(around[4]):
+                # TOP AND BOTTOM
+                pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, y), (cx, y + self.cell_size), 2)
+            elif self.check_wall(around[2]) and self.check_wall(around[6]):
+                # RIGHT AND LEFT
+                pygame.draw.line(self.game_object.screen, Color.BLUE, (x, cy), (x + self.cell_size, cy), 2)
 
     def process_draw(self):
         for i in range(len(self.cells)):
