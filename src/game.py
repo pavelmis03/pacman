@@ -12,7 +12,7 @@ from src.characters import *
 
 
 class Game:
-    screen = field = food = menu = hud = objects = None
+    screen = field = food = menu = hud = None
 
     def __init__(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT):
         self.width = width
@@ -24,6 +24,7 @@ class Game:
         self.lives = PACMAN_MAX_LIVES
         self.scores = 0
 
+        self.objects = []
         self.create_game_objects()
 
         self.mixer = SoundMixer()  # Initialization of sound mixer
@@ -44,17 +45,18 @@ class Game:
         self.field = Field(self)
         self.food = self.field.get_food()
         pac_pos = self.field.get_cell_position(PACMAN_SPAWN_POS[0], PACMAN_SPAWN_POS[1])
-        self.pacman = Pacman(self, pac_pos[0], pac_pos[1])
+        self.pacman = Pacman(self, pac_pos[0] + 2, pac_pos[1] + 4)
         self.blinky = Ghost(self, 100, 100, 'BLINKY')
         self.pinky = Ghost(self, 100, 100, 'PINKY')
         self.inky = Ghost(self, 100, 100, 'INKY')
         self.clyde = Ghost(self, 100, 100, 'CLYDE')
 
-        self.objects = [self.hud, self.field, self.pacman, self.blinky, self.pinky, self.inky, self.clyde]
-
         # Add all food to object list
         for food in self.food:
             self.objects.append(food)
+
+        self.objects += [self.hud, self.field, self.pacman, self.blinky, self.pinky, self.inky, self.clyde]
+
 
     def library_init(self):
         # Initialize all libs
@@ -85,13 +87,13 @@ class Game:
         sys.exit(0)  # Выход из программы
 
     def process_draw(self):
-        self.screen.fill(BG_COLOR)  # Заливка цветом
         for item in self.objects:
             item.process_draw()
         pygame.display.flip()  # Double buffering
         pygame.time.wait(RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
 
     def process_logic(self):
+        self.screen.fill(BG_COLOR)  # Заливка цветом
         for item in self.objects:
             item.process_logic()
         self.field.process_logic()

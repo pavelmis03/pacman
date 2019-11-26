@@ -9,6 +9,18 @@ class Color:
     POINTS_COLOR = [255, 181, 181]
 
 
+class Input:
+    LEFT = ord('a')
+    RIGHT = ord('d')
+    UP = ord('w')
+    DOWN = ord('s')
+    A_LEFT = ord('Ĕ')
+    A_RIGHT = ord('ē')
+    A_UP = ord('đ')
+    A_DOWN = ord('Ē')
+
+MUTE_AUDIO = True
+
 SCREEN_SIZE = [560, 720]
 SCREEN_WIDTH = SCREEN_SIZE[0]
 SCREEN_HEIGHT = SCREEN_SIZE[1]
@@ -89,13 +101,28 @@ FIELD_MAP = [
 
 # CHARACTERS
 PACMAN_SPAWN_POS = (14, 22)
-CHARACTERS_IMG_DIR = IMAGES_DIR + 'characters/'
+CHARACTERS_IMG_DIR = IMAGES_DIR + 'sprites/'
 HEROES_IMG_LIB = {
-    'CLOSE': CHARACTERS_IMG_DIR + 'pacman_close.png',
-    'OPEN': CHARACTERS_IMG_DIR + 'pacman_open.png',
-    'COOL': CHARACTERS_IMG_DIR + 'pacman_cool.png',
-    'BLINKY': CHARACTERS_IMG_DIR + 'blinky.png',
-    'PINKY': CHARACTERS_IMG_DIR + 'pinky.png',
-    'INKY': CHARACTERS_IMG_DIR + 'inky.png',
-    'CLYDE': CHARACTERS_IMG_DIR + 'clyde.png'
+    'OPEN': CHARACTERS_IMG_DIR + 'pacman/pacman1.png',
+    'NORMAL': CHARACTERS_IMG_DIR + 'pacman/pacman2.png',
+    'CLOSE': CHARACTERS_IMG_DIR + 'pacman/pacman3.png',
+
+    'BLINKY': CHARACTERS_IMG_DIR + 'ghosts/ghost1.png',
+    'PINKY': CHARACTERS_IMG_DIR + 'ghosts/ghost2.png',
+    'INKY': CHARACTERS_IMG_DIR + 'ghosts/ghost3.png',
+    'CLYDE': CHARACTERS_IMG_DIR + 'ghosts/ghost4.png',
+
+    'EYES_RIGHT': CHARACTERS_IMG_DIR + 'ghosts/eyes1.png',
+    'EYES_LEFT': CHARACTERS_IMG_DIR + 'ghosts/eyes2.png',
+    'EYES_UP': CHARACTERS_IMG_DIR + 'ghosts/eyes3.png',
+    'EYES_DOWN': CHARACTERS_IMG_DIR + 'ghosts/eyes4.png',
+
+    'FRUIT_1': CHARACTERS_IMG_DIR + 'fruits/fruit1.png',
+    'FRUIT_2': CHARACTERS_IMG_DIR + 'fruits/fruit2.png',
+    'FRUIT_3': CHARACTERS_IMG_DIR + 'fruits/fruit3.png',
+    'FRUIT_4': CHARACTERS_IMG_DIR + 'fruits/fruit4.png',
+    'FRUIT_5': CHARACTERS_IMG_DIR + 'fruits/fruit5.png',
+    'FRUIT_6': CHARACTERS_IMG_DIR + 'fruits/fruit6.png',
+    'FRUIT_7': CHARACTERS_IMG_DIR + 'fruits/fruit7.png',
+    'FRUIT_8': CHARACTERS_IMG_DIR + 'fruits/fruit8.png',
 }

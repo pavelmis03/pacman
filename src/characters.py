@@ -2,19 +2,31 @@ import pygame
 from random import randrange
 from src.base_classes import DrawableObject
 from src.constants import *
+from enum import Enum
 import sys
+
+
+class GostState(Enum):
+    walk = 0
+    persecution = 1
+    go_home = 2
+    waiting = 3
+
+
+class Direction(Enum):
+    stop = 0
+    right = 1
+    left = 2
+    up = 3
+    down = 4
 
 
 class Ghost(DrawableObject):
     def __init__(self, game_object, x, y, color):
         super().__init__(game_object)
+        self.state = GostState.walk
 
-        self.ghost = pygame.image.load(HEROES_IMG_LIB['COOL'])
-        self.state = False  # состояние призрака
-                            # False -> блуждание
-                            # True -> преследование
-
-        # выбор цвета призрака       ---------------------------
+        # выбор призрака       ---------------------------
         self.ghost = pygame.image.load(HEROES_IMG_LIB[color])
         # ------------------------------------------------------
         # координаты призрака ----------------------------------
@@ -23,7 +35,7 @@ class Ghost(DrawableObject):
         self.ghost_rect.y = y
         # ------------------------------------------------------
 
-    def process_events(self, event):
+    def process_event(self, event):
         self.pacman_x = 20
         self.pacman_y = 20
         self.ranged = ((self.ghost_rect.x - self.pacman_x) ** 2 + (self.ghost_rect.y <= self.pacman_y) ** 2) ** 0.5
@@ -53,6 +65,9 @@ class Ghost(DrawableObject):
             elif self.ghost_rect.x < self.pacman_x and self.ghost_rect.x < self.pacman_x:
                 self.g_go_right_down = 1
 
+    def process_logic(self):
+        self.smooth_move()
+
     def smooth_move(self):
         self.count_of_steps = randrange(1, 4)
         self.random_direction = randrange(1, 5)  # рандомное направление
@@ -60,31 +75,26 @@ class Ghost(DrawableObject):
                                                  # 2 -> вправо
                                                  # 3 -> вверх
                                                  # 4 -> вниз
-        i = 0
 
         if self.random_direction == 1:  # влево
             for i in range(self.count_of_steps):
                 if self.ghost_rect.x > 20:  # проверка на выход за пределы экрана
                     self.ghost_rect.x -= 5  # шаг
-            i = 0
 
         if self.random_direction == 2:  # вправо
             for i in range(self.count_of_steps):
                 if self.ghost_rect.x < 780:  # проверка на выход за пределы экрана
                     self.ghost_rect.x += 5  # шаг
-            i = 0
 
         if self.random_direction == 3:  # вверх
             for i in range(self.count_of_steps):
                 if self.ghost_rect.y > 20:  # проверка на выход за пределы экрана
                     self.ghost_rect.y -= 5  # шаг
-            i = 0
 
         if self.random_direction == 4:  # вниз
             for i in range(self.count_of_steps):
                 if self.ghost_rect.y < 580:  # проверка на выход за пределы экрана
                     self.ghost_rect.y += 5  # шаг
-            i = 0
 
     def process_draw(self):
         self.game_object.screen.blit(self.ghost, self.ghost_rect)  # отобразить объект
@@ -99,81 +109,71 @@ class Pacman(DrawableObject):
             self.images[list(HEROES_IMG_LIB.items())[i][0]] = (pygame.image.load(list(HEROES_IMG_LIB.items())[i][1]))
         # Init pacman image and rect
         self.pacman_img = self.images['OPEN']
-        self.pacman_rect = self.pacman_img.get_rect().move(x, y)
-
-        self.key_down = 0
-
-        self.move_left = False  # флаг анимации движеия влево
-        self.move_right = False  # флаг анимации движеия вправо
-        self.move_up = False  # флаг анимации движеия вверх
-        self.move_down = False  # флаг анимации движеия вниз
-        # есть по две разные картинки на каждое направление (всего 8)
-        # в цикле значение меняется
-        # если флаг False, то рисуется 1 изображение
-        # если флаг True, то рисуется 2 изображени
+        self.pacman_rect = pygame.Rect(self.pacman_img.get_rect().move(x, y))
+        # Setup default variables
+        self.move_dir = Direction.stop
+        self.speed = 2
 
     def process_event(self, event):
-        if event.type == pygame.KEYDOWN:  # проверка нажатия на клавиатуру
-            self.game_object.mixer.stop_all_sounds()
-            self.game_object.mixer.play_sound('SOUND_CHOMP', -1)
-            if event.key == pygame.K_a:
-                self.key_down = 1  # положене "1
-            elif event.key == pygame.K_d:
-                self.key_down = 2  # положене "2"
-            elif event.key == pygame.K_w:
-                self.key_down = 3  # положене "3"
-            elif event.key == pygame.K_s:
-                self.key_down = 4  # положене "4"
-        if event.type == pygame.KEYUP and False:
-            self.key_down = 0
-            self.game_object.mixer.stop_all_sounds()
+        if event.type == pygame.KEYDOWN:  # Check key down
+            if event.key in [Input.A_LEFT, Input.LEFT]:  # Change directory to left
+                self.move_dir = Direction.left
+            elif event.key in [Input.A_RIGHT, Input.RIGHT]:
+                self.move_dir = Direction.right
+            elif event.key in [Input.A_UP, Input.UP]:
+                self.move_dir = Direction.up
+            elif event.key in [Input.A_DOWN, Input.DOWN]:
+                self.move_dir = Direction.down
 
     def process_logic(self):  # логика объектов
-        # действие движение --------------
-        self.move_left = not self.move_left  # изменение значения флага
-        self.move_right = not self.move_right  # изменение значения флага
-        self.move_up = not self.move_up  # изменение значения флага
-        self.move_down = not self.move_down  # изменение значения флага
         self.smooth_move()
-        # -------------------------------
+
+    def check_collisions(self, pacman_speed):
+        field = self.game_object.field
+        p_x = self.pacman_rect.left + (pacman_speed if self.move_dir in [Direction.left, Direction.right] else 0)
+        p_y = self.pacman_rect.top + (pacman_speed if self.move_dir in [Direction.up, Direction.down] else 0)
+        p_size = self.pacman_rect.width
+        print(p_size)
+
+        for y in range(len(field.cells)):
+            for x in range(len(field.cells[y])):
+                if field.cells[y][x] == field.WALL_CODE:
+                    cell_x, cell_y = field.offset[0] + x * field.cell_size, field.offset[1] + y * field.cell_size
+                    # Строка внизу отвечает за дебаг
+                    #pygame.draw.line(self.game_object.screen, Color.RED, (field.offset[0] + x * field.cell_size, field.offset[1] + y * field.cell_size), (p_x, p_y), 1)
+                    if pygame.Rect(p_x, p_y, p_size, p_size).colliderect(pygame.Rect(cell_x, cell_y,
+                                                                                     field.cell_size, field.cell_size)):
+                        return False
+        return True
 
     def smooth_move(self):
-
-        if self.key_down == 1:
-            self.pacman_rect.x -= 3  # шаг влево
-            # Смена спрайта : анимация------------------------------
-            if self.move_left:
+        if self.move_dir == Direction.left:
+            if self.check_collisions(-self.speed):
+                self.pacman_rect.x -= self.speed  # шаг влево
+                # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], -180)
-            else:
-                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], -180)
-            # ------------------------------------------------------
+                # ------------------------------------------------------
         # --------------------------------------------------------------
-        elif self.key_down == 2:
-            self.pacman_rect.x += 3  # шаг вправо
-            # Смена спрайта : анимация------------------------------
-            if self.move_right:
+        elif self.move_dir == Direction.right:
+            if self.check_collisions(self.speed):
+                self.pacman_rect.x += self.speed  # шаг вправо
+                # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], 0)
-            else:
-                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 0)
-            # ------------------------------------------------------
+                # ------------------------------------------------------
         # --------------------------------------------------------------
-        elif self.key_down == 3:
-            self.pacman_rect.y -= 3  # шаг вверх
-            # Смена спрайта : анимация------------------------------
-            if self.move_up:
+        elif self.move_dir == Direction.up:
+            if self.check_collisions(-self.speed):
+                self.pacman_rect.y -= self.speed  # шаг вверх
+                # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], 90)
-            else:
-                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 90)
-            # ------------------------------------------------------
+                # ------------------------------------------------------
         # --------------------------------------------------------------
-        elif self.key_down == 4:
-            self.pacman_rect.y += 3  # шаг вниз
-            # Смена спрайта : анимация------------------------------
-            if self.move_down:
+        elif self.move_dir == Direction.down:
+            if self.check_collisions(self.speed):
+                self.pacman_rect.y += self.speed  # шаг вниз
+                # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], -90)
-            else:
-                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], -90)
-            # ------------------------------------------------------
+                # ------------------------------------------------------
 
     def process_draw(self):
         self.game_object.screen.blit(self.pacman_img, self.pacman_rect)  # отобразить объект
