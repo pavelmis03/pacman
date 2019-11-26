@@ -41,27 +41,28 @@ class Field(DrawableObject):
         return i and j
 
     def get_around(self, i, j):
-        if not self.is_cell(i-1, j):
-            print('Up not found ', i-1, j)
-        else:
-            q = self.cells[i-1][j]
-        if not self.is_cell(i, j+1):
-            print('Right not found ', i, j+1)
-        else:
-            q = self.cells[i][j+1]
-        if not self.is_cell(i+1, j):
-            print('Down not found ', i+1, j)
-        else:
-            q = self.cells[i+1][j]
-        if not self.is_cell(i, j-1):
-            print('Left not found ', i, j-1)
-        else:
-            q = self.cells[i][j-1]
+        up = [i-1, j]
+        right = [i, j+1]
+        down = [i+1, j]
+        left = [i, j-1]
+        return [(coords if self.is_cell(coords[0], coords[1]) and self.cells[coords[0]][coords[1]] == self.WALL_CODE else False) for coords in [up, right, down, left]]
 
-    def draw_wall(self, x, y):
-        pygame.draw.rect(self.game_object.screen, Color.DBLUE, (x, y, self.cell_size, self.cell_size), self.bump)
-        pygame.draw.rect(self.game_object.screen, Color.BLUE,
-                         (x + self.bump, y + self.bump, self.cell_size - self.bump, self.cell_size - self.bump))
+    def draw_wall(self, x, y, around):
+        halfcell = self.cell_size // 2
+        # centers:
+        cx, cy = x + halfcell, y + halfcell
+        if around[0]:
+            # UP
+            pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx, cy - halfcell), 2)
+        if around[1]:
+            # RIGHT
+            pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx + halfcell, cy), 2)
+        if around[2]:
+            # DOWN
+            pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx, cy + halfcell), 2)
+        if around[3]:
+            # LEFT
+            pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx - halfcell, cy), 2)
 
     def process_draw(self):
         for i in range(len(self.cells)):
@@ -70,7 +71,7 @@ class Field(DrawableObject):
                 y = self.offset[1] + i * self.cell_size
                 # Draw wall
                 if self.cells[i][j] == self.WALL_CODE:
-                    self.get_around(i, j)
-                    self.draw_wall(x, y)
+                    around = self.get_around(i, j)
+                    self.draw_wall(x, y, around)
                 if self.cells[i][j] == self.GHOSTS_ENTER_CODE:
                     pygame.draw.line(self.game_object.screen, Color.POINTS_COLOR, (x, y + self.cell_size // 2), (x + self.cell_size, y + self.cell_size // 2), 4)
