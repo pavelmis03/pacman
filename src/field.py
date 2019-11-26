@@ -46,11 +46,15 @@ class Field(DrawableObject):
         return self.cells[i][j] == self.WALL_CODE
 
     def get_around(self, i, j):
-        up = [i-1, j]
+        top = [i-1, j]
+        topright = [i-1, j+1]
         right = [i, j+1]
-        down = [i+1, j]
+        bottomright = [i+1, j+1]
+        bottom = [i+1, j]
+        bottomleft = [i+1, j-1]
         left = [i, j-1]
-        return [(coords if self.is_cell(coords) else False) for coords in [up, right, down, left]]
+        topleft = [i-1, j-1]
+        return [(coords if self.is_cell(coords) else False) for coords in [top, topright, right, bottomright, bottom, bottomleft, left, topleft]]
 
     def draw_wall(self, x, y, i, j):
         around = self.get_around(i, j)
@@ -58,15 +62,15 @@ class Field(DrawableObject):
         # centers:
         cx, cy = x + halfcell, y + halfcell
         if around[0] and self.is_wall(around[0]):
-            # UP
+            # TOP
             pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx, cy - halfcell), 2)
-        if around[1] and self.is_wall(around[1]):
+        if around[2] and self.is_wall(around[2]):
             # RIGHT
             pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx + halfcell, cy), 2)
-        if around[2] and self.is_wall(around[2]):
-            # DOWN
+        if around[4] and self.is_wall(around[4]):
+            # BOTTOM
             pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx, cy + halfcell), 2)
-        if around[3] and self.is_wall(around[3]):
+        if around[6] and self.is_wall(around[6]):
             # LEFT
             pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx - halfcell, cy), 2)
 
