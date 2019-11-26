@@ -116,7 +116,7 @@ class MainMenu:
                                               self.logo_rect.height + self.logo_rect.y // 2))
 
         pygame.display.flip()  # Double buffering
-        pygame.time.wait(RESPONSE)  # Ждать 10 миллисекунд
+        pygame.time.wait(SCREEN_RESPONSE)  # Ждать 10 миллисекунд
 
 
 def menu_action_back(menu):

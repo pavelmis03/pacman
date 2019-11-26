@@ -19,16 +19,24 @@ class Input:
     A_UP = ord('đ')
     A_DOWN = ord('Ē')
 
-MUTE_AUDIO = True
-
 SCREEN_SIZE = [560, 720]
 SCREEN_WIDTH = SCREEN_SIZE[0]
 SCREEN_HEIGHT = SCREEN_SIZE[1]
 SCREEN_CENTER = (SCREEN_SIZE[0] // 2, SCREEN_SIZE[1] // 2)
 
+# Directories
 IMAGES_DIR = 'images/'
 SOUNDS_DIR = 'sounds/'
 MENU_DIR = 'menu/'
+CHARACTERS_IMG_DIR = IMAGES_DIR + 'sprites/'
+
+# General
+SCORE_FOR_POINT = 100
+SCORE_FOR_FRUIT = [100, 200, 300, 400, 500, 600, 700, 800]
+PACMAN_MAX_LIVES = 3
+SCREEN_RESPONSE = 5  # ms
+PACMAN_SPEED = 1.5
+PATH_LOGO = IMAGES_DIR + 'logo.png'
 
 # User Interface(UI)
 BG_COLOR = [20, 20, 20]
@@ -47,24 +55,23 @@ PATH_HIGHSCORES = MENU_DIR + 'highscores.ini'
 PATH_CREDITS = MENU_DIR + 'credits.ini'
 PATH_CONTROLS = MENU_DIR + 'controls.ini'
 
-PATH_LOGO = IMAGES_DIR + 'logo.png'
-
-RESPONSE = 5  # ms
 
 # Sound mixer constants
 DEBUG_MIXER = True
+MUTE_AUDIO = False
 SOUNDLIB = {
-    'SOUND_START': SOUNDS_DIR + 'pacman_beginning.wav',
-    'SOUND_CHOMP': SOUNDS_DIR + 'pacman_chomp.wav',
-    'SOUND_DEATH': SOUNDS_DIR + 'pacman_death.wav',
-    'SOUND_EAT_FRUIT': SOUNDS_DIR + 'pacman_eatfruit.wav',
-    'SOUND_EAT_GHOST': SOUNDS_DIR + 'pacman_eatghost.wav',
-    'SOUND_EAT_FINAL': SOUNDS_DIR + 'pacman_intermission.wav',
+    'START': SOUNDS_DIR + 'pacman_beginning.wav',
+    'CHOMP': SOUNDS_DIR + 'pacman_chomp.wav',
+    'ENERGIZER': SOUNDS_DIR + 'pacman_eatghost.wav',
+    'DEATH': SOUNDS_DIR + 'pacman_death.wav',
+    'FRUIT': SOUNDS_DIR + 'pacman_eatfruit.wav',
+    'GHOST': SOUNDS_DIR + 'pacman_eatghost.wav',
+    'FINAL': SOUNDS_DIR + 'pacman_intermission.wav',
 }
+
 # HUD TEST
 SCORES_HUD_FONT_SIZE = 30
 PATH_HEART_IMG = IMAGES_DIR + 'life.png'
-PACMAN_MAX_LIVES = 3
 
 FIELD_MAP = [
     "############################",
@@ -89,7 +96,7 @@ FIELD_MAP = [
     "#............##............#",
     "#.####.#####.##.#####.####.#",
     "#.####.#####.##.#####.####.#",
-    "#@..##........P......##..@#",
+    "#@..##....... P.......##..@#",
     "###.##.##.########.##.##.###",
     "###.##.##.########.##.##.###",
     "#......##....##....##......#",
@@ -101,7 +108,6 @@ FIELD_MAP = [
 
 # CHARACTERS
 PACMAN_SPAWN_POS = (14, 22)
-CHARACTERS_IMG_DIR = IMAGES_DIR + 'sprites/'
 HEROES_IMG_LIB = {
     'OPEN': CHARACTERS_IMG_DIR + 'pacman/pacman1.png',
     'NORMAL': CHARACTERS_IMG_DIR + 'pacman/pacman2.png',
