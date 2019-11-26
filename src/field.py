@@ -35,32 +35,37 @@ class Field(DrawableObject):
                     food_objects.append(Food(self.game_object, self.cell_size, x, y, FoodType.FRUIT))
         return food_objects
 
-    def is_cell(self, i, j):
+    def is_cell(self, ij):
+        i, j = ij
         i = i >= 0 and i < len(self.cells)
         j = j >= 0 and j < len(self.cells[i])
         return i and j
+
+    def is_wall(self, ij):
+        i, j = ij
+        return self.cells[i][j] == self.WALL_CODE
 
     def get_around(self, i, j):
         up = [i-1, j]
         right = [i, j+1]
         down = [i+1, j]
         left = [i, j-1]
-        return [(coords if self.is_cell(coords[0], coords[1]) and self.cells[coords[0]][coords[1]] == self.WALL_CODE else False) for coords in [up, right, down, left]]
+        return [(coords if self.is_cell(coords) else False) for coords in [up, right, down, left]]
 
     def draw_wall(self, x, y, around):
         halfcell = self.cell_size // 2
         # centers:
         cx, cy = x + halfcell, y + halfcell
-        if around[0]:
+        if around[0] and self.is_wall(around[0]):
             # UP
             pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx, cy - halfcell), 2)
-        if around[1]:
+        if around[1] and self.is_wall(around[1]):
             # RIGHT
             pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx + halfcell, cy), 2)
-        if around[2]:
+        if around[2] and self.is_wall(around[2]):
             # DOWN
             pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx, cy + halfcell), 2)
-        if around[3]:
+        if around[3] and self.is_wall(around[3]):
             # LEFT
             pygame.draw.line(self.game_object.screen, Color.BLUE, (cx, cy), (cx - halfcell, cy), 2)
 
