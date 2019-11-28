@@ -127,7 +127,7 @@ class Pacman(DrawableObject):
 
     def process_logic(self):  # логика объектов
         for food in self.game_object.food:
-            if (self.check_collision_with(pygame.Rect(food.x, food.y, food.cell_size, food.cell_size))):
+            if self.check_collision_with(pygame.Rect(food.x, food.y, food.cell_size, food.cell_size)):
                 food.eat_up()
         self.smooth_move()
 
@@ -154,95 +154,36 @@ class Pacman(DrawableObject):
 
     def smooth_move(self):
         if self.move_dir == Direction.left:
-            if self.check_field_collisions(-self.speed):
+            if True:
                 self.pacman_rect.x -= self.speed  # шаг влево
                 # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], -180)
                 # ------------------------------------------------------
         # --------------------------------------------------------------
         elif self.move_dir == Direction.right:
-            if self.check_field_collisions(self.speed):
+            if True:
                 self.pacman_rect.x += self.speed * 1.2  # шаг вправо
                 # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], 0)
                 # ------------------------------------------------------
         # --------------------------------------------------------------
         elif self.move_dir == Direction.up:
-            if self.check_field_collisions(-self.speed):
+            if True:
                 self.pacman_rect.y -= self.speed  # шаг вверх
                 # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], 90)
                 # ------------------------------------------------------
         # --------------------------------------------------------------
         elif self.move_dir == Direction.down:
-            if self.check_field_collisions(self.speed):
+            if True:
                 self.pacman_rect.y += self.speed * 1.2  # шаг вниз
                 # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['OPEN'], -90)
                 # ------------------------------------------------------
 
     def process_draw(self):
-        # Задел на будущее(когда карта будет готова)
-        #img = pygame.transform.scale(self.pacman_img, (30, 30))
-        #rect = pygame.Rect(self.pacman_rect.x - 5, self.pacman_rect.y - 5, self.pacman_rect.width + 10, self.pacman_rect.height + 10)
-        self.game_object.screen.blit(self.pacman_img, self.pacman_rect)  # отобразить объект
-
-"""
-class Game:
-    def __init__(self, width = 800, height = 600):
-        self.width = width
-        self.height = height
-        self.size = [self.width, self.height]
-        self.library_init()
-        self.game_over = False
-        self.create_game_objects()
-
-        # разные параметры -------------
-        self.move_left = False   # флаг анимации движеия влево
-        self.move_right = False  # флаг анимации движеия вправо
-        self.move_up = False     # флаг анимации движеия вверх
-        self.move_down = False   # флаг анимации движеия вниз
-                                 # есть по две разные картинки на каждое направление (всего 8)
-                                 # в цикле значение меняется
-                                 # если флаг False, то рисуется 1 изображение
-                                 # если флаг True, то рисуется 2 изображени
-
-        self.smooth_ghost_move = 0
-        self.pacman_coordinate = []
-        # ------------------------------
-
-    def main_loop(self):
-        while not self.game_over:  # Основной цикл работы программы
-            self.process_events()
-            self.process_logic()
-            self.process_draw()
-        sys.exit(0)  # Выход из программы
-
-    def process_events(self):
-        # Обработка всех событий -------------------------------
-        for event in pygame.event.get():
-            # Обработка события выхода--------------------------
-            if event.type == pygame.QUIT:
-                 self.game_over = True
-            # --------------------------------------------------
-
-            # логика движения ----------------------------------
-            self.A.process_event(event)
-            self.pacman_coordinate = self.A.get_coordinate()
-            self.G.process_event(event, self.pacman_coordinate[0], self.pacman_coordinate[1])
-            # --------------------------------------------------
-
-    def process_logic(self):  # логика объектов
-        # действие движение --------------
-        self.move_left = not self.move_left     # изменение значения флага
-        self.move_right = not self.move_right   # изменение значения флага
-        self.move_up = not self.move_up         # изменение значения флага
-        self.move_down = not self.move_down     # изменение значения флага
-        self.A.smooth_move(self.move_left, self.move_right, self.move_up, self.move_down)
-        self.G.smooth_move()
-        # -------------------------------
-
-    def process_draw(self):
-        self.A.draw_object(self.screen)
-        self.G.draw_object(self.screen)
-"""
+        pac_size = CELL_SIZE * 2
+        pac_img = pygame.transform.scale(self.pacman_img, (pac_size, pac_size))
+        pac_rect = pygame.Rect(self.pacman_rect.x - CELL_SIZE // 2, self.pacman_rect.y - CELL_SIZE // 2,
+                           self.pacman_rect.width + pac_size, self.pacman_rect.height + pac_size)
+        self.game_object.screen.blit(pac_img, pac_rect)  # отобразить объект

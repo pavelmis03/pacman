@@ -3,6 +3,7 @@ import pygame
 from os import environ
 
 from src.constants import *
+from src.helpers import *
 from src.sound_engine import *
 from src.food import *
 from src.menu import *
@@ -24,6 +25,7 @@ class Game:
         self.height = height
         self.size = [width, height]
         self.library_init()
+        # Default variables
         self.game_over = False
         self.start_game = False
         self.lives = PACMAN_MAX_LIVES
@@ -32,6 +34,7 @@ class Game:
         self.objects = []
         self.create_game_objects()
 
+        # Add mixer
         self.mixer = SoundMixer()  # Initialization of sound mixer
 
     def init_menu(self):
@@ -49,18 +52,18 @@ class Game:
         self.hud = HUD(self)
         self.field = Field(self)
         self.food = self.field.get_food()
-        pac_pos = self.field.get_cell_position(PACMAN_SPAWN_POS[0], PACMAN_SPAWN_POS[1])
-        self.pacman = Pacman(self, pac_pos[0] - 6, pac_pos[1] + 2)
-        self.blinky = Ghost(self, 100, 100, 'BLINKY')
-        self.pinky = Ghost(self, 100, 100, 'PINKY')
-        self.inky = Ghost(self, 100, 100, 'INKY')
-        self.clyde = Ghost(self, 100, 100, 'CLYDE')
+        pac_pos = self.field.get_cell_position(self.field.pacman_pos)
+        self.pacman = Pacman(self, pac_pos.x - CELL_SIZE // 2, pac_pos.y)  # Add some offset to centering pcaman
+        #self.blinky = Ghost(self, 100, 100, 'BLINKY')
+        #self.pinky = Ghost(self, 100, 100, 'PINKY')
+        #self.inky = Ghost(self, 100, 100, 'INKY')
+        #self.clyde = Ghost(self, 100, 100, 'CLYDE')
 
         # Add all food to object list
         for food in self.food:
             self.objects.append(food)
 
-        self.objects += [self.hud, self.field, self.pacman, self.blinky, self.pinky, self.inky, self.clyde]
+        self.objects += [self.hud, self.field, self.pacman]#, self.blinky, self.pinky, self.inky, self.clyde]
 
 
     def library_init(self):

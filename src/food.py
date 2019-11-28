@@ -5,7 +5,7 @@ from enum import  Enum
 
 
 class FoodType(Enum):  # Class - enum. Need to recognize type of food object
-    POINT = 1
+    DOT = 1
     ENERGIZER = 2
     FRUIT = 3
 
@@ -21,17 +21,17 @@ class Food(DrawableObject):
     def eat_up(self):
         if self.type in [FoodType.FRUIT, FoodType.ENERGIZER]:
             self.game_object.mixer.play_sound('ENERGIZER')
-        if self.type == FoodType.POINT:
+        if self.type == FoodType.DOT:
             self.game_object.mixer.play_sound('CHOMP')
-        self.game_object.scores += SCORE_FOR_POINT
+        self.game_object.scores += SCORE_FOR_DOT
         self.game_object.food.remove(self.game_object.food[self.game_object.food.index(self)])
         #self.game_object.food.remove(self)
 
-    def draw_point(self):
-        food_size = int(self.cell_size * 0.25)
+    def draw_dot(self):
+        food_size = int(self.cell_size * 0.2)
         x_space = self.x + self.cell_size // 2 - food_size // 2
         y_space = self.y + self.cell_size // 2 - food_size // 2
-        pygame.draw.rect(self.game_object.screen, Color.POINTS_COLOR, (x_space, y_space, food_size, food_size), 0)
+        pygame.draw.rect(self.game_object.screen, Color.DOTS_COLOR, (x_space, y_space, food_size, food_size), 0)
 
     def draw_fruit(self):
         food_size = int(self.cell_size * 0.4)
@@ -43,13 +43,13 @@ class Food(DrawableObject):
         food_size = int(self.cell_size * 0.35)
         x_space = self.x + self.cell_size // 2
         y_space = self.y + self.cell_size // 2
-        pygame.draw.circle(self.game_object.screen, Color.POINTS_COLOR, (x_space, y_space), food_size, 0)
+        pygame.draw.circle(self.game_object.screen, Color.DOTS_COLOR, (x_space, y_space), food_size, 0)
 
     def process_draw(self):
         # Почему-то создаются копии всей еды на карте, скорее всего это связанно с конструктором копирования
         if self in self.game_object.food:
-            if self.type == FoodType.POINT:
-                self.draw_point()
+            if self.type == FoodType.DOT:
+                self.draw_dot()
             elif self.type == FoodType.ENERGIZER:
                 self.draw_energizer()
             elif self.type == FoodType.FRUIT:
