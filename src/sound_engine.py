@@ -4,6 +4,8 @@ from src.constants import *
 
 class SoundMixer:
     def __init__(self):
+        pygame.mixer.pre_init(44100, -16, 2, 2048)  # setup mixer to avoid sound lag
+        pygame.init()
         # Make list of sounds from SOUNDLIB
         self.sounds = dict()
         for i in range(len(SOUNDLIB.items())):

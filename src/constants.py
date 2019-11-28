@@ -69,13 +69,20 @@ PATH_CONTROLS = MENU_DIR + 'controls.ini'
 DEBUG_MIXER = False
 MUTE_AUDIO = False
 SOUNDLIB = {
-    'START': SOUNDS_DIR + 'pacman_beginning.wav',
-    'CHOMP': SOUNDS_DIR + 'pacman_chomp.wav',
-    'ENERGIZER': SOUNDS_DIR + 'pacman_eatghost.wav',
-    'DEATH': SOUNDS_DIR + 'pacman_death.wav',
-    'FRUIT': SOUNDS_DIR + 'pacman_eatfruit.wav',
-    'GHOST': SOUNDS_DIR + 'pacman_eatghost.wav',
-    'FINAL': SOUNDS_DIR + 'pacman_intermission.wav',
+    'START': SOUNDS_DIR + 'beginning.wav',
+    'MOVE': SOUNDS_DIR + 'move.wav',
+    'CHOMP': SOUNDS_DIR + 'eating.wav',
+    'ENERGIZER': SOUNDS_DIR + 'ate_ghost.wav',
+    'DEATH': SOUNDS_DIR + 'death.wav',
+    'FRUIT': SOUNDS_DIR + 'ate_fruit.wav',
+    'GHOST': SOUNDS_DIR + 'ate_ghost.wav',
+    'FINAL': SOUNDS_DIR + 'intermission.wav',
+    'ATTACK': SOUNDS_DIR + 'energizer.wav',
+    'SPRUT1': SOUNDS_DIR + 'spurt1.wav',
+    'SPRUT2': SOUNDS_DIR + 'spurt2.wav',
+    'SPRUT3': SOUNDS_DIR + 'spurt3.wav',
+    'SPRUT4': SOUNDS_DIR + 'spurt4.wav',
+    'GHOST_TO_HOME': SOUNDS_DIR + 'ghost_to_home.wav'
 }
 # endregion Sound mixer constants
 
