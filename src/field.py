@@ -19,6 +19,8 @@ class Cell(DrawableObject):
         self.is_wall = False
         self.is_door = False
 
+        self.food = None
+
     def get_rect(self):
         return pygame.Rect(self.g_pos.x, self.g_pos.y, self.size, self.size)
 
@@ -35,16 +37,13 @@ class Field(DrawableObject):
         # MAP_SIZE IS 28x31
         super().__init__(game_object)
         if not position:
-            position = [(SCREEN_WIDTH - cell_size * 28) // 2, 50]
+            position = Point((SCREEN_WIDTH - cell_size * 28) // 2, 50)
         self.cell_size = cell_size
         self.offset = position
         self.pacman_pos = PACMAN_SPAWN_POS  # If 'decoder' find PACMAN_CODE on map, it put coordinates to this variable
 
         # Load all map sprites
-        self.sprites = dict()
-        for ch in WALL_CODES:
-            self.sprites[ch] = pygame.transform.scale(pygame.image.load(MAP_SPRITES_DIR + ch + '.png'),
-                                                      (self.cell_size, cell_size))
+        self.sprites = self.game_object.map_sprites
 
         # Map = array of chars
         self.map = FIELD_MAP
@@ -60,35 +59,48 @@ class Field(DrawableObject):
             self.field.append([])
             for x in range(len(self.map[y])):
                 cell = Cell(self.game_object, Point(x, y), self.get_cell_position(Point(x, y)), self.cell_size)
+                m_cell = self.map[y][x]
                 # Walls
-                if self.map[y][x] in WALL_CODES:
+                if m_cell in WALL_CODES:
                     cell.is_wall = True
-                    cell.img = self.sprites[self.map[y][x]]
+                    cell.img = self.sprites[m_cell]
                 # Door
-                if self.map[y][x] == GHOSTS_ENTER_CODE:
+                if m_cell == GHOSTS_ENTER_CODE:
                     cell.is_door = True
-                # Door
-                if self.map[y][x] == PACMAN_CODE:
+                # Pacman
+                if m_cell == PACMAN_CODE:
                     self.pacman_pos = Point(x, y)
+                # Food
+                if m_cell == DOT_CODE:
+                    cell.food = Food(self.game_object, self.cell_size, cell.g_pos.x, cell.g_pos.y, FoodType.DOT)
+                if m_cell == ENERGIZER_CODE:
+                    cell.food = Food(self.game_object, self.cell_size, cell.g_pos.x, cell.g_pos.y, FoodType.ENERGIZER)
+                if m_cell in FRUIT_CODES:
+                    cell.food = Food(self.game_object, self.cell_size, cell.g_pos.x, cell.g_pos.y, FoodType.FRUIT, m_cell)
+                # Add cell to field
                 self.field[y].append(cell)
 
     # Return global position of field's cell
     def get_cell_position(self, pos):
         return Point(self.offset[0] + self.cell_size * pos.x, self.offset[1] + self.cell_size * pos.y)
 
+    # Return field's cell using global pos
+    def get_cell_from_position(self, pos: Point):
+        if self.offset.x < pos.x < self.offset.x + (len(self.field[0]) * self.cell_size) and \
+                self.offset.y < pos.y < self.offset.y + (len(self.field) * self.cell_size):
+            y = (pos.y - self.offset.y) // self.cell_size
+            x = (pos.x - self.offset.x) // self.cell_size
+            return self.field[y][x]
+        else:
+            return None
+
     # Decode food codes to Food classes and return getted list
     def get_food(self):
         food_objects = []
-        for y in range(len(self.map)):
-            for x in range(len(self.map[y])):
-                glob_x = self.offset[0] + x * self.cell_size
-                glob_y = self.offset[1] + y * self.cell_size
-                if self.map[y][x] == DOT_CODE:  # Food
-                    food_objects.append(Food(self.game_object, self.cell_size, glob_x, glob_y, FoodType.DOT))
-                elif self.map[y][x] == ENERGIZER_CODE:
-                    food_objects.append(Food(self.game_object, self.cell_size, glob_x, glob_y, FoodType.ENERGIZER))
-                elif self.map[y][x] == FRUIT_CODE:  # Food
-                    food_objects.append(Food(self.game_object, self.cell_size, glob_x, glob_y, FoodType.FRUIT))
+        for y in range(len(self.field)):
+            for x in range(len(self.field[y])):
+                if self.field[y][x].food:
+                    food_objects.append(self.field[y][x].food)
         return food_objects
 
     def draw_wall(self, pos):

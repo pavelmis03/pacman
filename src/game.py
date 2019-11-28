@@ -15,16 +15,17 @@ from src.characters import *
 class Game:
     screen: pygame.display
     field: Field
-    food:[]
-    menu:MainMenu
-    hud:HUD
-    mixer:SoundMixer
+    food: []
+    menu: MainMenu
+    hud: HUD
+    mixer: SoundMixer
 
     def __init__(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT):
         self.width = width
         self.height = height
         self.size = [width, height]
         self.library_init()
+        self.init_sprite_libs()
         # Default variables
         self.game_over = False
         self.start_game = False
@@ -65,7 +66,6 @@ class Game:
 
         self.objects += [self.hud, self.field, self.pacman]#, self.blinky, self.pinky, self.inky, self.clyde]
 
-
     def library_init(self):
         # Initialize all libs
         pygame.init()
@@ -78,6 +78,31 @@ class Game:
         # Setup the icon
         icon = pygame.image.load(IMAGES_DIR + '/icon.png')
         pygame.display.set_icon(icon)
+
+    def init_sprite_libs(self):
+        # Load all map sprite library
+        self.map_sprites = dict()
+        for ch in WALL_CODES:
+            self.map_sprites[ch] = pygame.transform.scale(pygame.image.load(MAP_DIR + ch + '.png'),
+                                                      (CELL_SIZE, CELL_SIZE))
+
+        # Load all fruits sprite library(Need in Food class)
+        self.fruits_sprites = dict()
+        for ch in FRUIT_CODES:
+            self.fruits_sprites[ch] = pygame.transform.scale(pygame.image.load(FRUITS_DIR + 'fruit' + ch + '.png'),
+                                                      (CELL_SIZE, CELL_SIZE))
+
+        # Load all pacman sprite library
+        self.pacman_sprites = dict()
+        for i in range(len(PAC_SPRITE_LIB.items())):
+            self.pacman_sprites[list(PAC_SPRITE_LIB.items())[i][0]] = (
+                pygame.image.load(list(PAC_SPRITE_LIB.items())[i][1]))
+
+        # Load all ghosts sprite library
+        self.ghosts_sprites = dict()
+        for i in range(len(GHOSTS_SPRITE_LIB.items())):
+            self.ghosts_sprites[list(GHOSTS_SPRITE_LIB.items())[i][0]] = (
+                pygame.image.load(list(GHOSTS_SPRITE_LIB.items())[i][1]))
 
     def main_loop(self):
         # Start Main menu First
@@ -96,8 +121,7 @@ class Game:
 
     def process_draw(self):
         for item in self.objects:
-            if type(item) != type(Food):
-                item.process_draw()
+            item.process_draw()
         pygame.display.flip()  # Double buffering
         pygame.time.wait(SCREEN_RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
 

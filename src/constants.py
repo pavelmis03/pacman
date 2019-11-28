@@ -26,8 +26,11 @@ class Input:
 IMAGES_DIR = 'images/'
 SOUNDS_DIR = 'sounds/'
 MENU_DIR = 'menu/'
-CHARACTERS_IMG_DIR = IMAGES_DIR + 'sprites/'
-MAP_SPRITES_DIR = CHARACTERS_IMG_DIR + 'map/'
+SPRITES_DIR = IMAGES_DIR + 'sprites/'
+MAP_DIR = SPRITES_DIR + 'map/'
+FRUITS_DIR = SPRITES_DIR + 'fruits/'
+GHOSTS_DIR = SPRITES_DIR + 'ghosts/'
+PACMAN_DIR = SPRITES_DIR + 'pacman/'
 
 # region General
 SCREEN_SIZE = [560, 720]
@@ -35,11 +38,12 @@ SCREEN_WIDTH = SCREEN_SIZE[0]
 SCREEN_HEIGHT = SCREEN_SIZE[1]
 SCREEN_CENTER = (SCREEN_SIZE[0] // 2, SCREEN_SIZE[1] // 2)
 
-SCORE_FOR_DOT = 100
-SCORE_FOR_FRUIT = [100, 200, 300, 400, 500, 600, 700, 800]
+SCORE_FOR_DOT = 10
+SCORE_FOR_ENERGIZER = 50
+SCORE_FOR_FRUIT = [-999, 100, 300, 500, 700, 1000, 2000, 3000, 5000]  # 0 fruit is not existing!
 PACMAN_MAX_LIVES = 3
-SCREEN_RESPONSE = 5  # ms
-PACMAN_SPEED = 3
+SCREEN_RESPONSE = 1  # ms
+PACMAN_SPEED = 1
 PATH_LOGO = IMAGES_DIR + 'logo.png'
 # endregion General
 
@@ -62,8 +66,8 @@ PATH_CONTROLS = MENU_DIR + 'controls.ini'
 # endregion User Interface(UI)
 
 # region Sound mixer constants
-DEBUG_MIXER = True
-MUTE_AUDIO = True
+DEBUG_MIXER = False
+MUTE_AUDIO = False
 SOUNDLIB = {
     'START': SOUNDS_DIR + 'pacman_beginning.wav',
     'CHOMP': SOUNDS_DIR + 'pacman_chomp.wav',
@@ -77,14 +81,14 @@ SOUNDLIB = {
 
 # HUD
 SCORES_HUD_FONT_SIZE = 30
-PATH_HEART_IMG = IMAGES_DIR + 'life.png'
+PATH_LIFE = IMAGES_DIR + 'life.png'
 
 # region FIELD
 CELL_SIZE = 20
 WALL_CODES = 'ABCDEFGHIJKLMNOPQRST'
+FRUIT_CODES = '12345678'
 ENERGIZER_CODE = '0'
 DOT_CODE = '.'
-FRUIT_CODE = '$'
 GHOSTS_ENTER_CODE = '-'
 PACMAN_CODE = '@'
 FIELD_MAP = [
@@ -98,15 +102,15 @@ FIELD_MAP = [
     "C0EBBF.DC.EBBLKBBF.DC.EBBF0D",
     "C......DC....DC....DC......D",
     "IAAAAH.DIAAH DC GAAJC.GAAAAJ",
-    "XXXXXC.DKBBF EF EBBLC.DXXXXX",
-    "XXXXXC.DC          DC.DXXXXX",
-    "XXXXXC.DC QMM--MMR DC.DXXXXX",
-    "BBBBBF.EF PZZZZZZO EF.EBBBBB",
-    "      .   PZZZZZZO   .      ",
-    "AAAAAH.GH PZZZZZZO GH.GAAAAA",
-    "XXXXXC.DC SNNNNNNT DC.DXXXXX",
-    "XXXXXC.DC          DC.DXXXXX",
-    "XXXXXC.DC GAAAAAAH DC.DXXXXX",
+    "     C.DKBBF EF EBBLC.D     ",
+    "     C.DC          DC.D     ",
+    "     C.DC QMM--MMR DC.D     ",
+    "BBBBBF.EF P      O EF.EBBBBB",
+    "      .   P      O   .      ",
+    "AAAAAH.GH P      O GH.GAAAAA",
+    "     C.DC SNNNNNNT DC.D     ",
+    "     C.DC 12345678 DC.D     ",
+    "     C.DC GAAAAAAH DC.D     ",
     "KBBBBF.EF EBBLKBBF EF.EBBBBL",
     "C............DC............D",
     "C.GAAH.GAAAH.DC.GAAAH.GAAH.D",
@@ -124,28 +128,30 @@ FIELD_MAP = [
 
 # region CHARACTERS
 PACMAN_SPAWN_POS = Point(14, 23)
-HEROES_IMG_LIB = {
-    'OPEN': CHARACTERS_IMG_DIR + 'pacman/pacman1.png',
-    'NORMAL': CHARACTERS_IMG_DIR + 'pacman/pacman2.png',
-    'CLOSE': CHARACTERS_IMG_DIR + 'pacman/pacman3.png',
-
-    'BLINKY': CHARACTERS_IMG_DIR + 'ghosts/ghost1.png',
-    'PINKY': CHARACTERS_IMG_DIR + 'ghosts/ghost2.png',
-    'INKY': CHARACTERS_IMG_DIR + 'ghosts/ghost3.png',
-    'CLYDE': CHARACTERS_IMG_DIR + 'ghosts/ghost4.png',
-
-    'EYES_RIGHT': CHARACTERS_IMG_DIR + 'ghosts/eyes1.png',
-    'EYES_LEFT': CHARACTERS_IMG_DIR + 'ghosts/eyes2.png',
-    'EYES_UP': CHARACTERS_IMG_DIR + 'ghosts/eyes3.png',
-    'EYES_DOWN': CHARACTERS_IMG_DIR + 'ghosts/eyes4.png',
-
-    'FRUIT_1': CHARACTERS_IMG_DIR + 'fruits/fruit1.png',
-    'FRUIT_2': CHARACTERS_IMG_DIR + 'fruits/fruit2.png',
-    'FRUIT_3': CHARACTERS_IMG_DIR + 'fruits/fruit3.png',
-    'FRUIT_4': CHARACTERS_IMG_DIR + 'fruits/fruit4.png',
-    'FRUIT_5': CHARACTERS_IMG_DIR + 'fruits/fruit5.png',
-    'FRUIT_6': CHARACTERS_IMG_DIR + 'fruits/fruit6.png',
-    'FRUIT_7': CHARACTERS_IMG_DIR + 'fruits/fruit7.png',
-    'FRUIT_8': CHARACTERS_IMG_DIR + 'fruits/fruit8.png',
+PAC_SPRITE_LIB = {
+    'OPEN': PACMAN_DIR + 'pacman1.png',
+    'NORMAL': PACMAN_DIR + 'pacman2.png',
+    'CLOSE': PACMAN_DIR + 'pacman3.png'
 }
+GHOSTS_SPRITE_LIB = {
+    'BLINKY': GHOSTS_DIR + 'ghost1.png',
+    'PINKY': GHOSTS_DIR + 'ghost2.png',
+    'INKY': GHOSTS_DIR + 'ghost3.png',
+    'CLYDE': GHOSTS_DIR + 'ghost4.png',
+
+    'EYES_RIGHT': GHOSTS_DIR + 'eyes1.png',
+    'EYES_LEFT': GHOSTS_DIR + 'eyes2.png',
+    'EYES_UP': GHOSTS_DIR + 'eyes3.png',
+    'EYES_DOWN': GHOSTS_DIR + 'eyes4.png',
+}
+"""FRUITS_SPRITE_LIB = {
+    'FRUIT_1': FRUITS_DIR + 'fruit1.png',
+    'FRUIT_2': FRUITS_DIR + 'fruit2.png',
+    'FRUIT_3': FRUITS_DIR + 'fruit3.png',
+    'FRUIT_4': FRUITS_DIR + 'fruit4.png',
+    'FRUIT_5': FRUITS_DIR + 'fruit5.png',
+    'FRUIT_6': FRUITS_DIR + 'fruit6.png',
+    'FRUIT_7': FRUITS_DIR + 'fruit7.png',
+    'FRUIT_8': FRUITS_DIR + 'fruit8.png',
+}"""
 # endregion CHARACTERS

@@ -6,6 +6,15 @@ from enum import Enum
 import sys
 
 
+# Types of basic direction
+class Direction(Enum):
+    right = 1
+    left = 2
+    up = 3
+    down = 4
+
+
+# Types of behavior of ghosts
 class GostState(Enum):
     walk = 0
     persecution = 1
@@ -13,21 +22,14 @@ class GostState(Enum):
     waiting = 3
 
 
-class Direction(Enum):
-    stop = 0
-    right = 1
-    left = 2
-    up = 3
-    down = 4
-
-
+# Base class of Ghost
 class Ghost(DrawableObject):
     def __init__(self, game_object, x, y, color):
         super().__init__(game_object)
         self.state = GostState.walk
 
         # выбор призрака       ---------------------------
-        self.ghost = pygame.image.load(HEROES_IMG_LIB[color])
+        self.ghost = pygame.image.load(GHOSTS_SPRITE_LIB[color])
         # ------------------------------------------------------
         # координаты призрака ----------------------------------
         self.ghost_rect = self.ghost.get_rect()
@@ -100,18 +102,17 @@ class Ghost(DrawableObject):
         self.game_object.screen.blit(self.ghost, self.ghost_rect)  # отобразить объект
 
 
+# Base class of Pacman
 class Pacman(DrawableObject):
     def __init__(self, game_object, x, y):
         super().__init__(game_object)
         # Initialize dict of used images
-        self.images = dict()
-        for i in range(len(HEROES_IMG_LIB.items())):
-            self.images[list(HEROES_IMG_LIB.items())[i][0]] = (pygame.image.load(list(HEROES_IMG_LIB.items())[i][1]))
+        self.images = self.game_object.pacman_sprites
         # Init pacman image and rect (DIRECTION = LEFT)
-        self.pacman_img = pygame.transform.rotate(self.images['OPEN'], -180)
-        self.pacman_rect = pygame.Rect(self.pacman_img.get_rect().move(x, y))
+        self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], -180)
+        self.p_rect = pygame.Rect(self.pacman_img.get_rect().move(x, y))
         # Setup default variables
-        self.move_dir = Direction.stop
+        self.move_dir = Direction.left
         self.speed = PACMAN_SPEED
 
     def process_event(self, event):
@@ -126,20 +127,66 @@ class Pacman(DrawableObject):
                 self.move_dir = Direction.down
 
     def process_logic(self):  # логика объектов
-        for food in self.game_object.food:
-            if self.check_collision_with(pygame.Rect(food.x, food.y, food.cell_size, food.cell_size)):
-                food.eat_up()
-        self.smooth_move()
+        self.move()
+        self.check_position()
 
-    def check_collision_with(self, rect : pygame.Rect):
-        return pygame.Rect(self.pacman_rect.x, self.pacman_rect.y, self.pacman_rect.width, self.pacman_rect.height)\
-            .colliderect(pygame.Rect(rect.x, rect.y, rect.width, rect.height))
+    def process_draw(self):
+        pac_size = CELL_SIZE * 2
+        pac_img = pygame.transform.scale(self.pacman_img, (pac_size, pac_size))
+        pac_rect = pygame.Rect(self.p_rect.x - CELL_SIZE // 2, self.p_rect.y - CELL_SIZE // 2,
+                           self.p_rect.width + pac_size, self.p_rect.height + pac_size)
+        self.game_object.screen.blit(pac_img, pac_rect)  # отобразить объект
 
-    def check_field_collisions(self, pacman_speed):
+    # Check collision rect of pacman with other rext
+    def check_collision_with(self, other: pygame.Rect):
+        return pygame.Rect(self.p_rect.x, self.p_rect.y, self.p_rect.width, self.p_rect.height)\
+            .colliderect(pygame.Rect(other.x, other.y, other.width, other.height))
+
+    def move(self):
+        if self.move_dir == Direction.left:
+            if True:
+                self.p_rect.x -= self.speed  # шаг влево
+                # Смена спрайта : анимация------------------------------
+                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], -180)
+                # ------------------------------------------------------
+        # --------------------------------------------------------------
+        elif self.move_dir == Direction.right:
+            if True:
+                self.p_rect.x += self.speed * 1.2  # шаг вправо
+                # Смена спрайта : анимация------------------------------
+                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 0)
+                # ------------------------------------------------------
+        # --------------------------------------------------------------
+        elif self.move_dir == Direction.up:
+            if True:
+                self.p_rect.y -= self.speed  # шаг вверх
+                # Смена спрайта : анимация------------------------------
+                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 90)
+                # ------------------------------------------------------
+        # --------------------------------------------------------------
+        elif self.move_dir == Direction.down:
+            if True:
+                self.p_rect.y += self.speed * 1.2  # шаг вниз
+                # Смена спрайта : анимация------------------------------
+                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], -90)
+                # ------------------------------------------------------
+
+    # return if pacman can move (there is no wall in the direction of movement)
+    def check_position(self):
+        crit_pos = Point((self.p_rect.x - self.game_object.field.offset.x) % CELL_SIZE,
+                         (self.p_rect.y - self.game_object.field.offset.y) % CELL_SIZE)
+        if 0 == crit_pos.x and 0 == crit_pos.y:  # If pacman and cell pos equals
+            cell = self.game_object.field.get_cell_from_position(Point(self.p_rect.centerx, self.p_rect.centery))
+            if cell and cell.food:
+                cell.food.eat_up()
+            return True
+        return False
+
+    """def check_field_collisions(self, pacman_speed):
         field = self.game_object.field
-        p_x = self.pacman_rect.left + (pacman_speed if self.move_dir in [Direction.left, Direction.right] else 0)
-        p_y = self.pacman_rect.top + (pacman_speed if self.move_dir in [Direction.up, Direction.down] else 0)
-        p_size = self.pacman_rect.width
+        p_x = self.p_rect.left + (pacman_speed if self.move_dir in [Direction.left, Direction.right] else 0)
+        p_y = self.p_rect.top + (pacman_speed if self.move_dir in [Direction.up, Direction.down] else 0)
+        p_size = self.p_rect.width
 
         for y in range(len(field.cells)):
             for x in range(len(field.cells[y])):
@@ -150,40 +197,4 @@ class Pacman(DrawableObject):
                     if pygame.Rect(p_x, p_y, p_size, p_size).colliderect(pygame.Rect(cell_x, cell_y,
                                                                                      field.cell_size, field.cell_size)):
                         return False
-        return True
-
-    def smooth_move(self):
-        if self.move_dir == Direction.left:
-            if True:
-                self.pacman_rect.x -= self.speed  # шаг влево
-                # Смена спрайта : анимация------------------------------
-                self.pacman_img = pygame.transform.rotate(self.images['OPEN'], -180)
-                # ------------------------------------------------------
-        # --------------------------------------------------------------
-        elif self.move_dir == Direction.right:
-            if True:
-                self.pacman_rect.x += self.speed * 1.2  # шаг вправо
-                # Смена спрайта : анимация------------------------------
-                self.pacman_img = pygame.transform.rotate(self.images['OPEN'], 0)
-                # ------------------------------------------------------
-        # --------------------------------------------------------------
-        elif self.move_dir == Direction.up:
-            if True:
-                self.pacman_rect.y -= self.speed  # шаг вверх
-                # Смена спрайта : анимация------------------------------
-                self.pacman_img = pygame.transform.rotate(self.images['OPEN'], 90)
-                # ------------------------------------------------------
-        # --------------------------------------------------------------
-        elif self.move_dir == Direction.down:
-            if True:
-                self.pacman_rect.y += self.speed * 1.2  # шаг вниз
-                # Смена спрайта : анимация------------------------------
-                self.pacman_img = pygame.transform.rotate(self.images['OPEN'], -90)
-                # ------------------------------------------------------
-
-    def process_draw(self):
-        pac_size = CELL_SIZE * 2
-        pac_img = pygame.transform.scale(self.pacman_img, (pac_size, pac_size))
-        pac_rect = pygame.Rect(self.pacman_rect.x - CELL_SIZE // 2, self.pacman_rect.y - CELL_SIZE // 2,
-                           self.pacman_rect.width + pac_size, self.pacman_rect.height + pac_size)
-        self.game_object.screen.blit(pac_img, pac_rect)  # отобразить объект
+        return True"""

@@ -10,9 +10,9 @@ class HUD(DrawableObject):
         super().__init__(game_object)
 
         self.hud_elements = []
-        self.lives_hud_image = pygame.image.load(PATH_HEART_IMG)
+        self.lives_hud_image = pygame.transform.scale(pygame.image.load(PATH_LIFE), (CELL_SIZE * 2, CELL_SIZE * 2))
         self.font = pygame.font.Font(FONT_PATH, SCORES_HUD_FONT_SIZE)
-        self.score_position = (SCREEN_WIDTH - 100, SCREEN_HEIGHT - 30)
+        self.score_position = (SCREEN_WIDTH - 100, SCREEN_HEIGHT - 20)
         self.lives_hud_rect = self.lives_hud_image.get_rect()
         self.lives_hud = []
 
@@ -21,8 +21,8 @@ class HUD(DrawableObject):
         for live in range(self.game_object.lives):
             # 1.2 - stretch coef of spacing between images
             r = pygame.Rect(20 + (self.lives_hud_rect.width * live * 1.2),  # x
-                            SCREEN_HEIGHT - self.lives_hud_rect.height - 15,  # y
-                            0, 0)  # width, height
+                            SCREEN_HEIGHT - self.lives_hud_rect.height - 10,  # y
+                            CELL_SIZE, CELL_SIZE)  # width, height
             self.lives_hud.append(r)
 
         # Update scores of pacman and position of text dependence of its length
