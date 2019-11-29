@@ -43,3 +43,12 @@ class Vec:
             return ((self.x - other.x)**2 + (self.y - other.y)**2)**0.5
         elif type(other) == type((0, 1)):  # Tuple
             return ((self.x - other[0])**2 + (self.y - other[1])**2)**0.5
+
+
+def nearest_divisor_of_num(target, num):
+    dividers = []
+    for i in range(1, num + 1):
+        if num % i == 0:
+            dividers.append(i)
+    result = min(dividers, key=lambda x: abs(x - target))  # Nearest divider to target
+    return result

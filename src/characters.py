@@ -125,7 +125,7 @@ class Pacman(DrawableObject):
         pac_pos = self.game_object.field.get_cell_position(self.game_object.field.pacman_pos)
         self.p_rect.move(pac_pos.x - CELL_SIZE // 2, pac_pos.y)
 
-        self.speed = PACMAN_SPEED
+        self.speed = nearest_divisor_of_num(PACMAN_SPEED, CELL_SIZE)
         self.vel = Vec(-1, 0)
         self.turn_to = Vec(-1, 0)
 
