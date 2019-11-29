@@ -1,5 +1,7 @@
 import pygame
 from random import randrange
+
+from src.animations import Anim
 from src.base_classes import DrawableObject
 from src.constants import *
 from src.food import FoodType
@@ -117,6 +119,8 @@ class Pacman(DrawableObject):
         # Init pacman image and rect (DIRECTION = LEFT)
         self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], -180)
         self.p_rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
+        # Animations
+        self.a_eat = Anim(['NORMAL', 'OPEN', 'NORMAL', 'CLOSE'], 6)
         # Setup default variables in reset
         self.reset()
 
@@ -143,11 +147,15 @@ class Pacman(DrawableObject):
                 self.turn_to = Dir.down  # DOWN
 
     def process_logic(self):  # логика объектов
-        self.move()
+        self.change_sprites()
         if self.check_position():
+            self.a_eat.add_tick()
             self.p_rect.x += self.vel.x * self.speed
             self.p_rect.y += self.vel.y * self.speed
             self.check_teleportations()
+        else:
+            # If pacman hit the wall
+            self.a_eat.curr_sprite = 'NORMAL'
 
     def check_teleportations(self):
         field_width = len(self.game_object.field.field[0]) * CELL_SIZE
@@ -170,19 +178,15 @@ class Pacman(DrawableObject):
         return pygame.Rect(self.p_rect.x, self.p_rect.y, self.p_rect.width, self.p_rect.height) \
             .colliderect(pygame.Rect(other.x, other.y, other.width, other.height))
 
-    def move(self):
+    def change_sprites(self):
         if self.vel == Dir.left:
-            if True:
-                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 0)
+            self.pacman_img = pygame.transform.rotate(self.images[self.a_eat.curr_sprite], 180)
         elif self.vel == Dir.right:
-            if True:
-                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 0)
+            self.pacman_img = pygame.transform.rotate(self.images[self.a_eat.curr_sprite], 0)
         elif self.vel == Dir.up:
-            if True:
-                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 0)
+            self.pacman_img = pygame.transform.rotate(self.images[self.a_eat.curr_sprite], 90)
         elif self.vel == Dir.down:
-            if True:
-                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 0)
+            self.pacman_img = pygame.transform.rotate(self.images[self.a_eat.curr_sprite], -90)
 
     # return if pacman can move (there is no wall in the direction of movement)
     def check_position(self):

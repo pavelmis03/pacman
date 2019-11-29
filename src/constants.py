@@ -42,8 +42,8 @@ SCORE_FOR_DOT = 10
 SCORE_FOR_ENERGIZER = 50
 SCORE_FOR_FRUIT = [-999, 100, 300, 500, 700, 1000, 2000, 3000, 5000]  # 0 fruit is not existing!
 PACMAN_MAX_LIVES = 3
-SCREEN_RESPONSE = 7  # ms
-PACMAN_SPEED = 2
+SCREEN_RESPONSE = 3  # ms
+PACMAN_SPEED = 1
 PATH_LOGO = IMAGES_DIR + 'logo.png'
 # endregion General
 
@@ -69,20 +69,21 @@ PATH_CONTROLS = MENU_DIR + 'controls.ini'
 DEBUG_MIXER = False
 MUTE_AUDIO = False
 SOUNDLIB = {
-    'START': SOUNDS_DIR + 'beginning.wav',
-    'MOVE': SOUNDS_DIR + 'move.wav',
-    'CHOMP': SOUNDS_DIR + 'eating.wav',
-    'ENERGIZER': SOUNDS_DIR + 'ate_ghost.wav',
+    'START': SOUNDS_DIR + 'intro.wav',
+    'SIREN': SOUNDS_DIR + 'siren.wav',
+    'CHOMP': SOUNDS_DIR + 'chomp.wav',
+    'ENERGIZER': SOUNDS_DIR + 'ate_ghost.wav',  # It's right
     'DEATH': SOUNDS_DIR + 'death.wav',
     'FRUIT': SOUNDS_DIR + 'ate_fruit.wav',
     'GHOST': SOUNDS_DIR + 'ate_ghost.wav',
-    'FINAL': SOUNDS_DIR + 'intermission.wav',
-    'ATTACK': SOUNDS_DIR + 'energizer.wav',
+    'CUTSCENE': SOUNDS_DIR + 'cutscene.wav',
+    'FRIGHTENING': SOUNDS_DIR + 'frightening.wav',
     'SPRUT1': SOUNDS_DIR + 'spurt1.wav',
     'SPRUT2': SOUNDS_DIR + 'spurt2.wav',
     'SPRUT3': SOUNDS_DIR + 'spurt3.wav',
     'SPRUT4': SOUNDS_DIR + 'spurt4.wav',
-    'GHOST_TO_HOME': SOUNDS_DIR + 'ghost_to_home.wav'
+    'GHOST_TO_HOME': SOUNDS_DIR + 'ghost_to_home.wav',
+    'EXTRA': SOUNDS_DIR + 'extra.wav'
 }
 # endregion Sound mixer constants
 
@@ -151,14 +152,4 @@ GHOSTS_SPRITE_LIB = {
     'EYES_UP': GHOSTS_DIR + 'eyes3.png',
     'EYES_DOWN': GHOSTS_DIR + 'eyes4.png',
 }
-"""FRUITS_SPRITE_LIB = {
-    'FRUIT_1': FRUITS_DIR + 'fruit1.png',
-    'FRUIT_2': FRUITS_DIR + 'fruit2.png',
-    'FRUIT_3': FRUITS_DIR + 'fruit3.png',
-    'FRUIT_4': FRUITS_DIR + 'fruit4.png',
-    'FRUIT_5': FRUITS_DIR + 'fruit5.png',
-    'FRUIT_6': FRUITS_DIR + 'fruit6.png',
-    'FRUIT_7': FRUITS_DIR + 'fruit7.png',
-    'FRUIT_8': FRUITS_DIR + 'fruit8.png',
-}"""
 # endregion CHARACTERS
