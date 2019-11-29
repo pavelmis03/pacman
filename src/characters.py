@@ -2,21 +2,22 @@ import pygame
 from random import randrange
 from src.base_classes import DrawableObject
 from src.constants import *
+from src.food import FoodType
 from enum import Enum
 import sys
 
 
 # Types of basic direction
-class Direction(Enum):
-    right = 1
-    left = 2
-    up = 3
-    down = 4
+class Dir:
+    left = Vec(-1, 0)
+    right = Vec(1, 0)
+    up = Vec(0, -1)
+    down = Vec(0, 1)
 
 
 # Types of behavior of ghosts
 class GostState(Enum):
-    walk = 0
+    frightened = 0
     persecution = 1
     go_home = 2
     waiting = 3
@@ -104,6 +105,10 @@ class Ghost(DrawableObject):
 
 # Base class of Pacman
 class Pacman(DrawableObject):
+    speed: float
+    vel: Vec
+    turn_to: Vec
+
     def __init__(self, game_object, x, y):
         super().__init__(game_object)
         # Initialize dict of used images
@@ -111,24 +116,43 @@ class Pacman(DrawableObject):
         # Init pacman image and rect (DIRECTION = LEFT)
         self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], -180)
         self.p_rect = pygame.Rect(self.pacman_img.get_rect().move(x, y))
-        # Setup default variables
-        self.move_dir = Direction.left
+        # Setup default variables in reset
+        self.reset()
+
+    # Setup default variables values
+    def reset(self):
+        pac_pos = self.game_object.field.get_cell_position(self.game_object.field.pacman_pos)
+        self.p_rect.move(pac_pos.x - CELL_SIZE // 2, pac_pos.y)
+
         self.speed = PACMAN_SPEED
+        self.vel = Vec(-self.speed, 0)
+        self.turn_to = Vec(-self.speed, 0)
 
     def process_event(self, event):
         if event.type == pygame.KEYDOWN:  # Check key down
             if event.key in [Input.A_LEFT, Input.LEFT]:  # Change directory to left
-                self.move_dir = Direction.left
+                self.turn_to = Dir.left * self.speed  # LEFT
             elif event.key in [Input.A_RIGHT, Input.RIGHT]:
-                self.move_dir = Direction.right
+                self.turn_to = Dir.right * self.speed  # RIGHT
             elif event.key in [Input.A_UP, Input.UP]:
-                self.move_dir = Direction.up
+                self.turn_to = Dir.up * self.speed  # UP
             elif event.key in [Input.A_DOWN, Input.DOWN]:
-                self.move_dir = Direction.down
+                self.turn_to = Dir.down * self.speed  # DOWN
 
     def process_logic(self):  # логика объектов
         self.move()
-        self.check_position()
+        if self.check_position():
+            self.p_rect.x += self.vel.x
+            self.p_rect.y += self.vel.y
+        else:
+            cell = self.game_object.field.get_cell_from_position(Vec(self.p_rect.centerx, self.p_rect.centery))
+            if cell and cell.food:
+                # Eat dot
+                cell.food.eat_up()
+                if cell.food.type == FoodType.ENERGIZER:
+                    # Set all ghosts to frightened
+                    for ghost in self.game_object.ghosts:
+                        ghost.state = GostState.frightened
 
     def process_draw(self):
         pac_size = CELL_SIZE * 2
@@ -143,49 +167,70 @@ class Pacman(DrawableObject):
             .colliderect(pygame.Rect(other.x, other.y, other.width, other.height))
 
     def move(self):
-        if self.move_dir == Direction.left:
+        if self.vel == Dir.left:
             if True:
-                self.p_rect.x -= self.speed  # шаг влево
-                # Смена спрайта : анимация------------------------------
-                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], -180)
-                # ------------------------------------------------------
-        # --------------------------------------------------------------
-        elif self.move_dir == Direction.right:
-            if True:
-                self.p_rect.x += self.speed * 1.2  # шаг вправо
-                # Смена спрайта : анимация------------------------------
                 self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 0)
-                # ------------------------------------------------------
-        # --------------------------------------------------------------
-        elif self.move_dir == Direction.up:
+        elif self.vel == Dir.right:
             if True:
-                self.p_rect.y -= self.speed  # шаг вверх
-                # Смена спрайта : анимация------------------------------
-                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 90)
-                # ------------------------------------------------------
-        # --------------------------------------------------------------
-        elif self.move_dir == Direction.down:
+                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 0)
+        elif self.vel == Dir.up:
             if True:
-                self.p_rect.y += self.speed * 1.2  # шаг вниз
-                # Смена спрайта : анимация------------------------------
-                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], -90)
-                # ------------------------------------------------------
+                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 0)
+        elif self.vel == Dir.down:
+            if True:
+                self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], 0)
 
     # return if pacman can move (there is no wall in the direction of movement)
     def check_position(self):
-        crit_pos = Point((self.p_rect.x - self.game_object.field.offset.x) % CELL_SIZE,
+        crit_pos = Vec((self.p_rect.x - self.game_object.field.offset.x) % CELL_SIZE,
                          (self.p_rect.y - self.game_object.field.offset.y) % CELL_SIZE)
         if 0 == crit_pos.x and 0 == crit_pos.y:  # If pacman and cell pos equals
-            cell = self.game_object.field.get_cell_from_position(Point(self.p_rect.centerx, self.p_rect.centery))
+            cell = self.game_object.field.get_cell_from_position(Vec(self.p_rect.centerx, self.p_rect.centery))
+            #==================================================================================================
+            # Eating food
             if cell and cell.food:
+                # Eat dot
+                if cell.food.type == FoodType.ENERGIZER:
+                    # Set all ghosts to frightened
+                    for ghost in self.game_object.ghosts:
+                        ghost.state = GostState.frightened
                 cell.food.eat_up()
+            # ==================================================================================================
+            # Movement
+            f_pos = Vec(cell.f_pos.x, cell.f_pos.y)  # Pacman position in field
+            pos_to_check = f_pos + self.turn_to  # Pos in field that the pacman is turning towards
+            # Check if there is a free space in the direction that it is going to turn
+            print(self.game_object.field.field[pos_to_check.y][pos_to_check.x].is_wall)
+            if self.game_object.field.field[pos_to_check.y][pos_to_check.x].is_wall:
+                if self.game_object.field.field[f_pos.y + self.vel.y][f_pos.x + self.vel.x].is_wall:
+                    return False  # if neither are free then dont move
+                else:
+                    return True  # forward is free
+            else:
+                self.vel = self.turn_to
+                return True  # Free to turn
+        else:
+            if self.turn_to.x + self.vel.x == 0 and self.vel.y + self.turn_to.y == 0:  # if turning chenging directions entirely i.e.180 degree turn
+                self.vel = Vec(self.turn_to.x, self.turn_to.y)
             return True
-        return False
 
+    # return whether the input vector hits pacman
+    def hit_ghost(self, ghost: Ghost):
+        self_pos = Vec(self.p_rect.x, self.p_rect.y)
+        ghost_pos = Vec(ghost.ghost_rect.x, ghost.ghost_rect.y)
+        return self_pos.dist(ghost_pos)
+
+    # called when a ghost hits pacman
+    def kill(self):
+        self.game_object.lives -= 1
+        if self.game_object.lives == 0:
+            self.game_object.game_over = True
+        else:
+            self.reset()
     """def check_field_collisions(self, pacman_speed):
         field = self.game_object.field
-        p_x = self.p_rect.left + (pacman_speed if self.move_dir in [Direction.left, Direction.right] else 0)
-        p_y = self.p_rect.top + (pacman_speed if self.move_dir in [Direction.up, Direction.down] else 0)
+        p_x = self.p_rect.left + (pacman_speed if self.vel in [Direction.left, Direction.right] else 0)
+        p_y = self.p_rect.top + (pacman_speed if self.vel in [Direction.up, Direction.down] else 0)
         p_size = self.p_rect.width
 
         for y in range(len(field.cells)):

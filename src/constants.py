@@ -134,7 +134,7 @@ FIELD_MAP = [
 # endregion FIELD
 
 # region CHARACTERS
-PACMAN_SPAWN_POS = Point(14, 23)
+PACMAN_SPAWN_POS = Vec(14, 23)
 PAC_SPRITE_LIB = {
     'OPEN': PACMAN_DIR + 'pacman1.png',
     'NORMAL': PACMAN_DIR + 'pacman2.png',

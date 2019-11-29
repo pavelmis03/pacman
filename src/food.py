@@ -36,7 +36,7 @@ class Food(DrawableObject):
             self.game_object.scores += SCORE_FOR_DOT
 
         # Del our instance of class from Cell class and from game list
-        self.game_object.field.get_cell_from_position(Point(self.x, self.y)).food = None
+        self.game_object.field.get_cell_from_position(Vec(self.x, self.y)).food = None
         self.game_object.food.remove(self.game_object.food[self.game_object.food.index(self)])
 
     def draw_dot(self):

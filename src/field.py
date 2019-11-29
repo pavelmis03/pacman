@@ -8,7 +8,7 @@ from src.helpers import *
 
 # Class of field's cell
 class Cell(DrawableObject):
-    def __init__(self, game_object, f_pos=Point(0, 0), g_pos=Point(0, 0), size=20, img=None):
+    def __init__(self, game_object, f_pos=Vec(0, 0), g_pos=Vec(0, 0), size=20, img=None):
         super().__init__(game_object)
 
         self.f_pos = f_pos  # Field x (0; 28) y (0; 31)
@@ -26,7 +26,7 @@ class Cell(DrawableObject):
 
     def process_draw(self):
         if self.img:
-            self.game_object.screen.blit(self.img, pygame.Rect(self.g_pos, Point(self.size, self.size)))
+            self.game_object.screen.blit(self.img, pygame.Rect(self.g_pos, Vec(self.size, self.size)))
 
     def __repr__(self):
         return 'Cell: X{}, Y{}, WALL{}'.format(self.f_pos, self.g_pos, self.is_wall)
@@ -37,7 +37,7 @@ class Field(DrawableObject):
         # MAP_SIZE IS 28x31
         super().__init__(game_object)
         if not position:
-            position = Point((SCREEN_WIDTH - cell_size * 28) // 2, 50)
+            position = Vec((SCREEN_WIDTH - cell_size * 28) // 2, 50)
         self.cell_size = cell_size
         self.offset = position
         self.pacman_pos = PACMAN_SPAWN_POS  # If 'decoder' find PACMAN_CODE on map, it put coordinates to this variable
@@ -58,7 +58,7 @@ class Field(DrawableObject):
         for y in range(len(self.map)):
             self.field.append([])
             for x in range(len(self.map[y])):
-                cell = Cell(self.game_object, Point(x, y), self.get_cell_position(Point(x, y)), self.cell_size)
+                cell = Cell(self.game_object, Vec(x, y), self.get_cell_position(Vec(x, y)), self.cell_size)
                 m_cell = self.map[y][x]
                 # Walls
                 if m_cell in WALL_CODES:
@@ -69,7 +69,7 @@ class Field(DrawableObject):
                     cell.is_door = True
                 # Pacman
                 if m_cell == PACMAN_CODE:
-                    self.pacman_pos = Point(x, y)
+                    self.pacman_pos = Vec(x, y)
                 # Food
                 if m_cell == DOT_CODE:
                     cell.food = Food(self.game_object, self.cell_size, cell.g_pos.x, cell.g_pos.y, FoodType.DOT)
@@ -82,10 +82,10 @@ class Field(DrawableObject):
 
     # Return global position of field's cell
     def get_cell_position(self, pos):
-        return Point(self.offset[0] + self.cell_size * pos.x, self.offset[1] + self.cell_size * pos.y)
+        return Vec(self.offset[0] + self.cell_size * pos.x, self.offset[1] + self.cell_size * pos.y)
 
     # Return field's cell using global pos
-    def get_cell_from_position(self, pos: Point):
+    def get_cell_from_position(self, pos: Vec):
         if self.offset.x < pos.x < self.offset.x + (len(self.field[0]) * self.cell_size) and \
                 self.offset.y < pos.y < self.offset.y + (len(self.field) * self.cell_size):
             y = (pos.y - self.offset.y) // self.cell_size
@@ -117,6 +117,6 @@ class Field(DrawableObject):
             for x in range(len(self.field[y])):
                 cell = self.field[y][x]
                 if cell.is_wall:  # Wall
-                    self.draw_wall(Point(x, y))
+                    self.draw_wall(Vec(x, y))
                 if cell.is_door:  # Door
-                    self.draw_door(Point(x, y))
+                    self.draw_door(Vec(x, y))
