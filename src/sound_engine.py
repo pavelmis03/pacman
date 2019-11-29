@@ -43,6 +43,9 @@ class SoundMixer:
         self.stop_all_sounds()
         self.query_of_sounds = []
 
+    def is_busy(self):
+        return pygame.mixer.get_busy()
+
     @staticmethod
     def stop_all_sounds():
         pygame.mixer.stop()

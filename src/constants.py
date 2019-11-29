@@ -88,7 +88,7 @@ SOUNDLIB = {
 # endregion Sound mixer constants
 
 # HUD
-SCORES_HUD_FONT_SIZE = 30
+SCORES_HUD_FONT_SIZE = 24
 PATH_LIFE = IMAGES_DIR + 'life.png'
 
 # region FIELD
@@ -99,6 +99,7 @@ ENERGIZER_CODE = '0'
 DOT_CODE = '.'
 GHOSTS_ENTER_CODE = '-'
 PACMAN_CODE = '@'
+CENTER_TEXT_POS = Vec(15, 17)
 FIELD_MAP = [
     "KBBBBBBBBBBBBLKBBBBBBBBBBBBL",
     "C3...........DC...........4D",

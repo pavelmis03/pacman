@@ -120,20 +120,45 @@ class Game:
                 pygame.transform.scale(pygame.image.load(list(GHOSTS_SPRITE_LIB.items())[i][1]),
                                        (CELL_SIZE * 2, CELL_SIZE * 2)))
 
+    def display_center_text(self, text, color):
+        self.font = pygame.font.Font(FONT_PATH, SCORES_HUD_FONT_SIZE)
+        s_text = self.font.render(text, 1, color)
+        pos = self.field.get_cell_position(CENTER_TEXT_POS)
+        half_len_text = SCORES_HUD_FONT_SIZE * len(text) // 2
+        self.screen.blit(s_text, (pos.x - half_len_text, pos.y))
+        pygame.display.flip()
+
     def main_loop(self):
         # Start Main menu First
         self.init_menu()
 
+        # Start game loop
         while not self.start_game:
             self.menu.menu_loop()
 
+        # Ready
+        self.game_update()  # Need to "ready screen"
+        self.display_center_text('READY!', Color.YELLOW)
+        self.mixer.play_sound('START')
+        while self.mixer.is_busy():
+            self.process_events()  # just wait
+
         # If user click START - start game
         while not self.game_over:  # Основной цикл работы программы
-            self.mixer.process_query_of_sounds()  # need to process the query of sounds if it used
-            self.process_events()
-            self.process_logic()
-            self.process_draw()
+            self.game_update()
+
+        # Game Over screen
+        self.display_center_text('GAME OVER!', Color.RED)
+        self.mixer.play_sound('DEATH')
+        while self.mixer.is_busy():
+            self.process_events()  # just wait
         sys.exit(0)  # Выход из программы
+
+    def game_update(self):
+        self.mixer.process_query_of_sounds()  # need to process the query of sounds if it used
+        self.process_events()
+        self.process_logic()
+        self.process_draw()
 
     def process_draw(self):
         for item in self.objects:
@@ -150,6 +175,6 @@ class Game:
     def process_events(self):
         for event in pygame.event.get():  # Обработка всех событий
             if event.type == pygame.QUIT:  # Обработка события выхода
-                self.game_over = True
+                sys.exit(0)
             for item in self.objects:
                 item.process_event(event)
