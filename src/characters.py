@@ -108,6 +108,7 @@ class Pacman(DrawableObject):
     speed: float
     vel: Vec
     turn_to: Vec
+    eating: bool
 
     def __init__(self, game_object, x, y):
         super().__init__(game_object)
@@ -128,6 +129,8 @@ class Pacman(DrawableObject):
         self.vel = Vec(-self.speed, 0)
         self.turn_to = Vec(-self.speed, 0)
 
+        self.eating = False
+
     def process_event(self, event):
         if event.type == pygame.KEYDOWN:  # Check key down
             if event.key in [Input.A_LEFT, Input.LEFT]:  # Change directory to left
@@ -144,15 +147,6 @@ class Pacman(DrawableObject):
         if self.check_position():
             self.p_rect.x += self.vel.x
             self.p_rect.y += self.vel.y
-        else:
-            cell = self.game_object.field.get_cell_from_position(Vec(self.p_rect.centerx, self.p_rect.centery))
-            if cell and cell.food:
-                # Eat dot
-                cell.food.eat_up()
-                if cell.food.type == FoodType.ENERGIZER:
-                    # Set all ghosts to frightened
-                    for ghost in self.game_object.ghosts:
-                        ghost.state = GostState.frightened
 
     def process_draw(self):
         pac_size = CELL_SIZE * 2
@@ -189,18 +183,29 @@ class Pacman(DrawableObject):
             #==================================================================================================
             # Eating food
             if cell and cell.food:
-                # Eat dot
+                # DOTS
+                if not self.eating:
+                    if cell.food.type == FoodType.DOT:  # Don't chomping on fruits and enj-ers
+                        self.game_object.mixer.play_sound('CHOMP', 0)
+                        self.eating = True
+                    else:
+                        self.game_object.mixer.stop_sound('CHOMP')
+                        self.eating = False
+                # ENERGIZER
                 if cell.food.type == FoodType.ENERGIZER:
                     # Set all ghosts to frightened
                     for ghost in self.game_object.ghosts:
                         ghost.state = GostState.frightened
                 cell.food.eat_up()
+            else:
+                #DOTS
+                self.game_object.mixer.stop_sound('CHOMP')
+                self.eating = False
             # ==================================================================================================
             # Movement
             f_pos = Vec(cell.f_pos.x, cell.f_pos.y)  # Pacman position in field
             pos_to_check = f_pos + self.turn_to  # Pos in field that the pacman is turning towards
             # Check if there is a free space in the direction that it is going to turn
-            print(self.game_object.field.field[pos_to_check.y][pos_to_check.x].is_wall)
             if self.game_object.field.field[pos_to_check.y][pos_to_check.x].is_wall:
                 if self.game_object.field.field[f_pos.y + self.vel.y][f_pos.x + self.vel.x].is_wall:
                     return False  # if neither are free then dont move

@@ -24,7 +24,7 @@ class Food(DrawableObject):
     def eat_up(self):
         # FRUIT
         if self.type == FoodType.FRUIT:
-            self.game_object.mixer.play_sound('ENERGIZER')
+            self.game_object.mixer.play_sound('FRUIT')
             self.game_object.scores += SCORE_FOR_FRUIT[self.fruit_type]
         # ENERGIZER
         if self.type == FoodType.ENERGIZER:
@@ -32,7 +32,7 @@ class Food(DrawableObject):
             self.game_object.scores += SCORE_FOR_ENERGIZER
         # DOT
         if self.type == FoodType.DOT:
-            self.game_object.mixer.play_sound('CHOMP')
+            #self.game_object.mixer.play_sound('CHOMP')
             self.game_object.scores += SCORE_FOR_DOT
 
         # Del our instance of class from Cell class and from game list

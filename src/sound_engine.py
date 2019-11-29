@@ -18,9 +18,15 @@ class SoundMixer:
     def play_sound(self, sound, loops_count=1):
         if not MUTE_AUDIO:
             self.sounds[sound].play(loops=loops_count - 1)  # For some reason plays 1 repeat more
-            s = self.sounds[sound].get_length()
             if DEBUG_MIXER:
                 print("Plays sound: " + sound)
+
+    # Can play sound at any time
+    def stop_sound(self, sound):
+        if not MUTE_AUDIO:
+            self.sounds[sound].stop()  # For some reason plays 1 repeat more
+            if DEBUG_MIXER:
+                print("Stop sound: " + sound)
 
     # Add sound to query with loops count
     def add_sound_to_query(self, sound, loops_count=1):
