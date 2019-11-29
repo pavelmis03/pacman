@@ -13,12 +13,20 @@ from src.characters import *
 
 
 class Game:
+    # region Prototypes of variables
     screen: pygame.display
     field: Field
     food: []
+    ghosts: []
     menu: MainMenu
     hud: HUD
     mixer: SoundMixer
+    blinky: Ghost
+    pinky: Ghost
+    inky: Ghost
+    clyde: Ghost
+    pacman: Pacman
+    # endregion Prototypes of variables
 
     def __init__(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT):
         self.width = width
@@ -55,16 +63,17 @@ class Game:
         self.food = self.field.get_food()
         pac_pos = self.field.get_cell_position(self.field.pacman_pos)
         self.pacman = Pacman(self, pac_pos.x - CELL_SIZE // 2, pac_pos.y)  # Add some offset to centering pcaman
-        #self.blinky = Ghost(self, 100, 100, 'BLINKY')
-        #self.pinky = Ghost(self, 100, 100, 'PINKY')
-        #self.inky = Ghost(self, 100, 100, 'INKY')
-        #self.clyde = Ghost(self, 100, 100, 'CLYDE')
+        self.blinky = Ghost(self, 100, 100, 'BLINKY')
+        self.pinky = Ghost(self, 100, 100, 'PINKY')
+        self.inky = Ghost(self, 100, 100, 'INKY')
+        self.clyde = Ghost(self, 100, 100, 'CLYDE')
+        self.ghosts = [self.blinky, self.pinky, self.inky, self.clyde]
 
         # Add all food to object list
         for food in self.food:
             self.objects.append(food)
 
-        self.objects += [self.hud, self.field, self.pacman]#, self.blinky, self.pinky, self.inky, self.clyde]
+        self.objects += [self.hud, self.field, self.pacman]  # , self.blinky, self.pinky, self.inky, self.clyde]
 
     def library_init(self):
         # Initialize all libs
@@ -84,13 +93,13 @@ class Game:
         self.map_sprites = dict()
         for ch in WALL_CODES:
             self.map_sprites[ch] = pygame.transform.scale(pygame.image.load(MAP_DIR + ch + '.png'),
-                                                      (CELL_SIZE, CELL_SIZE))
+                                                          (CELL_SIZE, CELL_SIZE))
 
         # Load all fruits sprite library(Need in Food class)
         self.fruits_sprites = dict()
         for ch in FRUIT_CODES:
             self.fruits_sprites[ch] = pygame.transform.scale(pygame.image.load(FRUITS_DIR + 'fruit' + ch + '.png'),
-                                                      (CELL_SIZE, CELL_SIZE))
+                                                             (CELL_SIZE, CELL_SIZE))
 
         # Load all pacman sprite library
         self.pacman_sprites = dict()

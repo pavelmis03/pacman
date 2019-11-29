@@ -15,16 +15,16 @@ class HUD(DrawableObject):
         self.score_position = (SCREEN_WIDTH - 100, SCREEN_HEIGHT - 20)
         self.lives_hud_rect = self.lives_hud_image.get_rect()
         self.lives_hud = []
+        self.update_lives()
 
-    def process_draw(self):
-        # Update amount of pacman lives
+    def update_lives(self):
         for live in range(self.game_object.lives):
-            # 1.2 - stretch coef of spacing between images
-            r = pygame.Rect(20 + (self.lives_hud_rect.width * live * 1.2),  # x
+            r = pygame.Rect(20 + (self.lives_hud_rect.width * live),  # x
                             SCREEN_HEIGHT - self.lives_hud_rect.height - 10,  # y
                             CELL_SIZE, CELL_SIZE)  # width, height
             self.lives_hud.append(r)
 
+    def process_draw(self):
         # Update scores of pacman and position of text dependence of its length
         score_text = self.font.render('ОЧКИ: ' + str(self.game_object.scores), 1, Color.WHITE)
         self.score_position = score_text.get_rect()

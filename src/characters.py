@@ -27,7 +27,7 @@ class GostState(Enum):
 class Ghost(DrawableObject):
     def __init__(self, game_object, x, y, color):
         super().__init__(game_object)
-        self.state = GostState.walk
+        self.state = GostState.persecution
 
         # выбор призрака       ---------------------------
         self.ghost = pygame.image.load(GHOSTS_SPRITE_LIB[color])
