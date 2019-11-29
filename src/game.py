@@ -12,9 +12,10 @@ class Game:
         self.size = [self.width, self.height]
         self.library_init()
         self.game_over = False
-        self.hud = HUD(self)
-        self.lifes = 3
+        self.lives = 3
         self.scores = 1000
+
+        self.hud = HUD(self)
 
         self.create_game_objects()
 
