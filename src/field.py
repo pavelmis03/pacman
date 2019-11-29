@@ -66,6 +66,7 @@ class Field(DrawableObject):
                     cell.img = self.sprites[m_cell]
                 # Door
                 if m_cell == GHOSTS_ENTER_CODE:
+                    cell.is_wall = True
                     cell.is_door = True
                 # Pacman
                 if m_cell == PACMAN_CODE:
@@ -116,7 +117,7 @@ class Field(DrawableObject):
         for y in range(len(self.field)):
             for x in range(len(self.field[y])):
                 cell = self.field[y][x]
-                if cell.is_wall:  # Wall
+                if cell.is_wall and not cell.is_door:  # Wall
                     self.draw_wall(Vec(x, y))
                 if cell.is_door:  # Door
                     self.draw_door(Vec(x, y))

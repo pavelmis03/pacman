@@ -74,10 +74,10 @@ class Ghost(DrawableObject):
     def smooth_move(self):
         self.count_of_steps = randrange(1, 4)
         self.random_direction = randrange(1, 5)  # рандомное направление
-                                                 # 1 -> влево
-                                                 # 2 -> вправо
-                                                 # 3 -> вверх
-                                                 # 4 -> вниз
+        # 1 -> влево
+        # 2 -> вправо
+        # 3 -> вверх
+        # 4 -> вниз
 
         if self.random_direction == 1:  # влево
             for i in range(self.count_of_steps):
@@ -116,7 +116,7 @@ class Pacman(DrawableObject):
         self.images = self.game_object.pacman_sprites
         # Init pacman image and rect (DIRECTION = LEFT)
         self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], -180)
-        self.p_rect = pygame.Rect(self.pacman_img.get_rect().move(x, y))
+        self.p_rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
         # Setup default variables in reset
         self.reset()
 
@@ -126,38 +126,48 @@ class Pacman(DrawableObject):
         self.p_rect.move(pac_pos.x - CELL_SIZE // 2, pac_pos.y)
 
         self.speed = PACMAN_SPEED
-        self.vel = Vec(-self.speed, 0)
-        self.turn_to = Vec(-self.speed, 0)
+        self.vel = Vec(-1, 0)
+        self.turn_to = Vec(-1, 0)
 
         self.eating = False
 
     def process_event(self, event):
         if event.type == pygame.KEYDOWN:  # Check key down
             if event.key in [Input.A_LEFT, Input.LEFT]:  # Change directory to left
-                self.turn_to = Dir.left * self.speed  # LEFT
+                self.turn_to = Dir.left  # LEFT
             elif event.key in [Input.A_RIGHT, Input.RIGHT]:
-                self.turn_to = Dir.right * self.speed  # RIGHT
+                self.turn_to = Dir.right  # RIGHT
             elif event.key in [Input.A_UP, Input.UP]:
-                self.turn_to = Dir.up * self.speed  # UP
+                self.turn_to = Dir.up  # UP
             elif event.key in [Input.A_DOWN, Input.DOWN]:
-                self.turn_to = Dir.down * self.speed  # DOWN
+                self.turn_to = Dir.down  # DOWN
 
     def process_logic(self):  # логика объектов
         self.move()
         if self.check_position():
-            self.p_rect.x += self.vel.x
-            self.p_rect.y += self.vel.y
+            self.p_rect.x += self.vel.x * self.speed
+            self.p_rect.y += self.vel.y * self.speed
+            self.check_teleportations()
+
+    def check_teleportations(self):
+        field_width = len(self.game_object.field.field[0]) * CELL_SIZE
+        offset_x = self.game_object.field.offset.x
+        # Check Left teleportation
+        if self.p_rect.x < offset_x:
+            self.p_rect.x = offset_x + field_width - CELL_SIZE - self.speed
+        # Check Right teleportation=
+        elif self.p_rect.right > offset_x + field_width - self.speed - 1:
+            self.p_rect.x = self.game_object.field.offset.x
 
     def process_draw(self):
         pac_size = CELL_SIZE * 2
-        pac_img = pygame.transform.scale(self.pacman_img, (pac_size, pac_size))
         pac_rect = pygame.Rect(self.p_rect.x - CELL_SIZE // 2, self.p_rect.y - CELL_SIZE // 2,
-                           self.p_rect.width + pac_size, self.p_rect.height + pac_size)
-        self.game_object.screen.blit(pac_img, pac_rect)  # отобразить объект
+                               self.p_rect.width + pac_size, self.p_rect.height + pac_size)
+        self.game_object.screen.blit(self.pacman_img, pac_rect)  # отобразить объект
 
     # Check collision rect of pacman with other rext
     def check_collision_with(self, other: pygame.Rect):
-        return pygame.Rect(self.p_rect.x, self.p_rect.y, self.p_rect.width, self.p_rect.height)\
+        return pygame.Rect(self.p_rect.x, self.p_rect.y, self.p_rect.width, self.p_rect.height) \
             .colliderect(pygame.Rect(other.x, other.y, other.width, other.height))
 
     def move(self):
@@ -177,10 +187,10 @@ class Pacman(DrawableObject):
     # return if pacman can move (there is no wall in the direction of movement)
     def check_position(self):
         crit_pos = Vec((self.p_rect.x - self.game_object.field.offset.x) % CELL_SIZE,
-                         (self.p_rect.y - self.game_object.field.offset.y) % CELL_SIZE)
+                       (self.p_rect.y - self.game_object.field.offset.y) % CELL_SIZE)
         if 0 == crit_pos.x and 0 == crit_pos.y:  # If pacman and cell pos equals
             cell = self.game_object.field.get_cell_from_position(Vec(self.p_rect.centerx, self.p_rect.centery))
-            #==================================================================================================
+            # ==================================================================================================
             # Eating food
             if cell and cell.food:
                 # DOTS
@@ -198,7 +208,7 @@ class Pacman(DrawableObject):
                         ghost.state = GostState.frightened
                 cell.food.eat_up()
             else:
-                #DOTS
+                # DOTS
                 self.game_object.mixer.stop_sound('CHOMP')
                 self.eating = False
             # ==================================================================================================
@@ -210,6 +220,8 @@ class Pacman(DrawableObject):
                 if self.game_object.field.field[f_pos.y + self.vel.y][f_pos.x + self.vel.x].is_wall:
                     return False  # if neither are free then dont move
                 else:
+                    # If you want some hard, uncommit the line below
+                    # self.turn_to = self.vel
                     return True  # forward is free
             else:
                 self.vel = self.turn_to
@@ -232,6 +244,7 @@ class Pacman(DrawableObject):
             self.game_object.game_over = True
         else:
             self.reset()
+
     """def check_field_collisions(self, pacman_speed):
         field = self.game_object.field
         p_x = self.p_rect.left + (pacman_speed if self.vel in [Direction.left, Direction.right] else 0)

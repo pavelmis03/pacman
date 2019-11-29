@@ -18,6 +18,10 @@ class Game:
     field: Field
     food: []
     ghosts: []
+    map_sprites: []
+    fruits_sprites: []
+    pacman_sprites: []
+    ghosts_sprites: []
     menu: MainMenu
     hud: HUD
     mixer: SoundMixer
@@ -26,6 +30,7 @@ class Game:
     inky: Ghost
     clyde: Ghost
     pacman: Pacman
+
     # endregion Prototypes of variables
 
     def __init__(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT):
@@ -99,19 +104,21 @@ class Game:
         self.fruits_sprites = dict()
         for ch in FRUIT_CODES:
             self.fruits_sprites[ch] = pygame.transform.scale(pygame.image.load(FRUITS_DIR + 'fruit' + ch + '.png'),
-                                                             (CELL_SIZE, CELL_SIZE))
+                                                             (CELL_SIZE * 2, CELL_SIZE * 2))
 
         # Load all pacman sprite library
         self.pacman_sprites = dict()
         for i in range(len(PAC_SPRITE_LIB.items())):
             self.pacman_sprites[list(PAC_SPRITE_LIB.items())[i][0]] = (
-                pygame.image.load(list(PAC_SPRITE_LIB.items())[i][1]))
+                pygame.transform.scale(pygame.image.load(list(PAC_SPRITE_LIB.items())[i][1]),
+                                       (CELL_SIZE * 2, CELL_SIZE * 2)))
 
         # Load all ghosts sprite library
         self.ghosts_sprites = dict()
         for i in range(len(GHOSTS_SPRITE_LIB.items())):
             self.ghosts_sprites[list(GHOSTS_SPRITE_LIB.items())[i][0]] = (
-                pygame.image.load(list(GHOSTS_SPRITE_LIB.items())[i][1]))
+                pygame.transform.scale(pygame.image.load(list(GHOSTS_SPRITE_LIB.items())[i][1]),
+                                       (CELL_SIZE * 2, CELL_SIZE * 2)))
 
     def main_loop(self):
         # Start Main menu First

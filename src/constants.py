@@ -3,12 +3,12 @@ from src.helpers import *
 class Color:
     BLACK = [0, 0, 0]
     WHITE = [255, 255, 255]
-    RED = [255, 0, 0]
+    RED = [253, 0, 0]
     GREEN = [0, 255, 0]
-    BLUE = [0, 0, 255]
-    DBLUE = [0, 0, 150]
-    YELLOW = [250, 150, 0]
-    DOTS_COLOR = [255, 181, 181]
+    BLUE = [33, 33, 222]
+    DBLUE = [25, 25, 166]
+    YELLOW = [255, 255, 0]
+    DOTS_COLOR = [222, 161, 133]
 
 
 class Input:
@@ -43,7 +43,7 @@ SCORE_FOR_ENERGIZER = 50
 SCORE_FOR_FRUIT = [-999, 100, 300, 500, 700, 1000, 2000, 3000, 5000]  # 0 fruit is not existing!
 PACMAN_MAX_LIVES = 3
 SCREEN_RESPONSE = 7  # ms
-PACMAN_SPEED = 1
+PACMAN_SPEED = 2
 PATH_LOGO = IMAGES_DIR + 'logo.png'
 # endregion General
 
@@ -100,7 +100,7 @@ GHOSTS_ENTER_CODE = '-'
 PACMAN_CODE = '@'
 FIELD_MAP = [
     "KBBBBBBBBBBBBLKBBBBBBBBBBBBL",
-    "C............DC............D",
+    "C3...........DC...........4D",
     "C.GAAH.GAAAH.DC.GAAAH.GAAH.D",
     "C.DXXC.DXXXC.DC.DXXXC.DXXC.D",
     "C.EBBF.EBBBF.EF.EBBBF.EBBF.D",
@@ -110,14 +110,14 @@ FIELD_MAP = [
     "C......DC....DC....DC......D",
     "IAAAAH.DIAAH DC GAAJC.GAAAAJ",
     "     C.DKBBF EF EBBLC.D     ",
-    "     C.DC          DC.D     ",
+    "     C.DC5        6DC.D     ",
     "     C.DC QMM--MMR DC.D     ",
     "BBBBBF.EF P      O EF.EBBBBB",
     "      .   P      O   .      ",
     "AAAAAH.GH P      O GH.GAAAAA",
     "     C.DC SNNNNNNT DC.D     ",
-    "     C.DC 12345678 DC.D     ",
-    "     C.DC GAAAAAAH DC.D     ",
+    "     C.DC          DC.D     ",
+    "     C.DC7GAAAAAAH8DC.D     ",
     "KBBBBF.EF EBBLKBBF EF.EBBBBL",
     "C............DC............D",
     "C.GAAH.GAAAH.DC.GAAAH.GAAH.D",
@@ -128,7 +128,7 @@ FIELD_MAP = [
     "C......DC....DC....DC......D",
     "C.GAAAAJIAAH.DC.GAAJIAAAAH.D",
     "C.EBBBBBBBBF.EF.EBBBBBBBBF.D",
-    "C..........................D",
+    "C1........................2D",
     "IAAAAAAAAAAAAAAAAAAAAAAAAAAF",
 ]
 # endregion FIELD

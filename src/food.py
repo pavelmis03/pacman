@@ -40,13 +40,13 @@ class Food(DrawableObject):
         self.game_object.food.remove(self.game_object.food[self.game_object.food.index(self)])
 
     def draw_dot(self):
-        food_size = int(self.cell_size * 0.2)
+        food_size = int(self.cell_size * 0.25)
         x_space = self.x + self.cell_size // 2 - food_size // 2
         y_space = self.y + self.cell_size // 2 - food_size // 2
         pygame.draw.rect(self.game_object.screen, Color.DOTS_COLOR, (x_space, y_space, food_size, food_size), 0)
 
     def draw_fruit(self):
-        self.game_object.screen.blit(self.fruit_sprite, (self.x, self.y, self.cell_size, self.cell_size))
+        self.game_object.screen.blit(self.fruit_sprite, (self.x - CELL_SIZE // 2, self.y- CELL_SIZE // 2, CELL_SIZE * 2, CELL_SIZE * 2))
 
     def draw_energizer(self):
         food_size = int(self.cell_size * 0.35)
