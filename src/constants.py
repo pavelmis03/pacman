@@ -43,7 +43,7 @@ SCORE_FOR_ENERGIZER = 50
 SCORE_FOR_FRUIT = [-999, 100, 300, 500, 700, 1000, 2000, 3000, 5000]  # 0 fruit is not existing!
 PACMAN_MAX_LIVES = 3
 SCREEN_RESPONSE = 3  # ms
-PACMAN_SPEED = 1
+PACMAN_SPEED = 2
 PATH_LOGO = IMAGES_DIR + 'logo.png'
 # endregion General
 
@@ -68,7 +68,9 @@ PATH_CONTROLS = MENU_DIR + 'controls.ini'
 # region Sound mixer constants
 DEBUG_MIXER = False
 MUTE_AUDIO = False
+MIXER_VOLUME = 0.4
 SOUNDLIB = {
+    'MENU': SOUNDS_DIR + 'menu.wav',
     'START': SOUNDS_DIR + 'intro.wav',
     'SIREN': SOUNDS_DIR + 'siren.wav',
     'CHOMP': SOUNDS_DIR + 'chomp.wav',
@@ -100,6 +102,7 @@ DOT_CODE = '.'
 GHOSTS_ENTER_CODE = '-'
 PACMAN_CODE = '@'
 CENTER_TEXT_POS = Vec(15, 17)
+GHOSTS_POS = {'BLINKY': (14, 11), 'PINKY': (12, 14), 'INKY': (14, 14), 'CLYDE': (16, 14)}
 FIELD_MAP = [
     "KBBBBBBBBBBBBLKBBBBBBBBBBBBL",
     "C3...........DC...........4D",
@@ -140,7 +143,18 @@ PACMAN_SPAWN_POS = Vec(14, 23)
 PAC_SPRITE_LIB = {
     'OPEN': PACMAN_DIR + 'pacman1.png',
     'NORMAL': PACMAN_DIR + 'pacman2.png',
-    'CLOSE': PACMAN_DIR + 'pacman3.png'
+    'CLOSE': PACMAN_DIR + 'pacman3.png',
+    'D0': PACMAN_DIR + 'pacman4.png',
+    'D1': PACMAN_DIR + 'pacman5.png',
+    'D2': PACMAN_DIR + 'pacman6.png',
+    'D3': PACMAN_DIR + 'pacman7.png',
+    'D4': PACMAN_DIR + 'pacman8.png',
+    'D5': PACMAN_DIR + 'pacman9.png',
+    'D6': PACMAN_DIR + 'pacman10.png',
+    'D7': PACMAN_DIR + 'pacman11.png',
+    'D8': PACMAN_DIR + 'pacman12.png',
+    'D9': PACMAN_DIR + 'pacman13.png',
+    'D10': PACMAN_DIR + 'pacman14.png'
 }
 GHOSTS_SPRITE_LIB = {
     'BLINKY': GHOSTS_DIR + 'ghost1.png',

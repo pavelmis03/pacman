@@ -18,91 +18,52 @@ class Dir:
 
 
 # Types of behavior of ghosts
-class GostState(Enum):
-    frightened = 0
-    persecution = 1
-    go_home = 2
-    waiting = 3
+class GhostState(Enum):
+    chase = 0
+    scatter = 1
+    eaten = 2
+    frightened = 3
 
 
 # Base class of Ghost
 class Ghost(DrawableObject):
-    def __init__(self, game_object, x, y, color):
+    state: GhostState
+
+    def __init__(self, game_object, color):
         super().__init__(game_object)
-        self.state = GostState.persecution
 
-        # выбор призрака       ---------------------------
-        self.ghost = pygame.image.load(GHOSTS_SPRITE_LIB[color])
-        # ------------------------------------------------------
-        # координаты призрака ----------------------------------
-        self.ghost_rect = self.ghost.get_rect()
-        self.ghost_rect.x = x
-        self.ghost_rect.y = y
-        # ------------------------------------------------------
+        # Get spawn pose
+        spawn = self.game_object.field.get_cell_position(Vec(GHOSTS_POS[color]))
 
+        # Load all ghosts sprites
+        self.images = self.game_object.pacman_sprites
+        # Choose ghost type
+        self.g_image = self.game_object.ghosts_sprites[color]
+        self.e_image = self.game_object.ghosts_sprites['EYES_LEFT']
+        self.g_rect = pygame.Rect(spawn.x - CELL_SIZE // 2, spawn.y, CELL_SIZE, CELL_SIZE)
+
+        self.reset()
+
+    def reset(self):
+        self.state = GhostState.chase
+
+    # Base class methods
     def process_event(self, event):
-        self.pacman_x = 20
-        self.pacman_y = 20
-        self.ranged = ((self.ghost_rect.x - self.pacman_x) ** 2 + (self.ghost_rect.y <= self.pacman_y) ** 2) ** 0.5
-
-        self.g_go_left_up = 0
-        self.g_go_left_down = 0
-        self.g_go_right_up = 0
-        self.g_go_right_down = 0
-
-        self.g_go_left = 0
-        self.g_go_right = 0
-        self.g_go_up = 0
-        self.g_go_down = 0
-
-        if self.ranged < 200:
-            self.state = True
-        else:
-            self.state = False
-
-        if self.state:
-            if self.ghost_rect.x > self.pacman_x and self.ghost_rect.x > self.pacman_x:
-                self.g_go_left_up = 1
-            elif self.ghost_rect.x < self.pacman_x and self.ghost_rect.x > self.pacman_x:
-                self.g_go_right_up = 1
-            elif self.ghost_rect.x > self.pacman_x and self.ghost_rect.x < self.pacman_x:
-                self.g_go_left_down = 1
-            elif self.ghost_rect.x < self.pacman_x and self.ghost_rect.x < self.pacman_x:
-                self.g_go_right_down = 1
+        pass
 
     def process_logic(self):
-        self.smooth_move()
-
-    def smooth_move(self):
-        self.count_of_steps = randrange(1, 4)
-        self.random_direction = randrange(1, 5)  # рандомное направление
-        # 1 -> влево
-        # 2 -> вправо
-        # 3 -> вверх
-        # 4 -> вниз
-
-        if self.random_direction == 1:  # влево
-            for i in range(self.count_of_steps):
-                if self.ghost_rect.x > 20:  # проверка на выход за пределы экрана
-                    self.ghost_rect.x -= 5  # шаг
-
-        if self.random_direction == 2:  # вправо
-            for i in range(self.count_of_steps):
-                if self.ghost_rect.x < 780:  # проверка на выход за пределы экрана
-                    self.ghost_rect.x += 5  # шаг
-
-        if self.random_direction == 3:  # вверх
-            for i in range(self.count_of_steps):
-                if self.ghost_rect.y > 20:  # проверка на выход за пределы экрана
-                    self.ghost_rect.y -= 5  # шаг
-
-        if self.random_direction == 4:  # вниз
-            for i in range(self.count_of_steps):
-                if self.ghost_rect.y < 580:  # проверка на выход за пределы экрана
-                    self.ghost_rect.y += 5  # шаг
+        if self.game_object.pacman.hit_ghost(self):
+            self.game_object.pacman.kill()
 
     def process_draw(self):
-        self.game_object.screen.blit(self.ghost, self.ghost_rect)  # отобразить объект
+        # Draw ghost
+        ghost_size = CELL_SIZE * 2
+        ghost_rect = pygame.Rect(self.g_rect.x - CELL_SIZE // 2, self.g_rect.y - CELL_SIZE // 2,
+                                 self.g_rect.width + ghost_size, self.g_rect.height + ghost_size)
+        self.game_object.screen.blit(self.g_image, ghost_rect)
+
+        # Draw his eyes
+        self.game_object.screen.blit(self.e_image, ghost_rect)
 
 
 # Base class of Pacman
@@ -120,42 +81,22 @@ class Pacman(DrawableObject):
         self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], -180)
         self.p_rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
         # Animations
-        self.a_eat = Anim(['NORMAL', 'OPEN', 'NORMAL', 'CLOSE'], 6)
+        self.a_eat = Anim(['NORMAL', 'OPEN', 'NORMAL', 'CLOSE'], 5)
+        self.a_death = Anim(['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D10', 'D10'], 20)
         # Setup default variables in reset
         self.reset()
 
     # Setup default variables values
     def reset(self):
         pac_pos = self.game_object.field.get_cell_position(self.game_object.field.pacman_pos)
-        self.p_rect.move(pac_pos.x - CELL_SIZE // 2, pac_pos.y)
+        self.p_rect.x = pac_pos.x - CELL_SIZE // 2
+        self.p_rect.y = pac_pos.y
 
         self.speed = nearest_divisor_of_num(PACMAN_SPEED, CELL_SIZE)
         self.vel = Vec(-1, 0)
         self.turn_to = Vec(-1, 0)
 
         self.eating = False
-
-    def process_event(self, event):
-        if event.type == pygame.KEYDOWN:  # Check key down
-            if event.key in [Input.A_LEFT, Input.LEFT]:  # Change directory to left
-                self.turn_to = Dir.left  # LEFT
-            elif event.key in [Input.A_RIGHT, Input.RIGHT]:
-                self.turn_to = Dir.right  # RIGHT
-            elif event.key in [Input.A_UP, Input.UP]:
-                self.turn_to = Dir.up  # UP
-            elif event.key in [Input.A_DOWN, Input.DOWN]:
-                self.turn_to = Dir.down  # DOWN
-
-    def process_logic(self):  # логика объектов
-        self.change_sprites()
-        if self.check_position():
-            self.a_eat.add_tick()
-            self.p_rect.x += self.vel.x * self.speed
-            self.p_rect.y += self.vel.y * self.speed
-            self.check_teleportations()
-        else:
-            # If pacman hit the wall
-            self.a_eat.curr_sprite = 'NORMAL'
 
     def check_teleportations(self):
         field_width = len(self.game_object.field.field[0]) * CELL_SIZE
@@ -166,12 +107,6 @@ class Pacman(DrawableObject):
         # Check Right teleportation=
         elif self.p_rect.right > offset_x + field_width - self.speed - 1:
             self.p_rect.x = self.game_object.field.offset.x
-
-    def process_draw(self):
-        pac_size = CELL_SIZE * 2
-        pac_rect = pygame.Rect(self.p_rect.x - CELL_SIZE // 2, self.p_rect.y - CELL_SIZE // 2,
-                               self.p_rect.width + pac_size, self.p_rect.height + pac_size)
-        self.game_object.screen.blit(self.pacman_img, pac_rect)  # отобразить объект
 
     # Check collision rect of pacman with other rext
     def check_collision_with(self, other: pygame.Rect):
@@ -209,7 +144,7 @@ class Pacman(DrawableObject):
                 if cell.food.type == FoodType.ENERGIZER:
                     # Set all ghosts to frightened
                     for ghost in self.game_object.ghosts:
-                        ghost.state = GostState.frightened
+                        ghost.state = GhostState.frightened
                 cell.food.eat_up()
             else:
                 # DOTS
@@ -238,30 +173,59 @@ class Pacman(DrawableObject):
     # return whether the input vector hits pacman
     def hit_ghost(self, ghost: Ghost):
         self_pos = Vec(self.p_rect.x, self.p_rect.y)
-        ghost_pos = Vec(ghost.ghost_rect.x, ghost.ghost_rect.y)
-        return self_pos.dist(ghost_pos)
+        ghost_pos = Vec(ghost.g_rect.x, ghost.g_rect.y)
+        return self_pos.dist(ghost_pos) < CELL_SIZE
 
     # called when a ghost hits pacman
     def kill(self):
         self.game_object.lives -= 1
+        self.game_object.hud.update_lives()
+
         if self.game_object.lives == 0:
+            self.play_death_anim('GAME OVER!')
             self.game_object.game_over = True
         else:
+            self.play_death_anim()
             self.reset()
 
-    """def check_field_collisions(self, pacman_speed):
-        field = self.game_object.field
-        p_x = self.p_rect.left + (pacman_speed if self.vel in [Direction.left, Direction.right] else 0)
-        p_y = self.p_rect.top + (pacman_speed if self.vel in [Direction.up, Direction.down] else 0)
-        p_size = self.p_rect.width
+    def play_death_anim(self, text=''):
+        self.game_object.mixer.play_sound('DEATH')
+        self.a_death.curr_sprite_num = 0
+        while self.game_object.mixer.is_busy():  # PLAY DEATH ANIMATION
+            self.game_object.screen.fill(BG_COLOR)  # Заливка цветом
+            self.a_death.add_tick()  # Переключаем спрайт
+            self.pacman_img = self.images[self.a_death.curr_sprite]  # Переключаем спрайт
+            self.game_object.field.process_draw()  # Рисуем поле
+            self.game_object.display_center_text(text, Color.RED, False)  # Рисуем текст
+            for food in self.game_object.food: food.process_draw()  # Рисуем еду
+            self.process_draw()  # Рисуем спрайт пакмана
+            pygame.display.flip()  # Флипаем экран
 
-        for y in range(len(field.cells)):
-            for x in range(len(field.cells[y])):
-                if field.cells[y][x] == field.WALL_CODE:
-                    cell_x, cell_y = field.offset[0] + x * field.cell_size, field.offset[1] + y * field.cell_size
-                    # Строка внизу отвечает за дебаг
-                    #pygame.draw.line(self.game_object.screen, Color.RED, (field.offset[0] + x * field.cell_size, field.offset[1] + y * field.cell_size), (p_x, p_y), 1)
-                    if pygame.Rect(p_x, p_y, p_size, p_size).colliderect(pygame.Rect(cell_x, cell_y,
-                                                                                     field.cell_size, field.cell_size)):
-                        return False
-        return True"""
+    # Base class methods)=============================================================================
+    def process_event(self, event):
+        if event.type == pygame.KEYDOWN:  # Check key down
+            if event.key in [Input.A_LEFT, Input.LEFT]:  # Change directory to left
+                self.turn_to = Dir.left  # LEFT
+            elif event.key in [Input.A_RIGHT, Input.RIGHT]:
+                self.turn_to = Dir.right  # RIGHT
+            elif event.key in [Input.A_UP, Input.UP]:
+                self.turn_to = Dir.up  # UP
+            elif event.key in [Input.A_DOWN, Input.DOWN]:
+                self.turn_to = Dir.down  # DOWN
+
+    def process_logic(self):  # логика объектов
+        self.change_sprites()
+        if self.check_position():
+            self.a_eat.add_tick()
+            self.p_rect.x += self.vel.x * self.speed
+            self.p_rect.y += self.vel.y * self.speed
+            self.check_teleportations()
+        else:
+            # If pacman hit the wall
+            self.a_eat.curr_sprite = 'NORMAL'
+
+    def process_draw(self):
+        pac_size = CELL_SIZE * 2
+        pac_rect = pygame.Rect(self.p_rect.x - CELL_SIZE // 2, self.p_rect.y - CELL_SIZE // 2,
+                               self.p_rect.width + pac_size, self.p_rect.height + pac_size)
+        self.game_object.screen.blit(self.pacman_img, pac_rect)  # отобразить объект

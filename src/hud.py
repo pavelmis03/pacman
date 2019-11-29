@@ -18,6 +18,7 @@ class HUD(DrawableObject):
         self.update_lives()
 
     def update_lives(self):
+        self.lives_hud = []
         for live in range(self.game_object.lives):
             r = pygame.Rect(20 + (self.lives_hud_rect.width * live),  # x
                             SCREEN_HEIGHT - self.lives_hud_rect.height - 10,  # y

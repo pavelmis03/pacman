@@ -53,7 +53,7 @@ class Game:
 
     def init_menu(self):
         # Start sound
-        self.mixer.play_sound('START', -1)
+        self.mixer.play_sound('MENU', -1)
 
         # Start Main menu First
         self.menu = MainMenu(self)
@@ -68,17 +68,18 @@ class Game:
         self.food = self.field.get_food()
         pac_pos = self.field.get_cell_position(self.field.pacman_pos)
         self.pacman = Pacman(self, pac_pos.x - CELL_SIZE // 2, pac_pos.y)  # Add some offset to centering pcaman
-        self.blinky = Ghost(self, 100, 100, 'BLINKY')
-        self.pinky = Ghost(self, 100, 100, 'PINKY')
-        self.inky = Ghost(self, 100, 100, 'INKY')
-        self.clyde = Ghost(self, 100, 100, 'CLYDE')
+        self.blinky = Ghost(self, 'BLINKY')
+        self.pinky = Ghost(self, 'PINKY')
+        self.inky = Ghost(self, 'INKY')
+        self.clyde = Ghost(self, 'CLYDE')
         self.ghosts = [self.blinky, self.pinky, self.inky, self.clyde]
 
         # Add all food to object list
         for food in self.food:
             self.objects.append(food)
 
-        self.objects += [self.hud, self.field, self.pacman]  # , self.blinky, self.pinky, self.inky, self.clyde]
+        self.objects += self.ghosts
+        self.objects += [self.hud, self.field, self.pacman]
 
     def library_init(self):
         # Initialize all libs
@@ -120,38 +121,38 @@ class Game:
                 pygame.transform.scale(pygame.image.load(list(GHOSTS_SPRITE_LIB.items())[i][1]),
                                        (CELL_SIZE * 2, CELL_SIZE * 2)))
 
-    def display_center_text(self, text, color):
-        self.font = pygame.font.Font(FONT_PATH, SCORES_HUD_FONT_SIZE)
-        s_text = self.font.render(text, 1, color)
+    def display_center_text(self, text, color, flip=True):
+        font = pygame.font.Font(FONT_PATH, SCORES_HUD_FONT_SIZE)
+        s_text = font.render(text, 1, color)
         pos = self.field.get_cell_position(CENTER_TEXT_POS)
         half_len_text = SCORES_HUD_FONT_SIZE * len(text) // 2
         self.screen.blit(s_text, (pos.x - half_len_text, pos.y))
-        pygame.display.flip()
+        if flip:
+            pygame.display.flip()
 
     def main_loop(self):
         # Start Main menu First
         self.init_menu()
 
-        # Start game loop
+        # Start menu loop
         while not self.start_game:
             self.menu.menu_loop()
+        del self.menu
 
         # Ready
         self.game_update()  # Need to "ready screen"
         self.display_center_text('READY!', Color.YELLOW)
-        self.mixer.play_sound('START')
+        self.mixer.play_sound('GHOST')
         while self.mixer.is_busy():
             self.process_events()  # just wait
+            pass
 
         # If user click START - start game
         while not self.game_over:  # Основной цикл работы программы
             self.game_update()
 
         # Game Over screen
-        self.display_center_text('GAME OVER!', Color.RED)
-        self.mixer.play_sound('DEATH')
-        while self.mixer.is_busy():
-            self.process_events()  # just wait
+        #self.display_center_text('GAME OVER!', Color.RED)
         sys.exit(0)  # Выход из программы
 
     def game_update(self):
