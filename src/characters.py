@@ -167,7 +167,6 @@ class Pacman(DrawableObject):
         self.game_object.mixer.play_sound('GHOST' if isinstance(obj, Ghost) else 'FRUIT')
         self.game_object.scores += SCORE_FOR_GHOST
         while self.game_object.mixer.is_busy():
-            print('a')
             self.game_object.screen.fill(BG_COLOR)  # Заливка цветом
             self.game_object.field.process_draw()  # Рисуем поле
             for food in self.game_object.food:
@@ -203,11 +202,6 @@ class Pacman(DrawableObject):
                     else:
                         self.game_object.mixer.stop_sound('CHOMP')
                         self.eating = False
-                # ENERGIZER
-                if cell.food.type == FoodType.ENERGIZER:
-                    # Set all ghosts to frightened
-                    for ghost in self.game_object.ghosts:
-                        ghost.state = GhostState.frightened
                 cell.food.eat_up()
             else:
                 # DOTS

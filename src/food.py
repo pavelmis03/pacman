@@ -30,10 +30,11 @@ class Food(DrawableObject):
         if self.type == FoodType.ENERGIZER:
             self.game_object.mixer.play_sound('ENERGIZER')
             self.game_object.scores += SCORE_FOR_ENERGIZER
-            # Set all ghosts to state frightened
+            # Set all ghosts to frightened if they aren't eaten
             for ghost in self.game_object.ghosts:
-                ghost.state = GhostState.frightened
-                ghost.frightened_ticks = 0
+                    if ghost.state != GhostState.eaten:
+                        ghost.state = GhostState.frightened
+                        ghost.frightened_ticks = 0
         # DOT
         if self.type == FoodType.DOT:
             #self.game_object.mixer.play_sound('CHOMP')
