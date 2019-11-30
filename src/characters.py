@@ -4,8 +4,8 @@ from random import randrange
 from src.animations import Anim
 from src.base_classes import DrawableObject
 from src.constants import *
-from src.food import FoodType
-from enum import Enum
+from src.enums import *
+from src.food import Food
 import sys
 
 
@@ -17,50 +17,89 @@ class Dir:
     down = Vec(0, 1)
 
 
-# Types of behavior of ghosts
-class GhostState(Enum):
-    chase = 0
-    scatter = 1
-    eaten = 2
-    frightened = 3
-
-
 # Base class of Ghost
 class Ghost(DrawableObject):
     state: GhostState
+    frightened_ticks: int
+    vel: Vec
 
-    def __init__(self, game_object, color):
+    def __init__(self, game_object, ghost_type: GhostType):
         super().__init__(game_object)
 
         # Get spawn pose
-        spawn = self.game_object.field.get_cell_position(Vec(GHOSTS_POS[color]))
+        spawn = self.game_object.field.get_cell_position(Vec(GHOSTS_POS[ghost_type]))
 
         # Load all ghosts sprites
-        self.images = self.game_object.pacman_sprites
+        self.g_lib = self.game_object.ghosts_sprites
         # Choose ghost type
-        self.g_image = self.game_object.ghosts_sprites[color]
-        self.e_image = self.game_object.ghosts_sprites['EYES_LEFT']
+        self.ghost_type = ghost_type
+        self.g_image = self.g_lib[ghost_type]
+        self.e_image = self.g_lib['EYES_LEFT']
         self.g_rect = pygame.Rect(spawn.x - CELL_SIZE // 2, spawn.y, CELL_SIZE, CELL_SIZE)
+        # Animation
+        self.a_move = Anim(['', '1'], 15)
 
         self.reset()
 
     def reset(self):
         self.state = GhostState.chase
+        self.frightened_ticks = 0
+        self.vel = Vec(-1, 0) if self.ghost_type == GhostType.BLINKY else Vec(0, -1)
 
-    # Base class methods
+    def set_eyes(self):
+        curr_eyes = 'EYES_FR_2' if self.state == GhostState.frightened and \
+                                   self.frightened_ticks > FRIGHTENED_TICKS_LIMIT - 100 else \
+                    'EYES_FR_1' if self.state == GhostState.frightened else \
+                    'EYES_LEFT' if self.vel == Dir.left else \
+                    'EYES_RIGHT' if self.vel == Dir.right else \
+                    'EYES_DOWN' if self.vel == Dir.down else \
+                    'EYES_UP'
+        self.e_image = self.g_lib[curr_eyes]
+
+    def set_body(self):
+        anim = self.a_move.curr_sprite
+        curr_body = 'ATTENT' + anim if self.state == GhostState.frightened and \
+                    self.frightened_ticks > FRIGHTENED_TICKS_LIMIT - 100 else \
+                    'FRIGHTENED' + anim if self.state == GhostState.frightened else \
+                    self.ghost_type + anim
+        self.g_image = self.g_lib[curr_body]
+
+    # Base class methods)=============================================================================
     def process_event(self, event):
         pass
 
     def process_logic(self):
+        # Hit pacman
         if self.game_object.pacman.hit_ghost(self):
-            self.game_object.pacman.kill()
+            if self.state == GhostState.frightened:  # If hit pacman under energizer, pacman eat ghost
+                self.game_object.pacman.eat_ghost_fruit(self)
+                self.state = GhostState.eaten
+            if self.state in [GhostState.chase, GhostState.scatter]:
+                self.game_object.pacman.kill()
+
+        # Animation
+        self.a_move.add_tick()
+        # Set eyes and body sprites
+        self.set_eyes()
+        self.set_body()
+
+        # Frightened state
+        if self.state == GhostState.frightened:
+            self.frightened_ticks += 1
+            # Stop Frightening
+            if self.frightened_ticks > FRIGHTENED_TICKS_LIMIT:
+                self.state = GhostState.chase
+                self.frightened_ticks = 0
+        else:
+            pass
 
     def process_draw(self):
-        # Draw ghost
         ghost_size = CELL_SIZE * 2
         ghost_rect = pygame.Rect(self.g_rect.x - CELL_SIZE // 2, self.g_rect.y - CELL_SIZE // 2,
                                  self.g_rect.width + ghost_size, self.g_rect.height + ghost_size)
-        self.game_object.screen.blit(self.g_image, ghost_rect)
+        # Draw ghost
+        if self.state != GhostState.eaten:
+            self.game_object.screen.blit(self.g_image, ghost_rect)
 
         # Draw his eyes
         self.game_object.screen.blit(self.e_image, ghost_rect)
@@ -82,7 +121,7 @@ class Pacman(DrawableObject):
         self.p_rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
         # Animations
         self.a_eat = Anim(['NORMAL', 'OPEN', 'NORMAL', 'CLOSE'], 5)
-        self.a_death = Anim(['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D10', 'D10'], 20)
+        self.a_death = Anim(['D' + str(i) for i in range(11)] + ['D10'] * 20, 16)
         # Setup default variables in reset
         self.reset()
 
@@ -122,6 +161,29 @@ class Pacman(DrawableObject):
             self.pacman_img = pygame.transform.rotate(self.images[self.a_eat.curr_sprite], 90)
         elif self.vel == Dir.down:
             self.pacman_img = pygame.transform.rotate(self.images[self.a_eat.curr_sprite], -90)
+
+    # Eating ghost
+    def eat_ghost_fruit(self, obj):
+        self.game_object.mixer.play_sound('GHOST' if isinstance(obj, Ghost) else 'FRUIT')
+        self.game_object.scores += SCORE_FOR_GHOST
+        while self.game_object.mixer.is_busy():
+            self.game_object.screen.fill(BG_COLOR)  # Заливка цветом
+            self.game_object.field.process_draw()  # Рисуем поле
+            for food in self.game_object.food:
+                if food != obj:  # Не рисуем съеденную еду
+                    food.process_draw()  # Рисуем еду
+            for ghost in self.game_object.ghosts:
+                if ghost != obj:  # Не рисуем съеденного призрака
+                    ghost.process_draw()  # Рисуем призраков
+            self.game_object.hud.process_draw()  # Рисуем HUD
+            text_pos = Vec(self.p_rect.center[0], self.p_rect.center[1])
+            # Рисуем очки
+            if isinstance(obj, Ghost):
+                self.game_object.display_score_text(str(SCORE_FOR_GHOST), Color.CYAN, text_pos, 15)
+            if isinstance(obj, Food):
+                self.game_object.display_score_text(str(SCORE_FOR_FRUIT[obj.fruit_type]), Color.CYAN, text_pos, 15)
+            # Флипаем экран
+            pygame.display.flip()
 
     # return if pacman can move (there is no wall in the direction of movement)
     def check_position(self):
@@ -176,7 +238,7 @@ class Pacman(DrawableObject):
         ghost_pos = Vec(ghost.g_rect.x, ghost.g_rect.y)
         return self_pos.dist(ghost_pos) < CELL_SIZE
 
-    # called when a ghost hits pacman
+    # Death of pacman
     def kill(self):
         self.game_object.lives -= 1
         self.game_object.hud.update_lives()
@@ -197,6 +259,7 @@ class Pacman(DrawableObject):
             self.pacman_img = self.images[self.a_death.curr_sprite]  # Переключаем спрайт
             self.game_object.field.process_draw()  # Рисуем поле
             self.game_object.display_center_text(text, Color.RED, False)  # Рисуем текст
+            self.game_object.hud.process_draw()  # Рисуем HUD
             for food in self.game_object.food: food.process_draw()  # Рисуем еду
             self.process_draw()  # Рисуем спрайт пакмана
             pygame.display.flip()  # Флипаем экран

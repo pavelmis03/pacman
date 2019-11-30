@@ -2,10 +2,7 @@ import sys
 import pygame
 from os import environ
 
-from src.constants import *
-from src.helpers import *
 from src.sound_engine import *
-from src.food import *
 from src.menu import *
 from src.hud import *
 from src.field import Field
@@ -68,10 +65,10 @@ class Game:
         self.food = self.field.get_food()
         pac_pos = self.field.get_cell_position(self.field.pacman_pos)
         self.pacman = Pacman(self, pac_pos.x - CELL_SIZE // 2, pac_pos.y)  # Add some offset to centering pcaman
-        self.blinky = Ghost(self, 'BLINKY')
-        self.pinky = Ghost(self, 'PINKY')
-        self.inky = Ghost(self, 'INKY')
-        self.clyde = Ghost(self, 'CLYDE')
+        self.blinky = Ghost(self, GhostType.BLINKY)
+        self.pinky = Ghost(self, GhostType.PINKY)
+        self.inky = Ghost(self, GhostType.INKY)
+        self.clyde = Ghost(self, GhostType.CLYDE)
         self.ghosts = [self.blinky, self.pinky, self.inky, self.clyde]
 
         # Add all food to object list
@@ -129,6 +126,12 @@ class Game:
         self.screen.blit(s_text, (pos.x - half_len_text, pos.y))
         if flip:
             pygame.display.flip()
+
+    def display_score_text(self, text: str, color, c_pos: Vec, t_size: int):
+        font = pygame.font.Font(FONT_PATH, t_size)
+        s_text = font.render(text, 1, color)
+        text_center_y = SCORES_HUD_FONT_SIZE // 2
+        self.screen.blit(s_text, (c_pos.x, c_pos.y - text_center_y))
 
     def main_loop(self):
         # Start Main menu First

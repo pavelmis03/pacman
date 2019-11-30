@@ -1,10 +1,12 @@
 from src.helpers import *
 
+
 class Color:
     BLACK = [0, 0, 0]
     WHITE = [255, 255, 255]
     RED = [253, 0, 0]
     GREEN = [0, 255, 0]
+    CYAN = [0, 183, 235]
     BLUE = [33, 33, 222]
     DBLUE = [25, 25, 166]
     YELLOW = [255, 255, 0]
@@ -40,6 +42,7 @@ SCREEN_CENTER = (SCREEN_SIZE[0] // 2, SCREEN_SIZE[1] // 2)
 
 SCORE_FOR_DOT = 10
 SCORE_FOR_ENERGIZER = 50
+SCORE_FOR_GHOST = 200
 SCORE_FOR_FRUIT = [-999, 100, 300, 500, 700, 1000, 2000, 3000, 5000]  # 0 fruit is not existing!
 PACMAN_MAX_LIVES = 3
 SCREEN_RESPONSE = 3  # ms
@@ -139,6 +142,7 @@ FIELD_MAP = [
 # endregion FIELD
 
 # region CHARACTERS
+FRIGHTENED_TICKS_LIMIT = 230 * SCREEN_RESPONSE  # 8 seconds
 PACMAN_SPAWN_POS = Vec(14, 23)
 PAC_SPRITE_LIB = {
     'OPEN': PACMAN_DIR + 'pacman1.png',
@@ -158,13 +162,24 @@ PAC_SPRITE_LIB = {
 }
 GHOSTS_SPRITE_LIB = {
     'BLINKY': GHOSTS_DIR + 'ghost1.png',
+    'BLINKY1': GHOSTS_DIR + 'ghost01.png',
     'PINKY': GHOSTS_DIR + 'ghost2.png',
+    'PINKY1': GHOSTS_DIR + 'ghost02.png',
     'INKY': GHOSTS_DIR + 'ghost3.png',
+    'INKY1': GHOSTS_DIR + 'ghost03.png',
     'CLYDE': GHOSTS_DIR + 'ghost4.png',
+    'CLYDE1': GHOSTS_DIR + 'ghost04.png',
+
+    'FRIGHTENED': GHOSTS_DIR + 'ghost5.png',
+    'FRIGHTENED1': GHOSTS_DIR + 'ghost05.png',
+    'ATTENT': GHOSTS_DIR + 'ghost6.png',
+    'ATTENT1': GHOSTS_DIR + 'ghost06.png',
 
     'EYES_RIGHT': GHOSTS_DIR + 'eyes1.png',
     'EYES_LEFT': GHOSTS_DIR + 'eyes2.png',
     'EYES_UP': GHOSTS_DIR + 'eyes3.png',
     'EYES_DOWN': GHOSTS_DIR + 'eyes4.png',
+    'EYES_FR_1': GHOSTS_DIR + 'eyes5.png',
+    'EYES_FR_2': GHOSTS_DIR + 'eyes6.png',
 }
 # endregion CHARACTERS
