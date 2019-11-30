@@ -108,8 +108,8 @@ CENTER_TEXT_POS = Vec(15, 17)
 GHOSTS_POS = {'BLINKY': (14, 11), 'PINKY': (12, 14), 'INKY': (14, 14), 'CLYDE': (16, 14)}
 FIELD_MAP = [
     "KBBBBBBBBBBBBLKBBBBBBBBBBBBL",
-    "C3...........DC...........4D",
-    "C.GAAH.GAAAH.DC.GAAAH.GAAH.D",
+    "C3 ..........DC.......... 4D",
+    "C GAAH.GAAAH.DC.GAAAH.GAAH D",
     "C.DXXC.DXXXC.DC.DXXXC.DXXC.D",
     "C.EBBF.EBBBF.EF.EBBBF.EBBF.D",
     "C..........................D",
@@ -135,8 +135,8 @@ FIELD_MAP = [
     "KBF.EF.DC.EBBLKBBF.DC.EF.EBL",
     "C......DC....DC....DC......D",
     "C.GAAAAJIAAH.DC.GAAJIAAAAH.D",
-    "C.EBBBBBBBBF.EF.EBBBBBBBBF.D",
-    "C1........................2D",
+    "C EBBBBBBBBF.EF.EBBBBBBBBF D",
+    "C1 ...................... 2D",
     "IAAAAAAAAAAAAAAAAAAAAAAAAAAF",
 ]
 # endregion FIELD
