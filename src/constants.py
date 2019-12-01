@@ -11,6 +11,7 @@ class Color:
     DBLUE = [25, 25, 166]
     YELLOW = [255, 255, 0]
     DOTS_COLOR = [222, 161, 133]
+    GRAY = [40, 40, 40]
 
 
 class Input:
@@ -71,7 +72,7 @@ PATH_CONTROLS = MENU_DIR + 'controls.ini'
 # region Sound mixer constants
 DEBUG_MIXER = False
 MUTE_AUDIO = False
-MIXER_VOLUME = 0.4
+MIXER_VOLUME = 0.05
 SOUNDLIB = {
     'MENU': SOUNDS_DIR + 'menu.wav',
     'START': SOUNDS_DIR + 'intro.wav',
