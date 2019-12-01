@@ -1,6 +1,7 @@
 import sys
 import pygame
 from src.constants import *
+from src.ui_elements import Slider
 
 
 class UI_Button:
@@ -43,6 +44,8 @@ class MainMenu:
         self.additional_text = None
         self.logo_shift = -1
         self.logo_effect_counter = 1
+        self.a_slider = Slider(game_object, 'Звуки', MIXER_VOLUME, -0.1, 1,
+                               (SCREEN_WIDTH - 75, SCREEN_HEIGHT - 60, 150, 60))
 
         # Init font engine
         pygame.font.init()
@@ -74,7 +77,11 @@ class MainMenu:
         if not self.logo_effect_counter % 40:
             self.logo_shift *= -1
         self.logo_rect.y += self.logo_shift
-        pass
+        self.a_slider.process_logic()
+        global MIXER_VOLUME
+        MIXER_VOLUME = self.a_slider.val
+        for sound in self.game_object.mixer.sounds:
+            self.game_object.mixer.sounds[sound].set_volume(MIXER_VOLUME)
 
     def menu_loop(self):
         #Start
@@ -98,6 +105,8 @@ class MainMenu:
                 sys.exit()
             for item in self.menu_items:
                 item.procedure_events(event)
+            # Slider
+            self.a_slider.process_event(event)
 
     def process_draw(self):
         self.game_object.screen.fill(BG_COLOR)  # Заливка цветом
@@ -114,7 +123,8 @@ class MainMenu:
         if self.display_logo:
             self.game_object.screen.blit(self.logo, (SCREEN_CENTER[0] - self.logo_rect.width // 2 + self.logo_rect.x // 2,
                                               self.logo_rect.height + self.logo_rect.y // 2))
-
+        # Slider
+        self.a_slider.process_draw()
         pygame.display.flip()  # Double buffering
         pygame.time.wait(SCREEN_RESPONSE)  # Ждать 10 миллисекунд
 
