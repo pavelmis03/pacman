@@ -78,10 +78,9 @@ class MainMenu:
             self.logo_shift *= -1
         self.logo_rect.y += self.logo_shift
         self.a_slider.process_logic()
-        global MIXER_VOLUME
-        MIXER_VOLUME = self.a_slider.val
+        self.game_object.mixer.volume = self.a_slider.val
         for sound in self.game_object.mixer.sounds:
-            self.game_object.mixer.sounds[sound].set_volume(MIXER_VOLUME)
+            self.game_object.mixer.sounds[sound].set_volume(self.game_object.mixer.volume)
 
     def menu_loop(self):
         #Start

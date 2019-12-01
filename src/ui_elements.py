@@ -14,45 +14,40 @@ class Slider(DrawableObject):
         self.rect.move_ip(-self.rect.width // 2, 0)
         self.panel = pygame.Surface((self.rect.width, self.rect.height))
         self.hit = False  # indicates slider movement due to mouse interaction
+        # Holder
+        self.holder = pygame.Surface((20, 20))
+        self.holder_rect = self.holder.get_rect()
 
         font = pygame.font.SysFont(FONT_PATH, 25)
         self.text = font.render(title, 1, Color.WHITE)
         self.txt_rect = self.text.get_rect(center=(self.rect.width // 2, self.text.get_rect().height))
 
-        self.setup_static_panel()
-
-    def setup_static_panel(self):
-        # Slider background #
-        #pygame.draw.rect(self.panel, Color.GRAY, [10, self.rect.height - 20, self.rect.width - 20, 5], 0)
-        pass
     def process_draw(self):
         self.panel.fill(BG_COLOR)
         self.panel.blit(self.text, self.txt_rect)  # this surface never changes
         # Slider Holder
-        self.holder = pygame.Surface((20, 20))
         self.holder.fill(Color.GREEN)
         self.holder.set_colorkey(Color.GREEN)
         pygame.draw.circle(self.holder, Color.BLACK, self.holder.get_rect().center, 8, 0)
         pygame.draw.circle(self.holder, Color.DOTS_COLOR, self.holder.get_rect().center, 6, 0)
-        #surf = self.panel.copy()
 
-        # Dynamic
+        # Dynamic position
         pos = (10 + int((self.val - self.mini) / (self.maxi - self.mini) * (self.rect.width - 20)),
                self.rect.height - 18)
-        self.button_rect = self.holder.get_rect(center=pos)
+        self.holder_rect = self.holder.get_rect(center=pos)
         # Slider background
         pygame.draw.rect(self.panel, Color.GRAY, [pos[0] - 10, self.rect.height - 20, self.rect.width - pos[0], 5], 0)
         pygame.draw.rect(self.panel, Color.DOTS_COLOR, [10, self.rect.height - 20, pos[0] - 10, 5], 0)
-        self.panel.blit(self.holder, self.button_rect)
-        self.button_rect.move_ip(self.rect.x, self.rect.y)  # move of button box to correct screen position
+        self.panel.blit(self.holder, self.holder_rect)
+        self.holder_rect.move_ip(self.rect.x, self.rect.y)  # move slider holder
 
-        # screen
+        # Blit to screen
         self.game_object.screen.blit(self.panel, (self.rect.x, self.rect.y))
 
     def process_event(self, event):
         pos = pygame.mouse.get_pos()
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.button_rect.collidepoint(pos):
+            if self.holder_rect.collidepoint(pos):
                 self.hit = True
         if event.type == pygame.MOUSEBUTTONUP:
             self.hit = False
