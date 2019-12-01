@@ -6,19 +6,30 @@ class Bots:
 
     def __init__(self, x, y, color):
         self.ghost = pygame.image.load("dead-g-1.png")
-        self.state = False  # состояние призрака
-                            # False -> блуждание
-                            # True -> преследование
+
+        self.right_free = False  # идти в право пока свободно 
+        self.left_free = False
+        self.up_free = False
+        self.down_free = False
+        self.state = 0  # каким способом будет двигаться призрак (1, 2)
 
         # выбор цвета призрака       ---------------------------
         if color[0] == 'b':
             self.ghost = pygame.image.load("blue-g-left-1.png")
+            self.right_free = True
+            self.state = 1
         if color[0] == 'g':
             self.ghost = pygame.image.load("green-g-left-1.png")
+            self.left_free = True
+            self.state = 2
         if color[0] == 'r':
             self.ghost = pygame.image.load("red-g-left-1.png")
+            self.up_free = True
+            self.state = 1
         if color[0] == 'o':
             self.ghost = pygame.image.load("orange-g-left-1.png")
+            self.down_free = True
+            self.state = 2
         # ------------------------------------------------------
         # координаты призрака ----------------------------------
         self.ghost_in_rect = self.ghost.get_rect()
@@ -26,68 +37,60 @@ class Bots:
         self.ghost_in_rect.y = y
         # ------------------------------------------------------
 
-    def process_event(self, event, p_x, p_y):
-        self.pacman_x = p_x
-        self.pacman_y = p_y
-        self.ranged = ((self.ghost_in_rect.x - self.pacman_x) ** 2 + (self.ghost_in_rect.y <= self.pacman_y) ** 2) ** 0.5
-
-        self.g_go_left_up = 0
-        self.g_go_left_down = 0
-        self.g_go_right_up = 0
-        self.g_go_right_down = 0
-
-        self.g_go_left = 0
-        self.g_go_right = 0
-        self.g_go_up = 0
-        self.g_go_down = 0
-
-        if self.ranged < 200:
-            self.state = True
-        else:
-            self.state = False
-
-        if self.state:
-            if self.ghost_in_rect.x > self.pacman_x and self.ghost_in_rect.x > self.pacman_x:
-                self.g_go_left_up = 1
-            elif self.ghost_in_rect.x < self.pacman_x and self.ghost_in_rect.x > self.pacman_x:
-                self.g_go_right_up = 1
-            elif self.ghost_in_rect.x > self.pacman_x and self.ghost_in_rect.x < self.pacman_x:
-                self.g_go_left_down = 1
-            elif self.ghost_in_rect.x < self.pacman_x and self.ghost_in_rect.x < self.pacman_x:
-                self.g_go_right_down = 1
+    def process_event(self, event):
+        pass
 
     def smooth_move(self):
-        self.count_of_steps = randrange(1, 4)
-        self.random_direction = randrange(1, 5)  # рандомное направление
-                                                 # 1 -> влево
-                                                 # 2 -> вправо
-                                                 # 3 -> вверх
-                                                 # 4 -> вниз
-        i = 0
-
-        if self.random_direction == 1:  # влево
-            for i in range(self.count_of_steps):
-                if self.ghost_in_rect.x > 20:  # проверка на выход за пределы экрана
-                    self.ghost_in_rect.x -= 5  # шаг
-            i = 0
-
-        if self.random_direction == 2:  # вправо
-            for i in range(self.count_of_steps):
-                if self.ghost_in_rect.x < 780:  # проверка на выход за пределы экрана
-                    self.ghost_in_rect.x += 5  # шаг
-            i = 0
-
-        if self.random_direction == 3:  # вверх
-            for i in range(self.count_of_steps):
-                if self.ghost_in_rect.y > 20:  # проверка на выход за пределы экрана
-                    self.ghost_in_rect.y -= 5  # шаг
-            i = 0
-
-        if self.random_direction == 4:  # вниз
-            for i in range(self.count_of_steps):
-                if self.ghost_in_rect.y < 580:  # проверка на выход за пределы экрана
-                    self.ghost_in_rect.y += 5  # шаг
-            i = 0
+        if self.state == 1:
+            if self.right_free:
+                if self.ghost_in_rect.x < 780:
+                    self.ghost_in_rect.x += 5
+                else:
+                    self.right_free = False
+                    self.left_free = True
+            elif self.down_free:
+                if self.ghost_in_rect.y < 580:
+                    self.ghost_in_rect.y += 5
+                else:
+                    self.down_free = False
+                    self.up_free = True
+            elif self.left_free:
+                if self.ghost_in_rect.x > 0:
+                    self.ghost_in_rect.x -= 5
+                else:
+                    self.left_free = False
+                    self.down_free = True
+            elif self.up_free:
+                if self.ghost_in_rect.y > 0:
+                    self.ghost_in_rect.y -= 5
+                else:
+                    self.up_free = False
+                    self.right_free = True
+        elif self.state == 2:
+            if self.right_free:
+                if self.ghost_in_rect.x < 780:
+                    self.ghost_in_rect.x += 5
+                else:
+                    self.right_free = False
+                    self.down_free = True
+            elif self.down_free:
+                if self.ghost_in_rect.y < 580:
+                    self.ghost_in_rect.y += 5
+                else:
+                    self.down_free = False
+                    self.left_free = True
+            elif self.left_free:
+                if self.ghost_in_rect.x > 0:
+                    self.ghost_in_rect.x -= 5
+                else:
+                    self.left_free = False
+                    self.up_free = True
+            elif self.up_free:
+                if self.ghost_in_rect.y > 0:
+                    self.ghost_in_rect.y -= 5
+                else:
+                    self.up_free = False
+                    self.right_free = True
 
     def draw_object(self, screen):
         screen.blit(self.ghost, self.ghost_in_rect)  # отобразить объект
@@ -104,9 +107,6 @@ class Pacman:
         self.move_animation = 0  # Это флаг анимации. В цикле он постоянно меняется, растет на 1.
                                  # Теперь можно проверять его кратность тому или иному числу, в зависимости от того,
                                  # сколько картинок в анимации.
-
-    def get_coordinate(self):  # спец метод для получения координат для класса "боты"
-        return self.pacman_in_rect
 
     def process_event(self, event):
         self.key_down = 0   # флаг на нажатие одной из 4-х кнопок
@@ -192,7 +192,11 @@ class Game:
 
     def create_game_objects(self):
         self.A = Pacman(300, 50)
-        self.G = Bots(50, 50, 'blue')
+        self.G1 = Bots(50, 50, 'blue')
+        self.G2 = Bots(50, 70, 'red')
+        self.G3 = Bots(50, 90, 'orange')
+        self.G4 = Bots(50, 110, 'green')
+
 
     def library_init(self):
         pygame.init()  # Инициализация библиотеки
@@ -216,20 +220,24 @@ class Game:
 
             # логика движения ----------------------------------
             self.A.process_event(event)
-            self.pacman_coordinate = self.A.get_coordinate()  # дает координаты пакмана для призрака
-            self.G.process_event(event, self.pacman_coordinate[0], self.pacman_coordinate[1])
             # --------------------------------------------------
 
     def process_logic(self):  # логика объектов
         # действие движение --------------
         self.A.smooth_move()
-        self.G.smooth_move()
+        self.G1.smooth_move()
+        self.G2.smooth_move()
+        self.G3.smooth_move()
+        self.G4.smooth_move()
         # -------------------------------
 
     def process_draw(self):
         self.screen.fill((0, 0, 0))
         self.A.draw_object(self.screen)
-        self.G.draw_object(self.screen)
+        self.G1.draw_object(self.screen)
+        self.G2.draw_object(self.screen)
+        self.G3.draw_object(self.screen)
+        self.G4.draw_object(self.screen)
         pygame.display.flip()  # Double buffering
         pygame.time.wait(100)  # Ждать 100 миллисекунд
 
