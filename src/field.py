@@ -33,7 +33,7 @@ class Cell(DrawableObject):
 
 
 class Field(DrawableObject):
-    def __init__(self, game_object, cell_size=CELL_SIZE, position=None):
+    def __init__(self, game_object, cell_size=CELL_SIZE, position=None, l_map=DEFAULT_MAP_FILE):
         # MAP_SIZE IS 28x31
         super().__init__(game_object)
         if not position:
@@ -46,12 +46,20 @@ class Field(DrawableObject):
         self.sprites = self.game_object.map_sprites
 
         # Map = array of chars
-        self.map = FIELD_MAP
+        self.map_name = l_map
+        self.map = self.load_map()
         # Field = array of Cells()
         self.field = []
 
         # Create map
         self.decode_map_to_field()
+
+    # Loads current map from map_direction
+    def load_map(self):
+        c_map = []
+        with open(MAPS_DIR + self.map_name, 'r') as file:
+            c_map = file.readlines()
+        return c_map
 
     # Convert list of strings(MAP) to field class
     def decode_map_to_field(self):

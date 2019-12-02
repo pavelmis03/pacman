@@ -39,14 +39,13 @@ class Game:
         # Default variables
         self.game_over = False
         self.start_game = False
+        self.current_map = DEFAULT_MAP_FILE
+
         self.lives = PACMAN_MAX_LIVES
         self.scores = 0
 
         self.objects = []
         self.create_game_objects()
-
-        # Add mixer
-        self.mixer = SoundMixer()  # Initialization of sound mixer
 
     def init_menu(self):
         # Play menu default music
@@ -61,7 +60,7 @@ class Game:
 
     def create_game_objects(self):
         self.hud = HUD(self)
-        self.field = Field(self)
+        self.field = Field(self, CELL_SIZE, l_map=self.current_map)
         self.food = self.field.get_food()
         pac_pos = self.field.get_cell_position(self.field.pacman_pos)
         self.pacman = Pacman(self, pac_pos.x - CELL_SIZE // 2, pac_pos.y)  # Add some offset to centering pcaman
@@ -82,6 +81,8 @@ class Game:
         # Initialize all libs
         pygame.init()
         pygame.font.init()
+        # Initialization of sound mixer
+        self.mixer = SoundMixer()
         # Create and move a window
         self.screen = pygame.display.set_mode(self.size, flags=pygame.DOUBLEBUF)  # Create window
         environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (1, 30)  # Move window to start coordinates
@@ -90,6 +91,12 @@ class Game:
         # Setup the icon
         icon = pygame.image.load(WINDOW_ICON_PATH)
         pygame.display.set_icon(icon)
+
+        # Load game config
+        with open(CONFIG_PATH, 'r') as conf:
+            c_lines = conf.readlines()
+            self.mixer.volume = float(c_lines[0].split(':')[1])  # Load music volume
+            self.current_map = str(c_lines[1].split(':')[1])  # Load current map
 
     def init_sprite_libs(self):
         # Load all map sprite library
@@ -191,3 +198,11 @@ class Game:
                 sys.exit(0)
             for item in self.objects:
                 item.process_event(event)
+
+    def __del__(self):
+        # Save config
+        with open(CONFIG_PATH, 'w') as conf:
+            # Save music volume
+            conf.write('MUSIC_VOLUME : {}'.format(self.mixer.volume))
+            # Save current map
+            conf.write('\nMAP : {}'.format(self.current_map if self.current_map else DEFAULT_MAP_FILE))

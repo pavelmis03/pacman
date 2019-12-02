@@ -69,11 +69,14 @@ FONT_PATH = MENU_DIR + 'menu_font.ttf'
 PATH_HIGHSCORES = MENU_DIR + 'highscores.ini'
 PATH_CREDITS = MENU_DIR + 'credits.ini'
 PATH_CONTROLS = MENU_DIR + 'controls.ini'
+CONFIG_PATH = 'config.ini'
+MAPS_DIR = 'maps/'
 # endregion User Interface(UI)
 
 # region Sound mixer constants
 DEBUG_MIXER = False
 MUTE_AUDIO = False
+MIXER_OFF = False
 MIXER_VOLUME = 0.5
 SOUNDLIB = {
     'MENU1': SOUNDS_DIR + 'menu1.wav',
@@ -111,39 +114,7 @@ GHOSTS_ENTER_CODE = '-'
 PACMAN_CODE = '@'
 CENTER_TEXT_POS = Vec(15, 17)
 GHOSTS_POS = {'BLINKY': (14, 11), 'PINKY': (12, 14), 'INKY': (14, 14), 'CLYDE': (16, 14)}
-FIELD_MAP = [
-    "KBBBBBBBBBBBBLKBBBBBBBBBBBBL",
-    "C3 ..........DC.......... 4D",
-    "C GAAH.GAAAH.DC.GAAAH.GAAH D",
-    "C.DXXC.DXXXC.DC.DXXXC.DXXC.D",
-    "C.EBBF.EBBBF.EF.EBBBF.EBBF.D",
-    "C..........................D",
-    "C.GAAH.GH.GAAAAAAH.GH.GAAH.D",
-    "C0EBBF.DC.EBBLKBBF.DC.EBBF0D",
-    "C......DC....DC....DC......D",
-    "IAAAAH.DIAAH DC GAAJC.GAAAAJ",
-    "     C.DKBBF EF EBBLC.D     ",
-    "     C.DC5        6DC.D     ",
-    "     C.DC QMM--MMR DC.D     ",
-    "BBBBBF.EF PX    XO EF.EBBBBB",
-    "      .   PX    XO   .      ",
-    "AAAAAH.GH PXXXXXXO GH.GAAAAA",
-    "     C.DC SNNNNNNT DC.D     ",
-    "     C.DC          DC.D     ",
-    "     C.DC7GAAAAAAH8DC.D     ",
-    "KBBBBF.EF EBBLKBBF EF.EBBBBL",
-    "C............DC............D",
-    "C.GAAH.GAAAH.DC.GAAAH.GAAH.D",
-    "C.EBLC.EBBBF.EF.EBBBF.DKBF.D",
-    "C0..DC....... @.......DC..0D",
-    "IAH.DC.GH.GAAAAAAH.GH.DC.GAJ",
-    "KBF.EF.DC.EBBLKBBF.DC.EF.EBL",
-    "C......DC....DC....DC......D",
-    "C.GAAAAJIAAH.DC.GAAJIAAAAH.D",
-    "C EBBBBBBBBF.EF.EBBBBBBBBF D",
-    "C1 ...................... 2D",
-    "IAAAAAAAAAAAAAAAAAAAAAAAAAAF",
-]
+DEFAULT_MAP_FILE = 'def_map.ini'
 # endregion FIELD
 
 # region CHARACTERS

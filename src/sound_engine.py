@@ -19,7 +19,8 @@ class SoundMixer:
     # Can play sound at any time
     def play_sound(self, sound, loops_count=1):
         self.sounds[sound].set_volume(0 if MUTE_AUDIO else self.volume)
-        self.sounds[sound].play(loops=loops_count - 1)  # For some reason plays 1 repeat more
+        if not MIXER_OFF:
+            self.sounds[sound].play(loops=loops_count - 1)  # For some reason plays 1 repeat more
         if DEBUG_MIXER:
             print("Plays sound: " + sound)
 
@@ -43,9 +44,6 @@ class SoundMixer:
     def clear_query_of_sounds(self):
         self.stop_all_sounds()
         self.query_of_sounds = []
-
-    def is_busy(self):
-        return pygame.mixer.get_busy()
 
     @staticmethod
     def stop_all_sounds():
