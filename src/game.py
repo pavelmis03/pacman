@@ -49,8 +49,8 @@ class Game:
         self.mixer = SoundMixer()  # Initialization of sound mixer
 
     def init_menu(self):
-        # Start sound
-        self.mixer.play_sound('MENU', -1)
+        # Play menu default music
+        self.mixer.play_sound(random.choice(['MENU1', 'MENU2', 'MENU3']), -1)
 
         # Start Main menu First
         self.menu = MainMenu(self)
@@ -86,9 +86,9 @@ class Game:
         self.screen = pygame.display.set_mode(self.size, flags=pygame.DOUBLEBUF)  # Create window
         environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (1, 30)  # Move window to start coordinates
         # Set window caption
-        pygame.display.set_caption('Pacman')
+        pygame.display.set_caption('SHP Pacman')
         # Setup the icon
-        icon = pygame.image.load(IMAGES_DIR + '/icon.png')
+        icon = pygame.image.load(WINDOW_ICON_PATH)
         pygame.display.set_icon(icon)
 
     def init_sprite_libs(self):
@@ -133,6 +133,21 @@ class Game:
         text_center_y = SCORES_HUD_FONT_SIZE // 2
         self.screen.blit(s_text, (c_pos.x, c_pos.y - text_center_y))
 
+    def display_ready_screen(self):
+        # Draw
+        self.screen.fill(BG_COLOR)  # Заливка цветом
+        self.process_draw()
+        self.display_center_text('READY!', Color.YELLOW)
+        # Play sound
+        self.mixer.play_sound('GHOST')
+
+        # Waiting for the START sound to play
+        start_ticks = pygame.time.get_ticks()
+        while pygame.time.get_ticks() - start_ticks < self.mixer.sounds['START'].get_length() * 100:
+            for event in pygame.event.get():  # Обработка события выхода
+                if event.type == pygame.QUIT:
+                    sys.exit(0)
+
     def main_loop(self):
         # Start Main menu First
         self.init_menu()
@@ -142,20 +157,14 @@ class Game:
             self.menu.menu_loop()
         del self.menu
 
-        # Ready
-        self.game_update()  # Need to "ready screen"
-        self.display_center_text('READY!', Color.YELLOW)
-        self.mixer.play_sound('GHOST')
-        while self.mixer.is_busy():
-            self.process_events()  # just wait
-            pass
+        # Draw Ready text and wait delay before start game
+        self.display_ready_screen()
 
         # If user click START - start game
         while not self.game_over:  # Основной цикл работы программы
             self.game_update()
 
         # Game Over screen
-        #self.display_center_text('GAME OVER!', Color.RED)
         sys.exit(0)  # Выход из программы
 
     def game_update(self):

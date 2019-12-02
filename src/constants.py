@@ -29,6 +29,7 @@ class Input:
 IMAGES_DIR = 'images/'
 SOUNDS_DIR = 'sounds/'
 MENU_DIR = 'menu/'
+WINDOW_ICON_PATH = IMAGES_DIR +  'icon.png'
 SPRITES_DIR = IMAGES_DIR + 'sprites/'
 MAP_DIR = SPRITES_DIR + 'map/'
 FRUITS_DIR = SPRITES_DIR + 'fruits/'
@@ -73,9 +74,11 @@ PATH_CONTROLS = MENU_DIR + 'controls.ini'
 # region Sound mixer constants
 DEBUG_MIXER = False
 MUTE_AUDIO = False
-MIXER_VOLUME = 0.05
+MIXER_VOLUME = 0.5
 SOUNDLIB = {
-    'MENU': SOUNDS_DIR + 'menu.wav',
+    'MENU1': SOUNDS_DIR + 'menu1.wav',
+    'MENU2': SOUNDS_DIR + 'menu2.wav',
+    'MENU3': SOUNDS_DIR + 'menu3.wav',
     'START': SOUNDS_DIR + 'intro.wav',
     'SIREN': SOUNDS_DIR + 'siren.wav',
     'CHOMP': SOUNDS_DIR + 'chomp.wav',
