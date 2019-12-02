@@ -48,6 +48,7 @@ SCORE_FOR_FRUIT = [-999, 100, 300, 500, 700, 1000, 2000, 3000, 5000]  # 0 fruit 
 PACMAN_MAX_LIVES = 3
 SCREEN_RESPONSE = 3  # ms
 PACMAN_SPEED = 2
+GHOST_SPEED = 2
 PATH_LOGO = IMAGES_DIR + 'logo.png'
 # endregion General
 
@@ -99,7 +100,7 @@ PATH_LIFE = IMAGES_DIR + 'life.png'
 
 # region FIELD
 CELL_SIZE = 20
-WALL_CODES = 'ABCDEFGHIJKLMNOPQRST'
+WALL_CODES = 'ABCDEFGHIJKLMNOPQRSTX'
 FRUIT_CODES = '12345678'
 ENERGIZER_CODE = '0'
 DOT_CODE = '.'
@@ -121,9 +122,9 @@ FIELD_MAP = [
     "     C.DKBBF EF EBBLC.D     ",
     "     C.DC5        6DC.D     ",
     "     C.DC QMM--MMR DC.D     ",
-    "BBBBBF.EF P      O EF.EBBBBB",
-    "      .   P      O   .      ",
-    "AAAAAH.GH P      O GH.GAAAAA",
+    "BBBBBF.EF PX    XO EF.EBBBBB",
+    "      .   PX    XO   .      ",
+    "AAAAAH.GH PXXXXXXO GH.GAAAAA",
     "     C.DC SNNNNNNT DC.D     ",
     "     C.DC          DC.D     ",
     "     C.DC7GAAAAAAH8DC.D     ",
@@ -143,7 +144,7 @@ FIELD_MAP = [
 # endregion FIELD
 
 # region CHARACTERS
-FRIGHTENED_TICKS_LIMIT = 230 * SCREEN_RESPONSE  # 8 seconds
+FRIGHTENED_TICKS_LIMIT = 8000  # 8 seconds
 PACMAN_SPAWN_POS = Vec(14, 23)
 PAC_SPRITE_LIB = {
     'OPEN': PACMAN_DIR + 'pacman1.png',

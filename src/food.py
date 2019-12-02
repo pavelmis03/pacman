@@ -34,7 +34,7 @@ class Food(DrawableObject):
             for ghost in self.game_object.ghosts:
                     if ghost.state != GhostState.eaten:
                         ghost.state = GhostState.frightened
-                        ghost.frightened_ticks = 0
+                        ghost.frightened_ticks = pygame.time.get_ticks()
         # DOT
         if self.type == FoodType.DOT:
             #self.game_object.mixer.play_sound('CHOMP')
