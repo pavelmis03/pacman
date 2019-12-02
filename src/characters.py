@@ -70,7 +70,6 @@ class Ghost(DrawableObject):
         return out  # Prioritets: up, left, down, right
 
     def get_vec_of_move(self, g_type: GhostType, ways: []):
-        print(self.state)
         if g_type == GhostType.BLINKY:  # Calculate behavior of BLINKY
             if self.state in [GhostState.chase, GhostState.frightened]:  # Go fast to point
                 if self.f_pos == GHOSTS_POS[GhostType.PINKY]:
@@ -106,6 +105,14 @@ class Ghost(DrawableObject):
         # Check Right teleportation=
         elif self.g_rect.right > offset_x + field_width - self.speed - 1:
             self.g_rect.x = self.game_object.field.offset.x
+        field_height = len(self.game_object.field.field) * CELL_SIZE
+        offset_y = self.game_object.field.offset.y
+        # Check Left teleportation
+        if self.g_rect.y < offset_y:
+            self.g_rect.y = offset_y + field_height - CELL_SIZE - self.speed
+        # Check Right teleportation=
+        elif self.g_rect.bottom > offset_y + field_height - self.speed - 1:
+            self.g_rect.y = self.game_object.field.offset.y
 
     # Animations)====================================================================================
     def set_eyes(self):
