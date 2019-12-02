@@ -32,7 +32,7 @@ class Food(DrawableObject):
             self.game_object.scores += SCORE_FOR_ENERGIZER
             # Set all ghosts to frightened if they aren't eaten
             for ghost in self.game_object.ghosts:
-                    if ghost.state != GhostState.eaten:
+                    if ghost.state not in [GhostState.eaten, GhostState.waiting]:
                         ghost.state = GhostState.frightened
                         ghost.frightened_ticks = pygame.time.get_ticks()
         # DOT

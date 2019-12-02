@@ -22,3 +22,4 @@ class GhostState(Enum):
     scatter = 1
     eaten = 2
     frightened = 3
+    waiting = 4

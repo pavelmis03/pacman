@@ -107,7 +107,7 @@ DOT_CODE = '.'
 GHOSTS_ENTER_CODE = '-'
 PACMAN_CODE = '@'
 CENTER_TEXT_POS = Vec(15, 17)
-GHOSTS_POS = {'BLINKY': (14, 11), 'PINKY': (12, 14), 'INKY': (14, 14), 'CLYDE': (16, 14)}
+GHOSTS_POS = {'BLINKY': Vec(14, 11), 'PINKY': Vec(14, 14), 'INKY': Vec(12, 14), 'CLYDE': Vec(16, 14)}
 FIELD_MAP = [
     "KBBBBBBBBBBBBLKBBBBBBBBBBBBL",
     "C3 ..........DC.......... 4D",
