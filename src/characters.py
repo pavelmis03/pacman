@@ -51,7 +51,7 @@ class Ghost(DrawableObject):
         self.target = self.game_object.pacman.f_pos
         self.state = GhostState.chase
         self.frightened_ticks = 0
-        self.vel = Vec(-1, 0) if self.ghost_type == GhostType.BLINKY else Vec(0, -1)
+        self.vel = Dir.left if self.ghost_type == GhostType.BLINKY else Dir.up
         self.speed = nearest_divisor_of_num(GHOST_SPEED, CELL_SIZE)
         self.f_pos = self.game_object.field.get_cell_from_position(Vec(self.g_rect.centerx, self.g_rect.centery)).f_pos
 
@@ -62,14 +62,20 @@ class Ghost(DrawableObject):
             dist = ((self.target.x - r.x) ** 2 + (self.target.y - r.y) ** 2) ** 0.5
             dists += [dist]
         way = ways[dists.index(min(dists))]
-        return way
+        res = [ways[i] for i in range(len(dists)) if dists[i] == min(dists)]
+        out = Dir.up if res.count(Dir.up) > 0 else \
+              Dir.left if res.count(Dir.left) > 0 else \
+              Dir.down if res.count(Dir.down) > 0 else \
+              Dir.right if res.count(Dir.right) > 0 else None
+        return out  # Prioritets: up, left, down, right
 
     def get_vec_of_move(self, g_type: GhostType, ways: []):
+        print(self.state)
         if g_type == GhostType.BLINKY:  # Calculate behavior of BLINKY
             if self.state in [GhostState.chase, GhostState.frightened]:  # Go fast to point
                 if self.f_pos == GHOSTS_POS[GhostType.PINKY]:
                     ways += [Dir.up]  # If blinky in house, now he can exit
-                self.target = self.game_object.pacman.f_pos if self.state == GhostState.chase else Vec(31, 0)
+                self.target = self.game_object.pacman.f_pos if self.state == GhostState.chase else BLINKY_S_TARGET
                 return self.choose_way_by_dist(ways)
             if self.state == GhostState.scatter:
                 way = random.choice([ways.index(item) for item in ways if item])
@@ -143,7 +149,7 @@ class Ghost(DrawableObject):
 
         # Frightened state
         if self.state == GhostState.frightened:
-            self.speed = GHOST_SPEED // 2  # Set ghoast speed
+            self.speed = GHOST_SPEED // 2  # Set ghost speed
             # Stop Frightening
             if pygame.time.get_ticks() - self.frightened_ticks > FRIGHTENED_TICKS_LIMIT:
                 self.state = GhostState.chase
@@ -151,7 +157,7 @@ class Ghost(DrawableObject):
 
         # Eaten state
         elif self.state == GhostState.eaten:
-            pass
+            self.speed = GHOST_SPEED * 2 # Set ghoast speed
             if self.f_pos == Vec(GHOSTS_POS[GhostType.BLINKY]):  # Need pinky position, but it'll do for now
                 self.state = GhostState.chase
         else:
@@ -166,10 +172,10 @@ class Ghost(DrawableObject):
             # Check around
             f = self.game_object.field.field
             pos = self.f_pos
-            ways = [Vec(0, -1) if not f[pos.y - 1][pos.x].is_wall and pos + Vec(0, -1) != self.old_f_pos else None,
-                    Vec(0, +1) if not f[pos.y + 1][pos.x].is_wall and pos + Vec(0, +1) != self.old_f_pos else None,
-                    Vec(-1, 0) if not f[pos.y][pos.x - 1].is_wall and pos + Vec(-1, 0) != self.old_f_pos else None,
-                    Vec(+1, 0) if not f[pos.y][pos.x + 1].is_wall and pos + Vec(1, 0) != self.old_f_pos else None]
+            ways = [Dir.up if not f[pos.y - 1][pos.x].is_wall and pos + Dir.up != self.old_f_pos else None,
+                    Dir.down if not f[pos.y + 1][pos.x].is_wall and pos + Dir.down != self.old_f_pos else None,
+                    Dir.left if not f[pos.y][pos.x - 1].is_wall and pos + Dir.left != self.old_f_pos else None,
+                    Dir.right if not f[pos.y][pos.x + 1].is_wall and pos + Dir.right != self.old_f_pos else None]
             ways = [item for item in ways if item is not None]
             way = self.get_vec_of_move(GhostType.BLINKY, ways)
             self.vel = way
@@ -257,7 +263,9 @@ class Pacman(DrawableObject):
     def eat_ghost_fruit(self, obj):
         self.game_object.mixer.play_sound('GHOST' if isinstance(obj, Ghost) else 'FRUIT')
         self.game_object.scores += SCORE_FOR_GHOST
-        while self.game_object.mixer.is_busy():
+        slow_mo_ticks = pygame.time.get_ticks()  # Timer for slow mo
+        limit = SLOW_MO_TICKS_LIMIT if isinstance(obj, Ghost) else SLOW_MO_TICKS_LIMIT * 2 // 3  # 2/3 of normal if fru
+        while pygame.time.get_ticks() - slow_mo_ticks < limit:
             self.game_object.screen.fill(BG_COLOR)  # Заливка цветом
             self.game_object.field.process_draw()  # Рисуем поле
             for food in self.game_object.food:
@@ -342,7 +350,8 @@ class Pacman(DrawableObject):
     def play_death_anim(self, text=''):
         self.game_object.mixer.play_sound('DEATH')
         self.a_death.curr_sprite_num = 0
-        while self.game_object.mixer.is_busy():  # PLAY DEATH ANIMATION
+        death_ticks = pygame.time.get_ticks()
+        while pygame.time.get_ticks() - death_ticks < DEATH_TICKS_LIMIT:  # PLAY DEATH ANIMATION
             self.game_object.screen.fill(BG_COLOR)  # Заливка цветом
             self.a_death.add_tick()  # Переключаем спрайт
             self.pacman_img = self.images[self.a_death.curr_sprite]  # Переключаем спрайт
