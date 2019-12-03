@@ -26,14 +26,23 @@ class Ghost(DrawableObject):
     target: Vec
     speed: float
     state: GhostState
+    next_state: GhostState
+    behaviour_state: GhostState
     frightened_ticks: int
     vel: Vec
+    waiting_time: int
+    spawned_time: int
+    sc_change_time: int
+    sc_change_mode: int
+    lvl_sc_changer_key: str
 
     def __init__(self, game_object, ghost_type: GhostType):
         super().__init__(game_object)
 
         # Load all ghosts sprites
         self.g_lib = self.game_object.ghosts_sprites
+        # Load font
+        self.font = pygame.font.Font(FONT_PATH, 8)
         # Choose ghost type
         self.ghost_type = ghost_type
         self.g_image = self.g_lib[ghost_type]
@@ -46,22 +55,56 @@ class Ghost(DrawableObject):
     def reset(self):
 
         # Get spawn pose
-        spawn = self.game_object.field.get_cell_position(Vec(GHOSTS_POS[self.ghost_type]))
-        self.g_rect = pygame.Rect(spawn.x - CELL_SIZE // 2, spawn.y, CELL_SIZE, CELL_SIZE)
+        spawn = self.game_object.field.get_cell_position(GHOSTS_POS[self.ghost_type])
+        self.g_rect = pygame.Rect(spawn.x, spawn.y, CELL_SIZE, CELL_SIZE)
         self.target = self.game_object.pacman.f_pos
-        self.state = GhostState.chase
+        self.state = GhostState.waiting
+        self.next_state = GhostState.waiting
         self.frightened_ticks = 0
         self.vel = Dir.left if self.ghost_type == GhostType.BLINKY else Dir.up
         self.speed = nearest_divisor_of_num(GHOST_SPEED, CELL_SIZE)
         self.f_pos = self.game_object.field.get_cell_from_position(Vec(self.g_rect.centerx, self.g_rect.centery)).f_pos
+        self.waiting_time = WAITING_TIME[self.ghost_type]
+        self.spawned_time = pygame.time.get_ticks()
+
+        # Find Blinky reference for inky
+        self.ref_to_blinky = None
+
+        # Scatter - chase
+        self.behaviour_state = GhostState.scatter
+        self.sc_change_time = self.spawned_time
+        self.sc_change_mode = 0
+        if self.game_object.level == 1:
+            self.lvl_sc_changer_key = 'LVL1'
+        elif 2 <= self.game_object.level <= 4:
+            self.lvl_sc_changer_key = 'LVL2-4'
+        else:
+            self.lvl_sc_changer_key = 'LVL5+'
+
+    def find_ref_to_blinky(self):
+        for gh in self.game_object.ghosts:
+            if gh.ghost_type == GhostType.BLINKY:
+                self.ref_to_blinky = gh
+
+    def clyde_out_8_cells(self):
+        p = self.game_object.pacman.f_pos
+        c = self.f_pos
+        dist = int(((p.x - c.x) ** 2 + (p.y - c.y) ** 2) ** 0.5)
+        return dist > 8
+
+    def set_frightened_state(self):
+        if self.state not in [GhostState.eaten, GhostState.waiting]:
+            self.state = GhostState.frightened
+            self.frightened_ticks = pygame.time.get_ticks()
 
     def choose_way_by_dist(self, ways: []):
         dists = []
+        if len(ways) == 0:
+            print('[ERROR]: ', self.ghost_type, self.f_pos)
         for way in ways:
             r = self.f_pos + way
             dist = ((self.target.x - r.x) ** 2 + (self.target.y - r.y) ** 2) ** 0.5
             dists += [dist]
-        way = ways[dists.index(min(dists))]
         res = [ways[i] for i in range(len(dists)) if dists[i] == min(dists)]
         out = Dir.up if res.count(Dir.up) > 0 else \
               Dir.left if res.count(Dir.left) > 0 else \
@@ -70,26 +113,107 @@ class Ghost(DrawableObject):
         return out  # Prioritets: up, left, down, right
 
     def get_vec_of_move(self, g_type: GhostType, ways: []):
-        if g_type == GhostType.BLINKY:  # Calculate behavior of BLINKY
-            if self.state in [GhostState.chase, GhostState.frightened]:  # Go fast to point
-                if self.f_pos == GHOSTS_POS[GhostType.PINKY]:
-                    ways += [Dir.up]  # If blinky in house, now he can exit
+        res_way = Vec(0, 0)
+        p_pos = GHOSTS_POS[GhostType.PINKY]
+
+        # Ways where ghost can't go up
+        if self.f_pos in GHOSTS_UP_BLOCKED_CELLS:
+            if Dir.up in ways:
+                ways.remove(Dir.up)
+
+        # Calculate behavior of BLINKY
+        if g_type == GhostType.BLINKY:
+            if self.state in [GhostState.chase, GhostState.scatter]:  # Go fast to point
                 self.target = self.game_object.pacman.f_pos if self.state == GhostState.chase else BLINKY_S_TARGET
-                return self.choose_way_by_dist(ways)
-            if self.state == GhostState.scatter:
-                way = random.choice([ways.index(item) for item in ways if item])
-                return way
+                res_way = self.choose_way_by_dist(ways)
+            if self.state == GhostState.frightened:
+                way = random.choice([item for item in ways if item])
+                res_way = way
+            if self.state == GhostState.eaten:
+                self.target = GHOSTS_POS[GhostType.BLINKY]
+                res_way = self.choose_way_by_dist(ways)
+        # Calculate behavior of PINKY
+        if g_type == GhostType.PINKY:
+            if self.state in [GhostState.chase, GhostState.scatter]:  # Go fast to point
+                if self.f_pos in [p_pos, p_pos + Vec(0, -1), p_pos + Vec(-1, 0), p_pos + Vec(-1, -1)]:
+                    ways += [Dir.up]  # If pinky in house, now he can exit
+                if self.state == GhostState.chase:
+                    self.target = self.game_object.pacman.f_pos + self.game_object.pacman.vel * 4
+                    if self.game_object.pacman.vel == Dir.up:
+                        self.target += Vec(-4, 0)
+                else:
+                    self.target = PINKY_S_TARGET
+                res_way = self.choose_way_by_dist(ways)
+            if self.state == GhostState.frightened:
+                way = random.choice([item for item in ways if item])
+                res_way = way
+        # Calculate behavior of INKY
+        if g_type == GhostType.INKY:
+            if self.state in [GhostState.chase, GhostState.scatter]:  # Go fast to point
+                if self.f_pos in HOUSE_CELLS:
+                    ways += [Dir.up]  # If inky in house, now he can exit
+                if self.state == GhostState.chase:
+                    self.target = self.game_object.pacman.f_pos + self.game_object.pacman.vel * 2
+                    if self.game_object.pacman.vel == Dir.up:
+                        self.target += Vec(-2, 0)
+                    # Mirroring besides blinky
+                    if self.ref_to_blinky:
+                        x = self.target.x - self.ref_to_blinky.f_pos.x
+                        y = self.target.y - self.ref_to_blinky.f_pos.y
+                        self.target += Vec(x, y)
+                    else:
+                        self.find_ref_to_blinky()
+                else:
+                    self.target = INKY_S_TARGETT
+                res_way = self.choose_way_by_dist(ways)
+            if self.state == GhostState.frightened:
+                way = random.choice([item for item in ways if item])
+                res_way = way
+        # Calculate behavior of CLYDE
+        if g_type == GhostType.CLYDE:
+            if self.state in [GhostState.chase, GhostState.scatter]:  # Go fast to point
+                if self.f_pos in HOUSE_CELLS:
+                    ways += [Dir.up]  # If inky in house, now he can exit
+                if self.state == GhostState.chase:
+                    if self.clyde_out_8_cells():
+                        self.target = self.game_object.pacman.f_pos
+                    else:
+                        self.target = CLYDE_S_TARGETT
+                else:
+                    self.target = CLYDE_S_TARGETT
+                res_way = self.choose_way_by_dist(ways)
+            if self.state == GhostState.frightened:
+                way = random.choice([item for item in ways if item])
+                res_way = way
+
         # Eaten state is the same for all types of ghosts
-        if self.state == GhostState.eaten:
-            self.target = Vec(GHOSTS_POS[GhostType.BLINKY])  # Need pinky position, but it'll do for now
-            #if self.f_pos == GHOSTS_POS[GhostType.BLINKY]:
-            #    ways += [Dir.down]  # Now ghost can enter the house
-            return self.choose_way_by_dist(ways)
+        if self.state == GhostState.eaten and self.ghost_type != GhostType.BLINKY:
+            self.target = GHOSTS_POS[GhostType.PINKY]
+            b_pos = GHOSTS_POS[GhostType.BLINKY]
+            if self.f_pos in [b_pos, b_pos + Vec(-1, 0)]:
+                ways += [Dir.down]  # Now ghost can enter the house
+            if self.f_pos in [GHOSTS_POS[GhostType.PINKY], GHOSTS_POS[GhostType.PINKY] + Vec(-1, 0)]:
+                ways = [Dir.up]
+            res_way = self.choose_way_by_dist(ways)
+
+        # If ghosts house
+        # Ghost in house and want to exit
+        if self.state in [GhostState.chase, GhostState.scatter] and self.f_pos in \
+                [p_pos, p_pos + Vec(0, -1), p_pos + Vec(-1, 0), p_pos + Vec(-1, -1)]:
+            res_way = Dir.up
+        # Ghost in edge of house
+        if self.state in [GhostState.chase, GhostState.scatter] and self.f_pos in \
+                [p_pos + Vec(-1, 0), p_pos + Vec(-2, 0)]:
+            res_way = Dir.right
+        if self.state in [GhostState.chase, GhostState.scatter] and self.f_pos in \
+                [p_pos + Vec(+1, 0), p_pos + Vec(+2, 0)]:
+            res_way = Dir.left
+        return res_way
 
     def check_crit_pos(self):
         crit_pos = Vec((self.g_rect.x - self.game_object.field.offset.x) % CELL_SIZE,
                        (self.g_rect.y - self.game_object.field.offset.y) % CELL_SIZE)
-        return 0 == crit_pos.x and 0 == crit_pos.y
+        return crit_pos.x == 0 and crit_pos.y == 0
 
     def move_to_target(self):
         self.g_rect.x += self.vel.x * self.speed
@@ -132,7 +256,7 @@ class Ghost(DrawableObject):
                     pygame.time.get_ticks() - self.frightened_ticks > 6000 and \
                     ((pygame. time.get_ticks() - self.frightened_ticks) // 200) % 2 else \
             'FRIGHTENED' + anim if self.state == GhostState.frightened else \
-                self.ghost_type + anim
+                str(self.ghost_type) + anim
         self.g_image = self.g_lib[curr_body]
 
     # Base class methods)=============================================================================
@@ -140,71 +264,115 @@ class Ghost(DrawableObject):
         pass
 
     def process_logic(self):
-        # Hit pacman
-        if self.game_object.pacman.hit_ghost(self):
-            if self.state == GhostState.frightened:  # If hit pacman under energizer, pacman eat ghost
-                self.game_object.pacman.eat_ghost_fruit(self)
-                self.state = GhostState.eaten
-            if self.state in [GhostState.chase, GhostState.scatter]:
-                self.game_object.pacman.kill()
+        if self.next_state != GhostState.eaten:
+            self.next_state = self.state
 
-        # Animation
-        self.a_move.add_tick()
-        # Set eyes and body sprites
-        self.set_eyes()
-        self.set_body()
-
-        # Frightened state
-        if self.state == GhostState.frightened:
-            self.speed = GHOST_SPEED // 2  # Set ghost speed
-            # Stop Frightening
-            if pygame.time.get_ticks() - self.frightened_ticks > FRIGHTENED_TICKS_LIMIT:
-                self.state = GhostState.chase
-                self.frightened_ticks = 0
-
-        # Eaten state
-        elif self.state == GhostState.eaten:
-            self.speed = GHOST_SPEED * 2 # Set ghoast speed
-            if self.f_pos == Vec(GHOSTS_POS[GhostType.BLINKY]):  # Need pinky position, but it'll do for now
-                self.state = GhostState.chase
+        if self.state == GhostState.waiting and pygame.time.get_ticks() - self.spawned_time < self.waiting_time:
+            pass
         else:
-            self.speed = GHOST_SPEED  # Set ghoast speed
+            if self.state == GhostState.waiting:
+                self.state = self.behaviour_state
+            # Animation
+            self.a_move.add_tick()
+            # Set eyes and body sprites
+            self.set_eyes()
+            self.set_body()
 
-        # Movement
-        if self.check_crit_pos():
-            cell = self.game_object.field.get_cell_from_position(Vec(self.g_rect.centerx, self.g_rect.centery))
-            self.old_f_pos = self.f_pos
-            self.f_pos = cell.f_pos
+            # Scatter - chase
+            if pygame.time.get_ticks() - self.sc_change_time > SC_CH_TURNS[self.lvl_sc_changer_key][self.sc_change_mode]:
+                self.sc_change_time = pygame.time.get_ticks()
+                self.sc_change_mode += 1
+                self.behaviour_state = GhostState.chase if self.sc_change_mode % 2 else \
+                    GhostState.scatter
+                if self.state in [GhostState.scatter, GhostState.chase]:
+                    self.state = self.behaviour_state
+                    self.next_state = self.state
+            # STATES===================================================================================
+            # Hit pacman
+            if self.game_object.pacman.hit_ghost(self):
+                if GhostState.frightened in [self.state]:  # If hit pacman under energizer, pacman eat ghost
+                    self.next_state = GhostState.eaten
+                if self.state in [GhostState.chase, GhostState.scatter]:
+                    self.game_object.pacman.kill()
+            # Ghost on center
+            if self.check_crit_pos():
+                # STATES===================================================================================
+                if self.next_state != self.state:
+                    if self.next_state == GhostState.eaten:
+                        self.game_object.pacman.eat_ghost_fruit(self)
+                        self.state = GhostState.eaten
+                    elif self.next_state in [GhostState.scatter, GhostState.chase]:
+                        self.state = self.behaviour_state
+                        self.next_state = self.state
+                # Frightened state
+                if self.state == GhostState.frightened:
+                    self.speed = GHOST_SPEED // 2 if GHOST_SPEED > 1 else 1  # Set ghost speed
+                    # Stop Frightening
+                    if pygame.time.get_ticks() - self.frightened_ticks > FRIGHTENED_TICKS_LIMIT:
+                        self.state = self.behaviour_state
+                        self.frightened_ticks = 0
 
-            # Check around
-            f = self.game_object.field.field
-            pos = self.f_pos
-            ways = [Dir.up if not f[pos.y - 1][pos.x].is_wall and pos + Dir.up != self.old_f_pos else None,
-                    Dir.down if not f[pos.y + 1][pos.x].is_wall and pos + Dir.down != self.old_f_pos else None,
-                    Dir.left if not f[pos.y][pos.x - 1].is_wall and pos + Dir.left != self.old_f_pos else None,
-                    Dir.right if not f[pos.y][pos.x + 1].is_wall and pos + Dir.right != self.old_f_pos else None]
-            ways = [item for item in ways if item is not None]
-            way = self.get_vec_of_move(GhostType.BLINKY, ways)
-            self.vel = way
+                # Eaten state
+                elif self.state == GhostState.eaten:
+                    self.speed = GHOST_SPEED * 2  # Set ghost speed
+                    if self.ghost_type == GhostType.BLINKY and self.f_pos == GHOSTS_POS[GhostType.BLINKY]:
+                        self.state = self.behaviour_state
+                        self.next_state = self.state
+                    elif self.f_pos == GHOSTS_POS[GhostType.PINKY]:
+                        self.state = self.behaviour_state
+                        self.next_state = self.state
+                else:
+                    self.speed = GHOST_SPEED  # Set ghost speed
 
-            if self.ghost_type == GhostType.BLINKY:
-                self.move_to_target()
+                # Movement (Ghost on center)=====================================================================
+                cell = self.game_object.field.get_cell_from_position(Vec(self.g_rect.centerx, self.g_rect.centery))
+                self.old_f_pos = self.f_pos
+                self.f_pos = cell.f_pos
 
-            pass  # Choose path
-        else:
-            if self.ghost_type == GhostType.BLINKY:
-                self.move_to_target()
+                # Check around
+                f = self.game_object.field.field
+                pos = self.f_pos
+                ways = [Dir.up if not f[pos.y - 1][pos.x].is_wall and pos + Dir.up != self.old_f_pos else None,
+                        Dir.down if not f[pos.y + 1][pos.x].is_wall and pos + Dir.down != self.old_f_pos else None,
+                        Dir.left if not f[pos.y][pos.x - 1].is_wall and pos + Dir.left != self.old_f_pos else None,
+                        Dir.right if not f[pos.y][pos.x + 1].is_wall and pos + Dir.right != self.old_f_pos else None]
+                ways = [item for item in ways if item is not None]
+                way = self.get_vec_of_move(self.ghost_type, ways)
+                self.vel = way
+
+            self.move_to_target()
 
     def process_draw(self):
         ghost_size = CELL_SIZE * 2
         ghost_rect = pygame.Rect(self.g_rect.x - CELL_SIZE // 2, self.g_rect.y - CELL_SIZE // 2,
                                  self.g_rect.width + ghost_size, self.g_rect.height + ghost_size)
+        if self.state == GhostState.waiting:
+            ghost_rect.move_ip(-CELL_SIZE // 2, 0)
         # Draw ghost
         if self.state != GhostState.eaten:
             self.game_object.screen.blit(self.g_image, ghost_rect)
 
         # Draw his eyes
         self.game_object.screen.blit(self.e_image, ghost_rect)
+
+        # Show ghost targets
+        if SHOW_GHOSTS_TARGETS and self.target:
+            x = (self.target.x * CELL_SIZE) + self.game_object.field.offset.x
+            y = (self.target.y * CELL_SIZE) + self.game_object.field.offset.y
+            clr = Color.RED if self.ghost_type == 'BLINKY' else Color.PINKY if self.ghost_type == 'PINKY' else \
+                Color.BLUE if self.ghost_type == 'INKY' else Color.ORANGE
+            # [TARGET] text
+            text = self.font.render('[TARGET]', 1, clr)
+            self.game_object.screen.blit(text, (x - 15, y - 20))
+            # CROSS
+            pygame.draw.line(self.game_object.screen, clr, (x + 5, y + 5), (x + CELL_SIZE - 5, y + CELL_SIZE - 5), 5)
+            pygame.draw.line(self.game_object.screen, clr, (x + CELL_SIZE - 5, y + 5), (x + 5, y + CELL_SIZE - 5), 5)
+            # OTHER (CLYDE CIRCLE)
+            p_pos = self.game_object.pacman.f_pos
+            f_offset = self.game_object.field.offset
+            c_pos = Vec(p_pos.x * CELL_SIZE + f_offset.x, p_pos.y * CELL_SIZE + f_offset.y + CELL_SIZE // 2)
+            if self.ghost_type == GhostType.CLYDE:
+                pygame.draw.circle(self.game_object.screen, clr, (c_pos.x, c_pos.y), CELL_SIZE * 8, 5)
 
 
 # Base class of Pacman
@@ -220,7 +388,7 @@ class Pacman(DrawableObject):
         # Initialize dict of used images
         self.images = self.game_object.pacman_sprites
         # Init pacman image and rect (DIRECTION = LEFT)
-        self.pacman_img = pygame.transform.rotate(self.images['CLOSE'], -180)
+        self.pacman_img = pygame.transform.rotate(self.images['NORMAL'], -180)
         self.p_rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
         # Animations
         self.a_eat = Anim(['NORMAL', 'OPEN', 'NORMAL', 'CLOSE'], 5)
@@ -268,6 +436,7 @@ class Pacman(DrawableObject):
 
     # Eating ghost
     def eat_ghost_fruit(self, obj):
+        self.game_object.mixer.stop_all_sounds()
         self.game_object.mixer.play_sound('GHOST' if isinstance(obj, Ghost) else 'FRUIT')
         self.game_object.scores += SCORE_FOR_GHOST
         slow_mo_ticks = pygame.time.get_ticks()  # Timer for slow mo
@@ -355,6 +524,7 @@ class Pacman(DrawableObject):
             self.reset()
 
     def play_death_anim(self, text=''):
+        self.game_object.mixer.stop_all_sounds()
         self.game_object.mixer.play_sound('DEATH')
         self.a_death.curr_sprite_num = 0
         death_ticks = pygame.time.get_ticks()

@@ -43,6 +43,7 @@ class Game:
 
         self.lives = PACMAN_MAX_LIVES
         self.scores = 0
+        self.level = 1
 
         self.objects = []
         self.create_game_objects()
@@ -63,7 +64,8 @@ class Game:
         self.field = Field(self, CELL_SIZE, l_map=self.current_map)
         self.food = self.field.get_food()
         pac_pos = self.field.get_cell_position(self.field.pacman_pos)
-        self.pacman = Pacman(self, pac_pos.x - CELL_SIZE // 2, pac_pos.y)  # Add some offset to centering pcaman
+        x_offset = -CELL_SIZE // 2
+        self.pacman = Pacman(self, pac_pos.x + x_offset, pac_pos.y)  # Add some offset to centering pcaman
         self.blinky = Ghost(self, GhostType.BLINKY)
         self.pinky = Ghost(self, GhostType.PINKY)
         self.inky = Ghost(self, GhostType.INKY)
@@ -146,14 +148,16 @@ class Game:
         self.process_draw()
         self.display_center_text('READY!', Color.YELLOW)
         # Play sound
-        self.mixer.play_sound('GHOST')
+        self.mixer.play_sound('START')
 
         # Waiting for the START sound to play
         start_ticks = pygame.time.get_ticks()
-        while pygame.time.get_ticks() - start_ticks < self.mixer.sounds['START'].get_length() * 100:
+        while pygame.time.get_ticks() - start_ticks < self.mixer.sounds['START'].get_length() * 1000:
             for event in pygame.event.get():  # Обработка события выхода
                 if event.type == pygame.QUIT:
                     sys.exit(0)
+            for ghost in self.ghosts:
+                ghost.reset()
 
     def main_loop(self):
         # Start Main menu First
@@ -166,6 +170,7 @@ class Game:
 
         # Draw Ready text and wait delay before start game
         self.display_ready_screen()
+        ready_time = pygame.time.get_ticks()
 
         # If user click START - start game
         while not self.game_over:  # Основной цикл работы программы

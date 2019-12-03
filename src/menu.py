@@ -193,9 +193,9 @@ def display_data(menu, file, param, is_table, x, y, table_head1='', table_head2=
                         ts[j] = t
                 except ValueError:
                     pass
-        new_s = ['{:<7}      {:^5}'.format(str(table_head1), str(table_head2))]
+        new_s = ['{:<9}    {:^5}'.format(str(table_head1), str(table_head2))]
         for i in range(len(ts)):
-            new_s.append('{:<7}      {:^5}'.format(ts[i][0], ts[i][1]))
+            new_s.append('{:<9}    {:^5}'.format(ts[i][0], ts[i][1]))
         text = []
         for i in range(len(new_s)):
             text.append(new_s[i])

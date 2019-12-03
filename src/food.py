@@ -32,12 +32,9 @@ class Food(DrawableObject):
             self.game_object.scores += SCORE_FOR_ENERGIZER
             # Set all ghosts to frightened if they aren't eaten
             for ghost in self.game_object.ghosts:
-                    if ghost.state != GhostState.eaten:
-                        ghost.state = GhostState.frightened
-                        ghost.frightened_ticks = pygame.time.get_ticks()
+                ghost.set_frightened_state()
         # DOT
         if self.type == FoodType.DOT:
-            #self.game_object.mixer.play_sound('CHOMP')
             self.game_object.scores += SCORE_FOR_DOT
 
         # Del our instance of class from Cell class and from game list

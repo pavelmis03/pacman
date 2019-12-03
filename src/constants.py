@@ -1,4 +1,7 @@
+import cmath
+
 from src.helpers import *
+from src.enums import *
 
 
 class Color:
@@ -12,6 +15,8 @@ class Color:
     YELLOW = [255, 255, 0]
     DOTS_COLOR = [222, 161, 133]
     GRAY = [40, 40, 40]
+    PINKY = [255, 203, 219]
+    ORANGE = [255, 184, 82]
 
 
 class Input:
@@ -35,6 +40,11 @@ MAP_DIR = SPRITES_DIR + 'map/'
 FRUITS_DIR = SPRITES_DIR + 'fruits/'
 GHOSTS_DIR = SPRITES_DIR + 'ghosts/'
 PACMAN_DIR = SPRITES_DIR + 'pacman/'
+
+# region Customization
+SHOW_GHOSTS_TARGETS = False
+MUTE_AUDIO = False
+# endregion Customization
 
 # region General
 SCREEN_SIZE = [560, 720]
@@ -75,7 +85,6 @@ MAPS_DIR = 'maps/'
 
 # region Sound mixer constants
 DEBUG_MIXER = False
-MUTE_AUDIO = False
 MIXER_OFF = False
 MIXER_VOLUME = 0.5
 SOUNDLIB = {
@@ -113,7 +122,9 @@ DOT_CODE = '.'
 GHOSTS_ENTER_CODE = '-'
 PACMAN_CODE = '@'
 CENTER_TEXT_POS = Vec(15, 17)
-GHOSTS_POS = {'BLINKY': (14, 11), 'PINKY': (12, 14), 'INKY': (14, 14), 'CLYDE': (16, 14)}
+GHOSTS_POS = {'BLINKY': Vec(14, 11), 'PINKY': Vec(14, 14), 'INKY': Vec(12, 14), 'CLYDE': Vec(16, 14)}
+GHOSTS_UP_BLOCKED_CELLS = [Vec(12, 11), Vec(15, 11), Vec(12, 23), Vec(15, 23)]
+HOUSE_CELLS = [Vec(13, 13), Vec(14, 13), Vec(15, 13)]
 DEFAULT_MAP_FILE = 'def_map.ini'
 # endregion FIELD
 
@@ -165,3 +176,15 @@ GHOSTS_SPRITE_LIB = {
     'EYES_FR_2': GHOSTS_DIR + 'eyes6.png',
 }
 # endregion CHARACTERS
+
+# region Characteristics tables
+
+WAITING_TIME = {GhostType.BLINKY: 0,
+                GhostType.PINKY: 100,
+                GhostType.INKY: 7000,
+                GhostType.CLYDE: 17000}
+SC_CH_TURNS = { 'LVL1': [7000, 20000, 7000, 20000, 5000, 20000, 5000, 999999999],
+                'LVL2-4': [7000, 20000, 7000, 20000, 5000, 1033, 16, 999999999],
+                'LVL5+': [5000, 20000, 5000, 20000, 5000, 1037, 16, 999999999]}
+
+# endregion Characteristics tables
