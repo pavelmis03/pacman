@@ -26,16 +26,23 @@ class Ghost(DrawableObject):
     target: Vec
     speed: float
     state: GhostState
+    next_state: GhostState
+    behaviour_state: GhostState
     frightened_ticks: int
     vel: Vec
     waiting_time: int
     spawned_time: int
+    sc_change_time: int
+    sc_change_mode: int
+    lvl_sc_changer_key: str
 
     def __init__(self, game_object, ghost_type: GhostType):
         super().__init__(game_object)
 
         # Load all ghosts sprites
         self.g_lib = self.game_object.ghosts_sprites
+        # Load font
+        self.font = pygame.font.Font(FONT_PATH, 8)
         # Choose ghost type
         self.ghost_type = ghost_type
         self.g_image = self.g_lib[ghost_type]
@@ -49,18 +56,41 @@ class Ghost(DrawableObject):
 
         # Get spawn pose
         spawn = self.game_object.field.get_cell_position(GHOSTS_POS[self.ghost_type])
-        x_offset = - CELL_SIZE // 2 * 0
-        self.g_rect = pygame.Rect(spawn.x + x_offset, spawn.y, CELL_SIZE, CELL_SIZE)
+        self.g_rect = pygame.Rect(spawn.x, spawn.y, CELL_SIZE, CELL_SIZE)
         self.target = self.game_object.pacman.f_pos
         self.state = GhostState.waiting
+        self.next_state = GhostState.waiting
         self.frightened_ticks = 0
         self.vel = Dir.left if self.ghost_type == GhostType.BLINKY else Dir.up
         self.speed = nearest_divisor_of_num(GHOST_SPEED, CELL_SIZE)
         self.f_pos = self.game_object.field.get_cell_from_position(Vec(self.g_rect.centerx, self.g_rect.centery)).f_pos
-        self.waiting_time = 0 if self.ghost_type == GhostType.BLINKY else \
-            0 if self.ghost_type == GhostType.PINKY else \
-                7000 if self.ghost_type == GhostType.INKY else 17000
+        self.waiting_time = WAITING_TIME[self.ghost_type]
         self.spawned_time = pygame.time.get_ticks()
+
+        # Find Blinky reference for inky
+        self.ref_to_blinky = None
+
+        # Scatter - chase
+        self.behaviour_state = GhostState.scatter
+        self.sc_change_time = self.spawned_time
+        self.sc_change_mode = 0
+        if self.game_object.level == 1:
+            self.lvl_sc_changer_key = 'LVL1'
+        elif 2 <= self.game_object.level <= 4:
+            self.lvl_sc_changer_key = 'LVL2-4'
+        else:
+            self.lvl_sc_changer_key = 'LVL5+'
+
+    def find_ref_to_blinky(self):
+        for gh in self.game_object.ghosts:
+            if gh.ghost_type == GhostType.BLINKY:
+                self.ref_to_blinky = gh
+
+    def clyde_out_8_cells(self):
+        p = self.game_object.pacman.f_pos
+        c = self.f_pos
+        dist = int(((p.x - c.x) ** 2 + (p.y - c.y) ** 2) ** 0.5)
+        return dist > 8
 
     def set_frightened_state(self):
         if self.state not in [GhostState.eaten, GhostState.waiting]:
@@ -69,11 +99,12 @@ class Ghost(DrawableObject):
 
     def choose_way_by_dist(self, ways: []):
         dists = []
+        if len(ways) == 0:
+            print('[ERROR]: ', self.ghost_type, self.f_pos)
         for way in ways:
             r = self.f_pos + way
             dist = ((self.target.x - r.x) ** 2 + (self.target.y - r.y) ** 2) ** 0.5
             dists += [dist]
-        way = ways[dists.index(min(dists))]
         res = [ways[i] for i in range(len(dists)) if dists[i] == min(dists)]
         out = Dir.up if res.count(Dir.up) > 0 else \
               Dir.left if res.count(Dir.left) > 0 else \
@@ -108,6 +139,8 @@ class Ghost(DrawableObject):
                     ways += [Dir.up]  # If pinky in house, now he can exit
                 if self.state == GhostState.chase:
                     self.target = self.game_object.pacman.f_pos + self.game_object.pacman.vel * 4
+                    if self.game_object.pacman.vel == Dir.up:
+                        self.target += Vec(-4, 0)
                 else:
                     self.target = PINKY_S_TARGET
                 res_way = self.choose_way_by_dist(ways)
@@ -120,7 +153,16 @@ class Ghost(DrawableObject):
                 if self.f_pos in HOUSE_CELLS:
                     ways += [Dir.up]  # If inky in house, now he can exit
                 if self.state == GhostState.chase:
-                    self.target = self.game_object.pacman.f_pos + self.game_object.pacman.vel * 4
+                    self.target = self.game_object.pacman.f_pos + self.game_object.pacman.vel * 2
+                    if self.game_object.pacman.vel == Dir.up:
+                        self.target += Vec(-2, 0)
+                    # Mirroring besides blinky
+                    if self.ref_to_blinky:
+                        x = self.target.x - self.ref_to_blinky.f_pos.x
+                        y = self.target.y - self.ref_to_blinky.f_pos.y
+                        self.target += Vec(x, y)
+                    else:
+                        self.find_ref_to_blinky()
                 else:
                     self.target = INKY_S_TARGETT
                 res_way = self.choose_way_by_dist(ways)
@@ -133,7 +175,10 @@ class Ghost(DrawableObject):
                 if self.f_pos in HOUSE_CELLS:
                     ways += [Dir.up]  # If inky in house, now he can exit
                 if self.state == GhostState.chase:
-                    self.target = self.game_object.pacman.f_pos + self.game_object.pacman.vel * 4
+                    if self.clyde_out_8_cells():
+                        self.target = self.game_object.pacman.f_pos
+                    else:
+                        self.target = CLYDE_S_TARGETT
                 else:
                     self.target = CLYDE_S_TARGETT
                 res_way = self.choose_way_by_dist(ways)
@@ -144,13 +189,16 @@ class Ghost(DrawableObject):
         # Eaten state is the same for all types of ghosts
         if self.state == GhostState.eaten and self.ghost_type != GhostType.BLINKY:
             self.target = GHOSTS_POS[GhostType.PINKY]
-            if self.f_pos in [GHOSTS_POS[GhostType.BLINKY], GHOSTS_POS[GhostType.BLINKY] + Vec(0, 1)]:
+            b_pos = GHOSTS_POS[GhostType.BLINKY]
+            if self.f_pos in [b_pos, b_pos + Vec(-1, 0)]:
                 ways += [Dir.down]  # Now ghost can enter the house
+            if self.f_pos in [GHOSTS_POS[GhostType.PINKY], GHOSTS_POS[GhostType.PINKY] + Vec(-1, 0)]:
+                ways = [Dir.up]
             res_way = self.choose_way_by_dist(ways)
 
         # If ghosts house
         # Ghost in house and want to exit
-        if self.state == GhostState.chase and self.f_pos in \
+        if self.state in [GhostState.chase, GhostState.scatter] and self.f_pos in \
                 [p_pos, p_pos + Vec(0, -1), p_pos + Vec(-1, 0), p_pos + Vec(-1, -1)]:
             res_way = Dir.up
         # Ghost in edge of house
@@ -216,13 +264,14 @@ class Ghost(DrawableObject):
         pass
 
     def process_logic(self):
-        tmp_state = self.state
+        if self.next_state != GhostState.eaten:
+            self.next_state = self.state
 
         if self.state == GhostState.waiting and pygame.time.get_ticks() - self.spawned_time < self.waiting_time:
             pass
         else:
             if self.state == GhostState.waiting:
-                self.state = GhostState.scatter
+                self.state = self.behaviour_state
             # Animation
             self.a_move.add_tick()
             # Set eyes and body sprites
@@ -230,34 +279,48 @@ class Ghost(DrawableObject):
             self.set_body()
 
             # Scatter - chase
-            self.behaviour_state = GhostState.chase
-
+            if pygame.time.get_ticks() - self.sc_change_time > SC_CH_TURNS[self.lvl_sc_changer_key][self.sc_change_mode]:
+                self.sc_change_time = pygame.time.get_ticks()
+                self.sc_change_mode += 1
+                self.behaviour_state = GhostState.chase if self.sc_change_mode % 2 else \
+                    GhostState.scatter
+                if self.state in [GhostState.scatter, GhostState.chase]:
+                    self.state = self.behaviour_state
+                    self.next_state = self.state
+            # STATES===================================================================================
+            # Hit pacman
+            if self.game_object.pacman.hit_ghost(self):
+                if GhostState.frightened in [self.state]:  # If hit pacman under energizer, pacman eat ghost
+                    self.next_state = GhostState.eaten
+                if self.state in [GhostState.chase, GhostState.scatter]:
+                    self.game_object.pacman.kill()
             # Ghost on center
             if self.check_crit_pos():
                 # STATES===================================================================================
-                # Hit pacman
-                if self.game_object.pacman.hit_ghost(self):
-                    if self.state == GhostState.frightened:  # If hit pacman under energizer, pacman eat ghost
+                if self.next_state != self.state:
+                    if self.next_state == GhostState.eaten:
                         self.game_object.pacman.eat_ghost_fruit(self)
                         self.state = GhostState.eaten
-                    if self.state in [GhostState.chase, GhostState.scatter]:
-                        self.game_object.pacman.kill()
-
+                    elif self.next_state in [GhostState.scatter, GhostState.chase]:
+                        self.state = self.behaviour_state
+                        self.next_state = self.state
                 # Frightened state
                 if self.state == GhostState.frightened:
                     self.speed = GHOST_SPEED // 2 if GHOST_SPEED > 1 else 1  # Set ghost speed
                     # Stop Frightening
                     if pygame.time.get_ticks() - self.frightened_ticks > FRIGHTENED_TICKS_LIMIT:
-                        self.state = GhostState.chase
+                        self.state = self.behaviour_state
                         self.frightened_ticks = 0
 
                 # Eaten state
                 elif self.state == GhostState.eaten:
                     self.speed = GHOST_SPEED * 2  # Set ghost speed
                     if self.ghost_type == GhostType.BLINKY and self.f_pos == GHOSTS_POS[GhostType.BLINKY]:
-                        self.state = GhostState.chase
+                        self.state = self.behaviour_state
+                        self.next_state = self.state
                     elif self.f_pos == GHOSTS_POS[GhostType.PINKY]:
-                        self.state = GhostState.chase
+                        self.state = self.behaviour_state
+                        self.next_state = self.state
                 else:
                     self.speed = GHOST_SPEED  # Set ghost speed
 
@@ -283,12 +346,33 @@ class Ghost(DrawableObject):
         ghost_size = CELL_SIZE * 2
         ghost_rect = pygame.Rect(self.g_rect.x - CELL_SIZE // 2, self.g_rect.y - CELL_SIZE // 2,
                                  self.g_rect.width + ghost_size, self.g_rect.height + ghost_size)
+        if self.state == GhostState.waiting:
+            ghost_rect.move_ip(-CELL_SIZE // 2, 0)
         # Draw ghost
         if self.state != GhostState.eaten:
             self.game_object.screen.blit(self.g_image, ghost_rect)
 
         # Draw his eyes
         self.game_object.screen.blit(self.e_image, ghost_rect)
+
+        # Show ghost targets
+        if SHOW_GHOSTS_TARGETS and self.target:
+            x = (self.target.x * CELL_SIZE) + self.game_object.field.offset.x
+            y = (self.target.y * CELL_SIZE) + self.game_object.field.offset.y
+            clr = Color.RED if self.ghost_type == 'BLINKY' else Color.PINKY if self.ghost_type == 'PINKY' else \
+                Color.BLUE if self.ghost_type == 'INKY' else Color.ORANGE
+            # [TARGET] text
+            text = self.font.render('[TARGET]', 1, clr)
+            self.game_object.screen.blit(text, (x - 15, y - 20))
+            # CROSS
+            pygame.draw.line(self.game_object.screen, clr, (x + 5, y + 5), (x + CELL_SIZE - 5, y + CELL_SIZE - 5), 5)
+            pygame.draw.line(self.game_object.screen, clr, (x + CELL_SIZE - 5, y + 5), (x + 5, y + CELL_SIZE - 5), 5)
+            # OTHER (CLYDE CIRCLE)
+            p_pos = self.game_object.pacman.f_pos
+            f_offset = self.game_object.field.offset
+            c_pos = Vec(p_pos.x * CELL_SIZE + f_offset.x, p_pos.y * CELL_SIZE + f_offset.y + CELL_SIZE // 2)
+            if self.ghost_type == GhostType.CLYDE:
+                pygame.draw.circle(self.game_object.screen, clr, (c_pos.x, c_pos.y), CELL_SIZE * 8, 5)
 
 
 # Base class of Pacman

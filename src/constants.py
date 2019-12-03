@@ -1,4 +1,7 @@
+import cmath
+
 from src.helpers import *
+from src.enums import *
 
 
 class Color:
@@ -12,6 +15,8 @@ class Color:
     YELLOW = [255, 255, 0]
     DOTS_COLOR = [222, 161, 133]
     GRAY = [40, 40, 40]
+    PINKY = [255, 203, 219]
+    ORANGE = [255, 184, 82]
 
 
 class Input:
@@ -34,6 +39,11 @@ MAP_DIR = SPRITES_DIR + 'map/'
 FRUITS_DIR = SPRITES_DIR + 'fruits/'
 GHOSTS_DIR = SPRITES_DIR + 'ghosts/'
 PACMAN_DIR = SPRITES_DIR + 'pacman/'
+
+# region Customization
+SHOW_GHOSTS_TARGETS = False
+MUTE_AUDIO = False
+# endregion Customization
 
 # region General
 SCREEN_SIZE = [560, 720]
@@ -72,8 +82,7 @@ PATH_CONTROLS = MENU_DIR + 'controls.ini'
 
 # region Sound mixer constants
 DEBUG_MIXER = False
-MUTE_AUDIO = False
-MIXER_VOLUME = 0.05
+MIXER_VOLUME = 0.5
 SOUNDLIB = {
     'MENU': SOUNDS_DIR + 'menu.wav',
     'START': SOUNDS_DIR + 'intro.wav',
@@ -109,11 +118,11 @@ PACMAN_CODE = '@'
 CENTER_TEXT_POS = Vec(15, 17)
 GHOSTS_POS = {'BLINKY': Vec(14, 11), 'PINKY': Vec(14, 14), 'INKY': Vec(12, 14), 'CLYDE': Vec(16, 14)}
 GHOSTS_UP_BLOCKED_CELLS = [Vec(12, 11), Vec(15, 11), Vec(12, 23), Vec(15, 23)]
-HOUSE_CELLS = [Vec(12, 13), Vec(13, 13), Vec(14, 13), Vec(15, 13), Vec(13, 12), Vec(13, 14)]
+HOUSE_CELLS = [Vec(13, 13), Vec(14, 13), Vec(15, 13)]
 FIELD_MAP = [
     "KBBBBBBBBBBBBLKBBBBBBBBBBBBL",
-    "C3 ..........DC.......... 4D",
-    "C GAAH.GAAAH.DC.GAAAH.GAAH D",
+    "C............DC............D",
+    "C.GAAH.GAAAH.DC.GAAAH.GAAH.D",
     "C.DXXC.DXXXC.DC.DXXXC.DXXC.D",
     "C.EBBF.EBBBF.EF.EBBBF.EBBF.D",
     "C..........................D",
@@ -122,14 +131,14 @@ FIELD_MAP = [
     "C......DC....DC....DC......D",
     "IAAAAH.DIAAH DC GAAJC.GAAAAJ",
     "     C.DKBBF EF EBBLC.D     ",
-    "     C.DC5        6DC.D     ",
+    "     C.DC          DC.D     ",
     "     C.DC QMM--MMR DC.D     ",
-    "BBBBBF.EF PX    XO EF.EBBBBB",
-    "      .   PX    XO   .      ",
+    "BBBBBF.EF PX     O EF.EBBBBB",
+    "      .   PXX  XXO   .      ",
     "AAAAAH.GH PXXXXXXO GH.GAAAAA",
     "     C.DC SNNNNNNT DC.D     ",
     "     C.DC          DC.D     ",
-    "     C.DC7GAAAAAAH8DC.D     ",
+    "     C.DC GAAAAAAH DC.D     ",
     "KBBBBF.EF EBBLKBBF EF.EBBBBL",
     "C............DC............D",
     "C.GAAH.GAAAH.DC.GAAAH.GAAH.D",
@@ -139,8 +148,8 @@ FIELD_MAP = [
     "KBF.EF.DC.EBBLKBBF.DC.EF.EBL",
     "C......DC....DC....DC......D",
     "C.GAAAAJIAAH.DC.GAAJIAAAAH.D",
-    "C EBBBBBBBBF.EF.EBBBBBBBBF D",
-    "C1 ...................... 2D",
+    "C.EBBBBBBBBF.EF.EBBBBBBBBF.D",
+    "C..........................D",
     "IAAAAAAAAAAAAAAAAAAAAAAAAAAF",
 ]
 # endregion FIELD
@@ -193,3 +202,15 @@ GHOSTS_SPRITE_LIB = {
     'EYES_FR_2': GHOSTS_DIR + 'eyes6.png',
 }
 # endregion CHARACTERS
+
+# region Characteristics tables
+
+WAITING_TIME = {GhostType.BLINKY: 0,
+                GhostType.PINKY: 100,
+                GhostType.INKY: 7000,
+                GhostType.CLYDE: 17000}
+SC_CH_TURNS = { 'LVL1': [7000, 20000, 7000, 20000, 5000, 20000, 5000, 999999999],
+                'LVL2-4': [7000, 20000, 7000, 20000, 5000, 1033, 16, 999999999],
+                'LVL5+': [5000, 20000, 5000, 20000, 5000, 1037, 16, 999999999]}
+
+# endregion Characteristics tables

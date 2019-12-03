@@ -41,6 +41,7 @@ class Game:
         self.start_game = False
         self.lives = PACMAN_MAX_LIVES
         self.scores = 0
+        self.level = 1
 
         self.objects = []
         self.create_game_objects()
@@ -144,11 +145,15 @@ class Game:
         del self.menu
 
         # Ready
-        self.game_update()  # Need to "ready screen"
+        self.screen.fill(BG_COLOR)  # Заливка цветом
+        self.process_draw()  # Need to "ready screen"
         self.display_center_text('READY!', Color.YELLOW)
-        self.mixer.play_sound('GHOST')
-        while self.mixer.is_busy():
+        ready_time = pygame.time.get_ticks()
+        self.mixer.play_sound('START')
+        while pygame.time.get_ticks() - ready_time < self.mixer.sounds['START'].get_length() * 1000:
             self.process_events()  # just wait
+            for ghost in self.ghosts:
+                ghost.reset()
             pass
 
         # If user click START - start game
