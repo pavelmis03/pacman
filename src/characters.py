@@ -96,6 +96,10 @@ class Ghost(DrawableObject):
         if self.state not in [GhostState.eaten, GhostState.waiting]:
             self.state = GhostState.frightened
             self.frightened_ticks = pygame.time.get_ticks()
+            self.game_object.mixer.stop_sound('SIREN')
+            self.game_object.mixer.stop_sound('FRIGHTENING')
+            self.game_object.mixer.stop_sound('GHOST_TO_HOME')
+            self.game_object.mixer.play_sound('FRIGHTENING', 0, ad_volume=0.6)
 
     def choose_way_by_dist(self, ways: []):
         dists = []
@@ -263,6 +267,22 @@ class Ghost(DrawableObject):
     def process_event(self, event):
         pass
 
+    def try_to_turn_f_sound(self, on=False):
+        # Try to stop sound of frightening
+        someone_is_frightened = False
+        for gh in self.game_object.ghosts:
+            if gh.state == GhostState.frightened:
+                someone_is_frightened = True
+        if on:
+            if someone_is_frightened:
+                self.game_object.mixer.stop_sound('FRIGHTENING')
+                self.game_object.mixer.stop_sound('SIREN')
+                self.game_object.mixer.play_sound('FRIGHTENING', 0)
+        elif not someone_is_frightened:
+            self.game_object.mixer.stop_sound('FRIGHTENING')
+            self.game_object.mixer.stop_sound('SIREN')
+            self.game_object.mixer.play_sound('SIREN', 0)
+
     def process_logic(self):
         if self.next_state != GhostState.eaten:
             self.next_state = self.state
@@ -272,6 +292,8 @@ class Ghost(DrawableObject):
         else:
             if self.state == GhostState.waiting:
                 self.state = self.behaviour_state
+                self.game_object.mixer.stop_sound('SIREN')
+                self.game_object.mixer.play_sound('SIREN', 0)
             # Animation
             self.a_move.add_tick()
             # Set eyes and body sprites
@@ -301,6 +323,13 @@ class Ghost(DrawableObject):
                     if self.next_state == GhostState.eaten:
                         self.game_object.pacman.eat_ghost_fruit(self)
                         self.state = GhostState.eaten
+                        self.game_object.mixer.stop_sound('SIREN')
+                        self.game_object.mixer.stop_sound('FRIGHTENING')
+                        self.game_object.mixer.stop_sound('GHOST_TO_HOME')
+                        self.game_object.mixer.play_sound('GHOST_TO_HOME', 7)
+
+                        self.try_to_turn_f_sound()
+
                     elif self.next_state in [GhostState.scatter, GhostState.chase]:
                         self.state = self.behaviour_state
                         self.next_state = self.state
@@ -312,13 +341,23 @@ class Ghost(DrawableObject):
                         self.state = self.behaviour_state
                         self.frightened_ticks = 0
 
+                        self.try_to_turn_f_sound()
+
                 # Eaten state
                 elif self.state == GhostState.eaten:
                     self.speed = GHOST_SPEED * 2  # Set ghost speed
                     if self.ghost_type == GhostType.BLINKY and self.f_pos == GHOSTS_POS[GhostType.BLINKY]:
+                        self.game_object.mixer.stop_sound('GHOST_TO_HOME')
+                        self.try_to_turn_f_sound(True)
+                        self.game_object.mixer.stop_sound('SIREN')
+                        self.game_object.mixer.play_sound('SIREN', 0)
                         self.state = self.behaviour_state
                         self.next_state = self.state
                     elif self.f_pos == GHOSTS_POS[GhostType.PINKY]:
+                        self.game_object.mixer.stop_sound('GHOST_TO_HOME')
+                        self.try_to_turn_f_sound(True)
+                        self.game_object.mixer.stop_sound('SIREN')
+                        self.game_object.mixer.play_sound('SIREN', 0)
                         self.state = self.behaviour_state
                         self.next_state = self.state
                 else:
@@ -436,7 +475,7 @@ class Pacman(DrawableObject):
 
     # Eating ghost
     def eat_ghost_fruit(self, obj):
-        self.game_object.mixer.stop_all_sounds()
+        self.game_object.mixer.stop_sound('CHOMP')
         self.game_object.mixer.play_sound('GHOST' if isinstance(obj, Ghost) else 'FRUIT')
         self.game_object.scores += SCORE_FOR_GHOST
         slow_mo_ticks = pygame.time.get_ticks()  # Timer for slow mo
@@ -473,7 +512,7 @@ class Pacman(DrawableObject):
                 # DOTS
                 if not self.eating:
                     if cell.food.type == FoodType.DOT:  # Don't chomping on fruits and enj-ers
-                        self.game_object.mixer.play_sound('CHOMP', 0)
+                        self.game_object.mixer.play_sound('CHOMP', 0, ad_volume=0.5)
                         self.eating = True
                     else:
                         self.game_object.mixer.stop_sound('CHOMP')
