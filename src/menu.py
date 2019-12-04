@@ -44,7 +44,7 @@ class MainMenu:
         self.additional_text = None
         self.logo_shift = -1
         self.logo_effect_counter = 1
-        self.a_slider = Slider(game_object, 'Звуки', self.game_object.mixer.volume, -0.1, 1,
+        self.a_slider = Slider(game_object, 'Звуки', self.game_object.mixer.volume, 0, 1,
                                (SCREEN_WIDTH - 75, SCREEN_HEIGHT - 60, 150, 60))
 
         # Init font engine

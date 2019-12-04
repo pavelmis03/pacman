@@ -48,7 +48,7 @@ class Ghost(DrawableObject):
         self.g_image = self.g_lib[ghost_type]
         self.e_image = self.g_lib['EYES_LEFT']
         # Animation
-        self.a_move = Anim(['', '1'], 15)
+        self.a_move = Anim(['', '1'], 150)
 
         self.reset()
 
@@ -430,8 +430,9 @@ class Pacman(DrawableObject):
         self.pacman_img = pygame.transform.rotate(self.images['NORMAL'], -180)
         self.p_rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
         # Animations
-        self.a_eat = Anim(['NORMAL', 'OPEN', 'NORMAL', 'CLOSE'], 5)
-        self.a_death = Anim(['D' + str(i) for i in range(11)] + ['D10'] * 20, 16)
+        self.a_eat = Anim(['NORMAL', 'OPEN', 'NORMAL', 'CLOSE'], 70)
+        s_death_len = self.game_object.mixer.sounds['DEATH'].get_length() * 100
+        self.a_death = Anim(['D' + str(i) for i in range(11)] + ['D10'] * 20, int(s_death_len // 11), True)
         # Setup default variables in reset
         self.reset()
 

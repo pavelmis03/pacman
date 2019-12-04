@@ -18,7 +18,7 @@ class Food(DrawableObject):
         if str(self.fruit_type) in FRUIT_CODES:
             self.fruit_sprite = self.game_object.fruits_sprites[str(self.fruit_type)]
         # Animation for energizer food
-        self.a_nrjzer = Anim(['SHOW', 'HIDE'], 15)
+        self.a_nrjzer = Anim(['SHOW', 'HIDE'], 200)
 
     def eat_up(self):
         # FRUIT
