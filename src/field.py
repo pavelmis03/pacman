@@ -37,7 +37,7 @@ class Field(DrawableObject):
         # MAP_SIZE IS 28x31
         super().__init__(game_object)
         if not position:
-            position = Vec((SCREEN_WIDTH - cell_size * 28) // 2, 50)
+            position = Vec(0, 50)
         self.cell_size = cell_size
         self.offset = position
         self.pacman_pos = PACMAN_SPAWN_POS  # If 'decoder' find PACMAN_CODE on map, it put coordinates to this variable
@@ -58,7 +58,16 @@ class Field(DrawableObject):
     def load_map(self):
         c_map = []
         with open(MAPS_DIR + self.map_name, 'r') as file:
-            c_map = file.readlines()
+            info = file.readlines()
+            info = [row.replace('\n', '') for row in info]
+            # Blocked cells
+            tmp = [Vec(tuple(item.split(','))) for item in info[0].replace(' ', '').split(':')[1:]]
+            self.game_object.map_spec_cells = tmp
+            # Center text cell
+            tmp = Vec(tuple(info[1].split(':')[1].split(',')))
+            self.game_object.center_text_cell = tmp
+            # Map
+            c_map = info[2:]
         return c_map
 
     # Convert list of strings(MAP) to field class
@@ -79,6 +88,17 @@ class Field(DrawableObject):
                 # Pacman
                 if m_cell == PACMAN_CODE:
                     self.pacman_pos = Vec(x, y)
+                # Ghosts
+                if m_cell in list(GHOSTS_CODES.values()):
+
+                    if m_cell == GHOSTS_CODES[GhostType.BLINKY]:
+                        self.game_object.gh_start_poses[GhostType.BLINKY] = Vec(x, y)
+                    if m_cell == GHOSTS_CODES[GhostType.PINKY]:
+                        self.game_object.gh_start_poses[GhostType.PINKY] = Vec(x, y)
+                    if m_cell == GHOSTS_CODES[GhostType.INKY]:
+                        self.game_object.gh_start_poses[GhostType.INKY] = Vec(x, y)
+                    if m_cell == GHOSTS_CODES[GhostType.CLYDE]:
+                        self.game_object.gh_start_poses[GhostType.CLYDE] = Vec(x, y)
                 # Food
                 if m_cell == DOT_CODE:
                     cell.food = Food(self.game_object, self.cell_size, cell.g_pos.x, cell.g_pos.y, FoodType.DOT)
@@ -101,7 +121,7 @@ class Field(DrawableObject):
             x = (pos.x - self.offset.x) // self.cell_size
             return self.field[y][x]
         else:
-            return None
+            return self.field[0][0]
 
     # Decode food codes to Food classes and return getted list
     def get_food(self):
@@ -118,8 +138,9 @@ class Field(DrawableObject):
     # Draw door to ghosts house
     def draw_door(self, pos):
         cell = self.field[pos.y][pos.x]
-        pygame.draw.line(self.game_object.screen, Color.DOTS_COLOR, (cell.get_rect().x, cell.get_rect().y + 16),
-                         (cell.get_rect().x + cell.size, cell.get_rect().y + 16), 3)
+        pygame.draw.line(self.game_object.screen, Color.DOTS_COLOR,
+                         (cell.get_rect().x, cell.get_rect().y + CELL_SIZE * 4 // 5),
+                         (cell.get_rect().x + cell.size, cell.get_rect().y + CELL_SIZE * 4 // 5), 3)
 
     def process_draw(self):
         for y in range(len(self.field)):

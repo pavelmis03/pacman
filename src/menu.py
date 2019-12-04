@@ -45,7 +45,7 @@ class MainMenu:
         self.logo_shift = -1
         self.logo_effect_counter = 1
         self.a_slider = Slider(game_object, 'Звуки', self.game_object.mixer.volume, 0, 1,
-                               (SCREEN_WIDTH - 75, SCREEN_HEIGHT - 60, 150, 60))
+                               (size.SCREEN_WIDTH - 75, size.SCREEN_HEIGHT - 60, 150, 60))
 
         # Init font engine
         pygame.font.init()
@@ -55,7 +55,7 @@ class MainMenu:
         self.logo_rect = self.logo.get_rect()
         self.display_logo = True
 
-    def setup_elements(self, menu_names=None, menu_actions=None, x0=SCREEN_CENTER[0] // 2, y0=300):
+    def setup_elements(self, menu_names=None, menu_actions=None, x0=size.SCREEN_CENTER[0] // 2, y0=300):
         # Add menu items(buttons)
         self.menu_items = []
         for i in range(len(menu_names)):
@@ -120,8 +120,9 @@ class MainMenu:
 
         # Logo
         if self.display_logo:
-            self.game_object.screen.blit(self.logo, (SCREEN_CENTER[0] - self.logo_rect.width // 2 + self.logo_rect.x // 2,
-                                              self.logo_rect.height + self.logo_rect.y // 2))
+            self.game_object.screen.blit(self.logo,
+                                         (size.SCREEN_CENTER[0] - self.logo_rect.width // 2 + self.logo_rect.x // 2,
+                                          self.logo_rect.height + self.logo_rect.y // 2))
         # Slider
         self.a_slider.process_draw()
         pygame.display.flip()  # Double buffering

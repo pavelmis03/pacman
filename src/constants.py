@@ -34,7 +34,7 @@ class Input:
 IMAGES_DIR = 'images/'
 SOUNDS_DIR = 'sounds/'
 MENU_DIR = 'menu/'
-WINDOW_ICON_PATH = IMAGES_DIR +  'icon.png'
+WINDOW_ICON_PATH = IMAGES_DIR + 'icon.png'
 SPRITES_DIR = IMAGES_DIR + 'sprites/'
 MAP_DIR = SPRITES_DIR + 'map/'
 FRUITS_DIR = SPRITES_DIR + 'fruits/'
@@ -44,14 +44,25 @@ PACMAN_DIR = SPRITES_DIR + 'pacman/'
 # region Customization
 SHOW_GHOSTS_TARGETS = False
 MUTE_AUDIO = False
+SKIP_CUTSCENES = False
 # endregion Customization
 
-# region General
-SCREEN_SIZE = [560, 720]
-SCREEN_WIDTH = SCREEN_SIZE[0]
-SCREEN_HEIGHT = SCREEN_SIZE[1]
-SCREEN_CENTER = (SCREEN_SIZE[0] // 2, SCREEN_SIZE[1] // 2)
 
+# region General
+class SZ:
+    DEF_SCREEN_SIZE = Vec(560, 720)
+    SCREEN_SIZE = DEF_SCREEN_SIZE
+    SCREEN_WIDTH = SCREEN_SIZE.x
+    SCREEN_HEIGHT = SCREEN_SIZE.y
+    SCREEN_CENTER = (SCREEN_SIZE.x // 2, SCREEN_SIZE.y // 2)
+
+    def resize(self, size: Vec):
+        self.SCREEN_SIZE = size
+        self.SCREEN_WIDTH = size.x
+        self.SCREEN_HEIGHT = size.y
+        self.SCREEN_CENTER = (size.x // 2, size.y // 2)
+
+size = SZ()
 SCORE_FOR_DOT = 10
 SCORE_FOR_ENERGIZER = 50
 SCORE_FOR_GHOST = 200
@@ -121,21 +132,18 @@ ENERGIZER_CODE = '0'
 DOT_CODE = '.'
 GHOSTS_ENTER_CODE = '-'
 PACMAN_CODE = '@'
-CENTER_TEXT_POS = Vec(15, 17)
-GHOSTS_POS = {'BLINKY': Vec(14, 11), 'PINKY': Vec(14, 14), 'INKY': Vec(12, 14), 'CLYDE': Vec(16, 14)}
-GHOSTS_UP_BLOCKED_CELLS = [Vec(12, 11), Vec(15, 11), Vec(12, 23), Vec(15, 23)]
-HOUSE_CELLS = [Vec(13, 13), Vec(14, 13), Vec(15, 13)]
-DEFAULT_MAP_FILE = 'def_map.ini'
+GHOSTS_CODES = {'BLINKY': 'b', 'PINKY': 'p', 'INKY': 'i', 'CLYDE': 'c'}
+DEFAULT_MAP_FILE = 'google_map.ini'
 # endregion FIELD
 
 # region CHARACTERS
 FRIGHTENED_TICKS_LIMIT = 8000  # 8 seconds
 SLOW_MO_TICKS_LIMIT = 600  # 0.5 seconds
 DEATH_TICKS_LIMIT = 1900  # 1.9 seconds
-BLINKY_S_TARGET = Vec(25, -4)
+BLINKY_S_TARGET = Vec(999, -4)
 PINKY_S_TARGET = Vec(2, -4)
-INKY_S_TARGETT = Vec(27, 31)
-CLYDE_S_TARGETT = Vec(0, 31)
+INKY_S_TARGETT = Vec(999, 999)
+CLYDE_S_TARGETT = Vec(0, 999)
 PACMAN_SPAWN_POS = Vec(14, 23)
 PAC_SPRITE_LIB = {
     'OPEN': PACMAN_DIR + 'pacman1.png',

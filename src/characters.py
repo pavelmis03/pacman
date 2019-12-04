@@ -55,7 +55,7 @@ class Ghost(DrawableObject):
     def reset(self):
 
         # Get spawn pose
-        spawn = self.game_object.field.get_cell_position(GHOSTS_POS[self.ghost_type])
+        spawn = self.game_object.field.get_cell_position(self.game_object.gh_start_poses[self.ghost_type])
         self.g_rect = pygame.Rect(spawn.x, spawn.y, CELL_SIZE, CELL_SIZE)
         self.target = self.game_object.pacman.f_pos
         self.state = GhostState.waiting
@@ -103,8 +103,6 @@ class Ghost(DrawableObject):
 
     def choose_way_by_dist(self, ways: []):
         dists = []
-        if len(ways) == 0:
-            print('[ERROR]: ', self.ghost_type, self.f_pos)
         for way in ways:
             r = self.f_pos + way
             dist = ((self.target.x - r.x) ** 2 + (self.target.y - r.y) ** 2) ** 0.5
@@ -118,10 +116,11 @@ class Ghost(DrawableObject):
 
     def get_vec_of_move(self, g_type: GhostType, ways: []):
         res_way = Vec(0, 0)
-        p_pos = GHOSTS_POS[GhostType.PINKY]
+        p_pos = self.game_object.gh_start_poses[GhostType.PINKY]
+        b_pos = self.game_object.gh_start_poses[GhostType.BLINKY]
 
         # Ways where ghost can't go up
-        if self.f_pos in GHOSTS_UP_BLOCKED_CELLS:
+        if self.f_pos in self.game_object.map_spec_cells:
             if Dir.up in ways:
                 ways.remove(Dir.up)
 
@@ -130,11 +129,8 @@ class Ghost(DrawableObject):
             if self.state in [GhostState.chase, GhostState.scatter]:  # Go fast to point
                 self.target = self.game_object.pacman.f_pos if self.state == GhostState.chase else BLINKY_S_TARGET
                 res_way = self.choose_way_by_dist(ways)
-            if self.state == GhostState.frightened:
-                way = random.choice([item for item in ways if item])
-                res_way = way
             if self.state == GhostState.eaten:
-                self.target = GHOSTS_POS[GhostType.BLINKY]
+                self.target = b_pos
                 res_way = self.choose_way_by_dist(ways)
         # Calculate behavior of PINKY
         if g_type == GhostType.PINKY:
@@ -148,13 +144,10 @@ class Ghost(DrawableObject):
                 else:
                     self.target = PINKY_S_TARGET
                 res_way = self.choose_way_by_dist(ways)
-            if self.state == GhostState.frightened:
-                way = random.choice([item for item in ways if item])
-                res_way = way
         # Calculate behavior of INKY
         if g_type == GhostType.INKY:
             if self.state in [GhostState.chase, GhostState.scatter]:  # Go fast to point
-                if self.f_pos in HOUSE_CELLS:
+                if self.f_pos in [p_pos, p_pos + Vec(0, -1), p_pos + Vec(-1, 0), p_pos + Vec(-1, -1)]:
                     ways += [Dir.up]  # If inky in house, now he can exit
                 if self.state == GhostState.chase:
                     self.target = self.game_object.pacman.f_pos + self.game_object.pacman.vel * 2
@@ -170,13 +163,10 @@ class Ghost(DrawableObject):
                 else:
                     self.target = INKY_S_TARGETT
                 res_way = self.choose_way_by_dist(ways)
-            if self.state == GhostState.frightened:
-                way = random.choice([item for item in ways if item])
-                res_way = way
         # Calculate behavior of CLYDE
         if g_type == GhostType.CLYDE:
             if self.state in [GhostState.chase, GhostState.scatter]:  # Go fast to point
-                if self.f_pos in HOUSE_CELLS:
+                if self.f_pos in [p_pos, p_pos + Vec(0, -1), p_pos + Vec(-1, 0), p_pos + Vec(-1, -1)]:
                     ways += [Dir.up]  # If inky in house, now he can exit
                 if self.state == GhostState.chase:
                     if self.clyde_out_8_cells():
@@ -186,17 +176,22 @@ class Ghost(DrawableObject):
                 else:
                     self.target = CLYDE_S_TARGETT
                 res_way = self.choose_way_by_dist(ways)
-            if self.state == GhostState.frightened:
+        # Frightened state is the same for all types of ghosts
+        if self.state == GhostState.frightened:
+            if len(ways) > 0:
                 way = random.choice([item for item in ways if item])
-                res_way = way
-
+            else:
+                way = None
+            res_way = way
         # Eaten state is the same for all types of ghosts
         if self.state == GhostState.eaten and self.ghost_type != GhostType.BLINKY:
-            self.target = GHOSTS_POS[GhostType.PINKY]
-            b_pos = GHOSTS_POS[GhostType.BLINKY]
+            p_pos = self.game_object.gh_start_poses[GhostType.PINKY]
+            b_pos = self.game_object.gh_start_poses[GhostType.BLINKY]
+            self.target = p_pos
+            b_pos = b_pos
             if self.f_pos in [b_pos, b_pos + Vec(-1, 0)]:
                 ways += [Dir.down]  # Now ghost can enter the house
-            if self.f_pos in [GHOSTS_POS[GhostType.PINKY], GHOSTS_POS[GhostType.PINKY] + Vec(-1, 0)]:
+            if self.f_pos in [p_pos, p_pos + Vec(-1, 0)]:
                 ways = [Dir.up]
             res_way = self.choose_way_by_dist(ways)
 
@@ -226,19 +221,18 @@ class Ghost(DrawableObject):
 
     def check_teleportations(self):
         field_width = len(self.game_object.field.field[0]) * CELL_SIZE
-        offset_x = self.game_object.field.offset.x
-        # Check Left teleportation
-        if self.g_rect.x < offset_x:
-            self.g_rect.x = offset_x + field_width - CELL_SIZE - self.speed
-        # Check Right teleportation=
-        elif self.g_rect.right > offset_x + field_width - self.speed - 1:
-            self.g_rect.x = self.game_object.field.offset.x
-        field_height = len(self.game_object.field.field) * CELL_SIZE
         offset_y = self.game_object.field.offset.y
         # Check Left teleportation
+        if self.g_rect.x < 0:
+            self.g_rect.x = size.SCREEN_WIDTH - CELL_SIZE - self.speed
+        # Check Right teleportation=
+        elif self.g_rect.right > size.SCREEN_WIDTH - self.speed - 1:
+            self.g_rect.x = 0
+        field_height = len(self.game_object.field.field) * CELL_SIZE
+        # Check Up teleportation
         if self.g_rect.y < offset_y:
             self.g_rect.y = offset_y + field_height - CELL_SIZE - self.speed
-        # Check Right teleportation=
+        # Check Bottom teleportation=
         elif self.g_rect.bottom > offset_y + field_height - self.speed - 1:
             self.g_rect.y = self.game_object.field.offset.y
 
@@ -278,6 +272,9 @@ class Ghost(DrawableObject):
                 self.game_object.mixer.stop_sound('FRIGHTENING')
                 self.game_object.mixer.stop_sound('SIREN')
                 self.game_object.mixer.play_sound('FRIGHTENING', 0)
+            else:
+                self.game_object.mixer.stop_sound('SIREN')
+                self.game_object.mixer.play_sound('SIREN', 0)
         elif not someone_is_frightened:
             self.game_object.mixer.stop_sound('FRIGHTENING')
             self.game_object.mixer.stop_sound('SIREN')
@@ -315,6 +312,11 @@ class Ghost(DrawableObject):
                 if GhostState.frightened in [self.state]:  # If hit pacman under energizer, pacman eat ghost
                     self.next_state = GhostState.eaten
                 if self.state in [GhostState.chase, GhostState.scatter]:
+                    for ghost in self.game_object.ghosts:  # There was a bug with frightened ghosts in the house
+                        ghost.state = GhostState.scatter
+                        ghost.set_body()
+                        ghost.set_eyes()
+                        ghost.process_draw()
                     self.game_object.pacman.kill()
             # Ghost on center
             if self.check_crit_pos():
@@ -346,18 +348,16 @@ class Ghost(DrawableObject):
                 # Eaten state
                 elif self.state == GhostState.eaten:
                     self.speed = GHOST_SPEED * 2  # Set ghost speed
-                    if self.ghost_type == GhostType.BLINKY and self.f_pos == GHOSTS_POS[GhostType.BLINKY]:
+                    p_pos = self.game_object.gh_start_poses[GhostType.PINKY]
+                    b_pos = self.game_object.gh_start_poses[GhostType.BLINKY]
+                    if self.ghost_type == GhostType.BLINKY and self.f_pos == b_pos:
                         self.game_object.mixer.stop_sound('GHOST_TO_HOME')
                         self.try_to_turn_f_sound(True)
-                        self.game_object.mixer.stop_sound('SIREN')
-                        self.game_object.mixer.play_sound('SIREN', 0)
                         self.state = self.behaviour_state
                         self.next_state = self.state
-                    elif self.f_pos == GHOSTS_POS[GhostType.PINKY]:
+                    elif self.f_pos == p_pos:
                         self.game_object.mixer.stop_sound('GHOST_TO_HOME')
                         self.try_to_turn_f_sound(True)
-                        self.game_object.mixer.stop_sound('SIREN')
-                        self.game_object.mixer.play_sound('SIREN', 0)
                         self.state = self.behaviour_state
                         self.next_state = self.state
                 else:
@@ -377,7 +377,10 @@ class Ghost(DrawableObject):
                         Dir.right if not f[pos.y][pos.x + 1].is_wall and pos + Dir.right != self.old_f_pos else None]
                 ways = [item for item in ways if item is not None]
                 way = self.get_vec_of_move(self.ghost_type, ways)
-                self.vel = way
+                if way:
+                    self.vel = way
+                else:
+                    self.vel *= -1
 
             self.move_to_target()
 
@@ -450,14 +453,13 @@ class Pacman(DrawableObject):
         self.eating = False
 
     def check_teleportations(self):
-        field_width = len(self.game_object.field.field[0]) * CELL_SIZE
         offset_x = self.game_object.field.offset.x
         # Check Left teleportation
-        if self.p_rect.x < offset_x:
-            self.p_rect.x = offset_x + field_width - CELL_SIZE - self.speed
+        if self.p_rect.x < 0:
+            self.p_rect.x = size.SCREEN_WIDTH - CELL_SIZE - self.speed
         # Check Right teleportation=
-        elif self.p_rect.right > offset_x + field_width - self.speed - 1:
-            self.p_rect.x = self.game_object.field.offset.x
+        elif self.p_rect.right > size.SCREEN_WIDTH - self.speed - 1:
+            self.p_rect.x = 0
 
     # Check collision rect of pacman with other rext
     def check_collision_with(self, other: pygame.Rect):

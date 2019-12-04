@@ -1,4 +1,6 @@
 import sys
+from cmath import inf
+
 import pygame
 from os import environ
 
@@ -20,6 +22,8 @@ class Game:
     fruits_sprites: []
     pacman_sprites: []
     ghosts_sprites: []
+    map_spec_cells: []
+    gh_start_poses: {}
     menu: MainMenu
     hud: HUD
     mixer: SoundMixer
@@ -28,33 +32,56 @@ class Game:
     inky: Ghost
     clyde: Ghost
     pacman: Pacman
+    lives: int
+    scores: int
     change_level: bool
+    game_over: bool
+    start_game: bool
+    center_text_cell: Vec
 
     # endregion Prototypes of variables
 
-    def __init__(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT):
+    def __init__(self, width=size.DEF_SCREEN_SIZE.x, height=size.DEF_SCREEN_SIZE.y):
         self.width = width
         self.height = height
         self.size = [width, height]
         self.library_init()
         self.init_sprite_libs()
         # Default variables
-        self.game_over = False
-        self.start_game = False
         self.current_map = DEFAULT_MAP_FILE
 
-        self.lives = PACMAN_MAX_LIVES
-        self.scores = 0
         self.level = 1
 
         self.reset()
-        self.create_game_objects()
 
-    def reset(self):
+    def reset(self, diplay_menu=True):
+        self.game_over = False
+        self.start_game = False
+
+        # Display main menu
+        if diplay_menu:
+            # Start Main menu First
+            self.init_menu()
+
+            # Start menu loop
+            while not self.start_game:
+                self.menu.menu_loop()
+            del self.menu
+        print('Your level: ', self.level)
+        # Setup vars
+        self.lives = PACMAN_MAX_LIVES
+        self.scores = 0
         self.objects = []
+        self.gh_start_poses = {'BLINKY': Vec(999), 'PINKY': Vec(999), 'INKY': Vec(999), 'CLYDE': Vec(999)}
+        self.map_spec_cells = []
+        self.create_game_objects()
         self.change_level = False
+        self.main_loop()
 
     def init_menu(self):
+        # Set menu resolution
+        size.resize(Vec(size.DEF_SCREEN_SIZE.x, size.DEF_SCREEN_SIZE.y))
+        pygame.display.set_mode((size.DEF_SCREEN_SIZE.x, size.DEF_SCREEN_SIZE.y))
         # Play menu default music
         self.mixer.play_sound(random.choice(['MENU1', 'MENU2', 'MENU3']), 0)
 
@@ -67,8 +94,12 @@ class Game:
 
     def create_game_objects(self):
         # Create hud, food, field
-        self.hud = HUD(self)
         self.field = Field(self, CELL_SIZE, l_map=self.current_map)
+        size.resize(Vec(CELL_SIZE * len(self.field.field[0]),
+                         (CELL_SIZE * len(self.field.field) + 100)))
+        pygame.display.set_mode((size.SCREEN_WIDTH, size.SCREEN_HEIGHT))
+
+        self.hud = HUD(self)
         self.food = self.field.get_food()
         # Create pacman and ghosts
         pac_pos = self.field.get_cell_position(self.field.pacman_pos)
@@ -138,7 +169,7 @@ class Game:
     def display_center_text(self, text, color, flip=True):
         font = pygame.font.Font(FONT_PATH, SCORES_HUD_FONT_SIZE)
         s_text = font.render(text, 1, color)
-        pos = self.field.get_cell_position(CENTER_TEXT_POS)
+        pos = self.field.get_cell_position(self.center_text_cell)
         half_len_text = SCORES_HUD_FONT_SIZE * len(text) // 2
         self.screen.blit(s_text, (pos.x - half_len_text, pos.y))
         if flip:
@@ -169,13 +200,6 @@ class Game:
                 ghost.reset()
 
     def main_loop(self):
-        # Start Main menu First
-        self.init_menu()
-
-        # Start menu loop
-        while not self.start_game:
-            self.menu.menu_loop()
-        del self.menu
 
         # Draw Ready text and wait delay before start game
         self.display_ready_screen()
@@ -186,11 +210,14 @@ class Game:
 
         # Change level
         if self.change_level:
-            self.disply_win_screen()
+            self.display_win_screen()
             self.level += 1
-            self.reset()
+            self.reset(False)
         if self.game_over:
             self.display_lose_screen()
+            self.level = 1
+            self.reset(True)
+        print('BUG')
 
     def game_update(self):
         self.mixer.process_query_of_sounds()  # need to process the query of sounds if it used
@@ -206,15 +233,23 @@ class Game:
 
     def display_lose_screen(self):
         print('YOU LOSE(')
+        self.mixer.stop_all_sounds()
+        # Some delay (black field)
         wait_time = pygame.time.get_ticks()
         while pygame.time.get_ticks() - wait_time < 1000:
+            self.screen.fill(BG_COLOR)
+            pygame.display.flip()
             for event in pygame.event.get():  # Обработка всех событий
                 if event.type == pygame.QUIT:  # Обработка события выхода
                     print('YOU CLOSE PACMAN!')
                     sys.exit(0)
 
-    def disply_win_screen(self):
-        print('YOU WIN')
+        # Set menu resolution
+        size.resize(Vec(size.DEF_SCREEN_SIZE.x, size.DEF_SCREEN_SIZE.y))
+        pygame.display.set_mode((size.DEF_SCREEN_SIZE.x, size.DEF_SCREEN_SIZE.y))
+
+    def display_win_screen(self):
+        print('You win')
         # Some delay (pacman and field is visible)
         self.mixer.stop_all_sounds()
         delay_time = pygame.time.get_ticks()
@@ -225,59 +260,76 @@ class Game:
             self.hud.process_draw()  # Рисуем HUD
             if pygame.time.get_ticks() - delay_time > 400:
                 pygame.display.flip()  # Флипаем экран если прошла небольшая задержка
-        # Play music
-        self.mixer.play_sound('CUTSCENE', 2)
-        # Play cutscene Ghost > Pacman
-        pacman = Pacman(self, 0, 10)
-        blinky = Ghost(self, GhostType.BLINKY)
-        pacman.p_rect.right = SCREEN_WIDTH + 20
-        blinky.g_rect.right = pacman.p_rect.right + blinky.g_rect.width + pacman.p_rect.width + 20
-        pacman.p_rect.centery = SCREEN_CENTER[1]
-        blinky.g_rect.centery = pacman.p_rect.centery
-        cutscene_time = pygame.time.get_ticks()
-        while pygame.time.get_ticks() - cutscene_time < self.mixer.sounds['CUTSCENE'].get_length() * 1000:
-            self.screen.fill(BG_COLOR)
-            # FAKE PACMAN
-            pacman.a_eat.add_tick()
-            pacman.p_rect.x += Dir.left.x
-            pacman.pacman_img = self.pacman_sprites[pacman.a_eat.curr_sprite]  # Переключаем спрайт
-            pacman.pacman_img = pygame.transform.rotate(pacman.images[pacman.a_eat.curr_sprite], 180)
-            pacman.process_draw()
-            # FAKE GHOST
-            blinky.a_move.add_tick()
-            blinky.set_body()
-            blinky.g_rect.x += Dir.left.x
-            blinky.process_draw()
-            pygame.display.flip()
-            pygame.time.wait(SCREEN_RESPONSE * 2)  # Ждать SCREEN_RESPONCE миллисекунд
-        # Play cutscene Pacman > Ghost
-        pacman = Pacman(self, 0, 10)
-        pacman.p_rect = pygame.transform.scale2x(pacman.images[pacman.a_eat.curr_sprite]).get_rect()
-        blinky = Ghost(self, GhostType.BLINKY)
-        pacman.p_rect.right = - pacman.p_rect.width // 2
-        blinky.g_rect.right = pacman.p_rect.right + blinky.g_rect.width + pacman.p_rect.width // 10
-        pacman.p_rect.centery = SCREEN_CENTER[1]
-        blinky.g_rect.centery = pacman.p_rect.centery
-        cutscene_time = pygame.time.get_ticks()
-        while pygame.time.get_ticks() - cutscene_time < self.mixer.sounds['CUTSCENE'].get_length() * 1000:
-            self.screen.fill(BG_COLOR)
-            # FAKE PACMAN
-            pacman.a_eat.add_tick()
-            pacman.p_rect.x += Dir.right.x
-            pacman.pacman_img = self.pacman_sprites[pacman.a_eat.curr_sprite]  # Переключаем спрайт
-            pacman.pacman_img = pygame.transform.scale2x(pacman.images[pacman.a_eat.curr_sprite])
-            pacman.process_draw()
-            # FAKE GHOST
-            blinky.vel = Dir.right
-            blinky.a_move.add_tick()
-            blinky.state = GhostState.frightened
-            blinky.set_body()
-            blinky.set_eyes()
-            blinky.g_rect.x += Dir.right.x
-            blinky.process_draw()
-            pygame.display.flip()
-            pygame.time.wait(SCREEN_RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
-            pygame.display.flip()
+
+        # Set menu resolution
+        size.resize(Vec(size.DEF_SCREEN_SIZE.x, size.DEF_SCREEN_SIZE.y))
+        pygame.display.set_mode((size.DEF_SCREEN_SIZE.x, size.DEF_SCREEN_SIZE.y))
+
+        if not SKIP_CUTSCENES:
+            # Play music
+            self.mixer.play_sound('CUTSCENE', 2)
+
+            # Play cutscene Ghost > Pacman
+            pacman = Pacman(self, 0, 10)
+            blinky = Ghost(self, GhostType.BLINKY)
+            pacman.p_rect.right = size.SCREEN_WIDTH + 20
+            blinky.g_rect.right = pacman.p_rect.right + blinky.g_rect.width + pacman.p_rect.width + 30
+            pacman.p_rect.centery = size.SCREEN_CENTER[1]
+            blinky.g_rect.centery = pacman.p_rect.centery
+            b_speed = 0
+            cutscene_time = pygame.time.get_ticks()
+            while pygame.time.get_ticks() - cutscene_time < self.mixer.sounds['CUTSCENE'].get_length() * 1000:
+                self.screen.fill(BG_COLOR)
+                # FAKE PACMAN
+                pacman.a_eat.add_tick()
+                pacman.p_rect.x += Dir.left.x
+                pacman.pacman_img = self.pacman_sprites[pacman.a_eat.curr_sprite]  # Переключаем спрайт
+                pacman.pacman_img = pygame.transform.rotate(pacman.images[pacman.a_eat.curr_sprite], 180)
+                pacman.process_draw()
+                # FAKE GHOST
+                blinky.a_move.add_tick()
+                blinky.set_body()
+                b_speed += 1
+                blinky.g_rect.x += Dir.left.x - (1 if b_speed % 30 == 0 else 0)
+                blinky.process_draw()
+                pygame.display.flip()
+                pygame.time.wait(SCREEN_RESPONSE * 2)  # Ждать SCREEN_RESPONCE миллисекунд
+
+            # Play cutscene Pacman > Ghost
+            pacman = Pacman(self, 0, 10)
+            pacman.p_rect = pygame.transform.scale2x(pacman.images[pacman.a_eat.curr_sprite]).get_rect()
+            blinky = Ghost(self, GhostType.BLINKY)
+            pacman.p_rect.right = - pacman.p_rect.width * 2
+            blinky.g_rect.right = pacman.p_rect.right + blinky.g_rect.width + pacman.p_rect.width
+            pacman.p_rect.centery = size.SCREEN_CENTER[1]
+            blinky.g_rect.centery = pacman.p_rect.centery
+            p_speed = 0
+            cutscene_time = pygame.time.get_ticks()
+            while pygame.time.get_ticks() - cutscene_time < self.mixer.sounds['CUTSCENE'].get_length() * 1000:
+                self.screen.fill(BG_COLOR)
+                # FAKE PACMAN
+                pacman.a_eat.add_tick()
+                p_speed += 1
+                pacman.p_rect.x += Dir.right.x + (1 if p_speed % 10 == 0 else 0)
+                pacman.pacman_img = self.pacman_sprites[pacman.a_eat.curr_sprite]  # Переключаем спрайт
+                pacman.pacman_img = pygame.transform.scale2x(pacman.images[pacman.a_eat.curr_sprite])
+                pacman.process_draw()
+                # FAKE GHOST
+                blinky.vel = Dir.right
+                blinky.a_move.add_tick()
+                blinky.state = GhostState.frightened
+                blinky.set_body()
+                blinky.set_eyes()
+                blinky.g_rect.x += Dir.right.x
+                blinky.process_draw()
+                pygame.display.flip()
+                pygame.time.wait(SCREEN_RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
+                pygame.display.flip()
+        # Some delay (black field)
+        delay_time = pygame.time.get_ticks()
+        while pygame.time.get_ticks() - delay_time < 1500:  # 1.5 sec
+            self.screen.fill(BG_COLOR)  # Заливка цветом
+            pygame.display.flip()  # Флипаем экран
 
     def process_logic(self):
         self.screen.fill(BG_COLOR)  # Заливка цветом для корректного отображения всех элементов
@@ -287,7 +339,7 @@ class Game:
             item.process_logic()
 
         # Обработка общей логики игры
-        if len(self.food) == 0:
+        if len(self.food) == 244:
             self.change_level = True
 
     def process_events(self):
