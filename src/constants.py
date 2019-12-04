@@ -133,7 +133,7 @@ DOT_CODE = '.'
 GHOSTS_ENTER_CODE = '-'
 PACMAN_CODE = '@'
 GHOSTS_CODES = {'BLINKY': 'b', 'PINKY': 'p', 'INKY': 'i', 'CLYDE': 'c'}
-DEFAULT_MAP_FILE = 'google_map.ini'
+DEFAULT_MAP_FILE = 'def_map.ini'
 # endregion FIELD
 
 # region CHARACTERS

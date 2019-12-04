@@ -37,6 +37,7 @@ class Game:
     change_level: bool
     game_over: bool
     start_game: bool
+    current_map: str
     center_text_cell: Vec
 
     # endregion Prototypes of variables
@@ -48,8 +49,6 @@ class Game:
         self.library_init()
         self.init_sprite_libs()
         # Default variables
-        self.current_map = DEFAULT_MAP_FILE
-
         self.level = 1
 
         self.reset()
@@ -135,9 +134,9 @@ class Game:
 
         # Load game config
         with open(CONFIG_PATH, 'r') as conf:
-            c_lines = conf.readlines()
-            self.mixer.volume = float(c_lines[0].split(':')[1])  # Load music volume
-            self.current_map = str(c_lines[1].split(':')[1])  # Load current map
+            c_lines = [row.replace('\n', '') for row in conf.readlines()]
+            self.mixer.volume = float(c_lines[0].replace(' ', '').split(':')[1])  # Load music volume
+            self.current_map = str(c_lines[1].replace(' ', '').split(':')[1])  # Load current map
 
     def init_sprite_libs(self):
         # Load all map sprite library
@@ -339,7 +338,7 @@ class Game:
             item.process_logic()
 
         # Обработка общей логики игры
-        if len(self.food) == 244:
+        if len(self.food) == 0:
             self.change_level = True
 
     def process_events(self):
@@ -357,3 +356,7 @@ class Game:
             conf.write('MUSIC_VOLUME : {}'.format(self.mixer.volume))
             # Save current map
             conf.write('\nMAP : {}'.format(self.current_map if self.current_map else DEFAULT_MAP_FILE))
+            # Wrie comment
+            conf.write('\n#  Here you can change the name of the card on which you will play\
+(in the way and in the name should not be spaces). You can change the value of \'MUSIC_VOLUME\', \
+but this is useless as it will be overwritten when you turn IT off. Have fun :)')
