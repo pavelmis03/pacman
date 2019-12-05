@@ -45,7 +45,7 @@ PACMAN_DIR = SPRITES_DIR + 'pacman/'
 # region Customization
 SHOW_GHOSTS_TARGETS = False
 MUTE_AUDIO = False
-SKIP_CUTSCENES = True
+SKIP_CUTSCENES = False
 # endregion Customization
 
 
