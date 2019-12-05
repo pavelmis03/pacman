@@ -322,6 +322,8 @@ class Ghost(DrawableObject):
                 if self.state in [GhostState.scatter, GhostState.chase]:
                     self.state = self.behaviour_state
                     self.next_state = self.state
+            if self.state == GhostState.frightened:  # Pause counter if in frightened state
+                self.sc_change_time = pygame.time.get_ticks()
             # STATES===================================================================================
             # Hit pacman
             if self.game_object.pacman.hit_ghost(self):

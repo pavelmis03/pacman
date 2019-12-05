@@ -53,6 +53,8 @@ class Game:
         self.init_sprite_libs()
         # Default variables
         self.level = 1
+        self.fruit = None
+        self.fruit_lifetimer = 0
 
         self.reset()
 
@@ -64,6 +66,27 @@ class Game:
     def save_records(self, name):
         with open(PATH_HIGHSCORES, 'a') as records:
             records.write(str(name) + ':' + str(self.scores) + '\n')
+
+    def update_lvl_bonus(self):
+        #  Try to spawn bonus
+        if (self.eated_food == (self.eated_food + len(self.food)) * 28//100 or
+                self.eated_food == (self.eated_food + len(self.food)) * 69//100) and not self.fruit:
+            cell = self.field.field[self.center_text_cell.y][self.center_text_cell.x - 1]
+            self.fruit = Food(self, CELL_SIZE, cell.g_pos.x, cell.g_pos.y,
+                              FoodType.FRUIT, REF_TABLE[self.level]['FRUIT'])
+            cell.food = self.fruit
+            self.food.append(self.fruit)
+            self.objects.append(self.fruit)
+
+            self.fruit_lifetimer = pygame.time.get_ticks()
+            print('FRUIT SPAWNED! ' + str(self.fruit.fruit_type))
+        # Remove bonus
+        if self.fruit and pygame.time.get_ticks() - self.fruit_lifetimer > FRUIT_LIFETIME:
+            cell = self.field.field[self.center_text_cell.y][self.center_text_cell.x - 1]
+            self.food.remove(self.fruit)
+            self.objects.remove(self.fruit)
+            cell.food = None
+            self.fruit = None
 
     # INITIALIZATION METHODS
     def reset(self, hard_reset=True):
@@ -369,6 +392,9 @@ class Game:
             item.process_logic()
 
         # Обработка общей логики игры
+        # Spawn fruits
+        self.update_lvl_bonus()
+        # End level
         if len(self.food) == 0:
             self.change_level = True
 
