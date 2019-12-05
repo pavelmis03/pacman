@@ -2,10 +2,23 @@ import os
 import sys
 from os import environ
 
-from src.base_classes import DrawableObject
 from src.constants import *
-from src.field import Field
 import pygame
+
+
+class DrawableObject:
+
+    def __init__(self, game_object):
+        self.game_object = game_object
+
+    def process_event(self, event):
+        pass
+
+    def process_logic(self):
+        pass
+
+    def process_draw(self):
+        pass
 
 
 class InputBox(DrawableObject):
@@ -160,13 +173,13 @@ class LevelCreator:
                             self.map[y][-1].set_image(FRUITS_DIR + 'energizer.png')
                         if str(self.map[y][-1].code) == '@':
                             self.map[y][-1].set_image(PACMAN_DIR + 'pacman2.png')
-                        if str(self.map[y][-1].code) == '^':
+                        if str(self.map[y][-1].code) == 'b':
                             self.map[y][-1].set_image(GHOSTS_DIR + 'ghost1.png')
-                        if str(self.map[y][-1].code) == '&':
+                        if str(self.map[y][-1].code) == 'p':
                             self.map[y][-1].set_image(GHOSTS_DIR + 'ghost2.png')
-                        if str(self.map[y][-1].code) == '*':
+                        if str(self.map[y][-1].code) == 'i':
                             self.map[y][-1].set_image(GHOSTS_DIR + 'ghost3.png')
-                        if str(self.map[y][-1].code) == '(':
+                        if str(self.map[y][-1].code) == 'c':
                             self.map[y][-1].set_image(GHOSTS_DIR + 'ghost4.png')
                 self.sync_map_and_objects()
                 file.close()
@@ -205,13 +218,13 @@ class LevelCreator:
                 button.set_image(FRUITS_DIR + 'energizer.png')
             elif button.code == '@':
                 button.set_image(PACMAN_DIR + 'pacman2.png')
-            elif button.code == '^':
+            elif button.code == 'b':
                 button.set_image(GHOSTS_DIR + 'ghost1.png')
-            elif button.code == '&':
+            elif button.code == 'p':
                 button.set_image(GHOSTS_DIR + 'ghost2.png')
-            elif button.code == '*':
+            elif button.code == 'i':
                 button.set_image(GHOSTS_DIR + 'ghost3.png')
-            elif button.code == '(':
+            elif button.code == 'c':
                 button.set_image(GHOSTS_DIR + 'ghost4.png')
             else:
                 print('ERROR! Inknown map code!')
@@ -262,8 +275,8 @@ class LevelCreator:
             self.walls_btn += [btn]
         # Fruit buttons
         self.fruit_btn = []
-        for fruit_code in '.01@^&*(':
-            num = '.01@^&*('.index(fruit_code)
+        for fruit_code in '.01@bpic':
+            num = '.01@bpic'.index(fruit_code)
             btn = Button(self, Vec(60, 100 + (30 * num + 5)),
                          Vec(20, 20), Color.BLACK, Color.CYAN, code=fruit_code)
             btn.tumbler = True
@@ -275,13 +288,13 @@ class LevelCreator:
                 btn.set_image(FRUITS_DIR + 'fruit1.png')
             if fruit_code == '@':
                 btn.set_image(PACMAN_DIR + 'pacman2.png')
-            if fruit_code == '^':
+            if fruit_code == 'b':
                 btn.set_image(GHOSTS_DIR + 'ghost1.png')
-            if fruit_code == '&':
+            if fruit_code == 'p':
                 btn.set_image(GHOSTS_DIR + 'ghost2.png')
-            if fruit_code == '*':
+            if fruit_code == 'i':
                 btn.set_image(GHOSTS_DIR + 'ghost3.png')
-            if fruit_code == '(':
+            if fruit_code == 'c':
                 btn.set_image(GHOSTS_DIR + 'ghost4.png')
             self.fruit_btn += [btn]
         self.objects += self.walls_btn + self.fruit_btn
