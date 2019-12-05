@@ -4,6 +4,7 @@ from cmath import inf
 import pygame
 from os import environ
 
+from src.records_menu import RecordMenu
 from src.sound_engine import *
 from src.menu import *
 from src.hud import *
@@ -55,6 +56,16 @@ class Game:
 
         self.reset()
 
+    def change_music(self):
+        self.music_choice = ((self.music_choice + 1) % MAX_MENU_MUSIC) + 1
+        self.mixer.stop_all_sounds()
+        self.mixer.play_sound('MENU' + str(self.music_choice), 0)
+
+    def save_records(self, name):
+        with open(PATH_HIGHSCORES, 'a') as records:
+            records.write(str(name) + ':' + str(self.scores) + '\n')
+
+    # INITIALIZATION METHODS
     def reset(self, hard_reset=True):
         self.game_over = False
         self.start_game = False
@@ -82,11 +93,6 @@ class Game:
         self.create_game_objects()
         self.change_level = False
         self.main_loop()
-
-    def change_music(self):
-        self.music_choice = ((self.music_choice + 1) % MAX_MENU_MUSIC) + 1
-        self.mixer.stop_all_sounds()
-        self.mixer.play_sound('MENU' + str(self.music_choice), 0)
 
     def init_menu(self):
         # Set menu resolution
@@ -177,6 +183,7 @@ class Game:
                 pygame.transform.scale(pygame.image.load(list(GHOSTS_SPRITE_LIB.items())[i][1]),
                                        (CELL_SIZE * 2, CELL_SIZE * 2)))
 
+    # DISPLAY TEXTS
     def display_center_text(self, text, color, flip=True):
         font = pygame.font.Font(FONT_PATH, SCORES_HUD_FONT_SIZE)
         s_text = font.render(text, 1, color)
@@ -192,24 +199,7 @@ class Game:
         text_center_y = SCORES_HUD_FONT_SIZE // 2
         self.screen.blit(s_text, (c_pos.x, c_pos.y - text_center_y))
 
-    def display_ready_screen(self):
-        # Draw
-        self.screen.fill(BG_COLOR)  # Заливка цветом
-        self.process_draw()
-        self.display_center_text('READY!', Color.YELLOW)
-        # Play sound
-        self.mixer.play_sound('START')
-
-        # Waiting for the START sound to play
-        start_ticks = pygame.time.get_ticks()
-        while pygame.time.get_ticks() - start_ticks < self.mixer.sounds['START'].get_length() * 1000:
-            for event in pygame.event.get():  # Обработка события выхода
-                if event.type == pygame.QUIT:
-                    'YOU CLOSE PACMAN!'
-                    sys.exit(0)
-            for ghost in self.ghosts:
-                ghost.reset()
-
+    # UPDATES
     def main_loop(self):
 
         # Draw Ready text and wait delay before start game
@@ -226,6 +216,12 @@ class Game:
             self.reset(False)
         if self.game_over:
             self.display_lose_screen()
+            self.out_rmenu = False
+            record_menu = RecordMenu(self)
+            while self.out_rmenu == False:
+                record_menu.process_event(pygame.event.get())
+                record_menu.process_logic()
+                record_menu.process_draw()
             self.level = 1
             self.reset(True)
         print('BUG')
@@ -236,11 +232,25 @@ class Game:
         self.process_logic()
         self.process_draw()
 
-    def process_draw(self):
-        for item in self.objects:
-            item.process_draw()
-        pygame.display.flip()  # Double buffering
-        pygame.time.wait(SCREEN_RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
+    # SCREENS
+    def display_ready_screen(self):
+        # Draw
+        self.screen.fill(BG_COLOR)  # Заливка цветом
+        self.process_draw()
+        self.display_center_text('READY!', Color.YELLOW)
+        if not SKIP_CUTSCENES:
+            # Play sound
+            self.mixer.play_sound('START')
+
+            # Waiting for the START sound to play
+            start_ticks = pygame.time.get_ticks()
+            while pygame.time.get_ticks() - start_ticks < self.mixer.sounds['START'].get_length() * 1000:
+                for event in pygame.event.get():  # Обработка события выхода
+                    if event.type == pygame.QUIT:
+                        'YOU CLOSE PACMAN!'
+                        sys.exit(0)
+                for ghost in self.ghosts:
+                    ghost.reset()
 
     def display_lose_screen(self):
         print('YOU LOSE(')
@@ -342,6 +352,15 @@ class Game:
             self.screen.fill(BG_COLOR)  # Заливка цветом
             pygame.display.flip()  # Флипаем экран
 
+    # =======================================BASE METHODS=======================================
+    def process_events(self):
+        for event in pygame.event.get():  # Обработка всех событий
+            if event.type == pygame.QUIT:  # Обработка события выхода
+                print('YOU CLOSE PACMAN!')
+                sys.exit(0)
+            for item in self.objects:
+                item.process_event(event)
+
     def process_logic(self):
         self.screen.fill(BG_COLOR)  # Заливка цветом для корректного отображения всех элементов
 
@@ -353,13 +372,11 @@ class Game:
         if len(self.food) == 0:
             self.change_level = True
 
-    def process_events(self):
-        for event in pygame.event.get():  # Обработка всех событий
-            if event.type == pygame.QUIT:  # Обработка события выхода
-                print('YOU CLOSE PACMAN!')
-                sys.exit(0)
-            for item in self.objects:
-                item.process_event(event)
+    def process_draw(self):
+        for item in self.objects:
+            item.process_draw()
+        pygame.display.flip()  # Double buffering
+        pygame.time.wait(SCREEN_RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
 
     def __del__(self):
         # Save config

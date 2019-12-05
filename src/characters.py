@@ -597,7 +597,7 @@ class Pacman(DrawableObject):
             self.process_draw()  # Рисуем спрайт пакмана
             pygame.display.flip()  # Флипаем экран
 
-    # Base class methods)=============================================================================
+    # =======================================BASE METHODS=======================================
     def process_event(self, event):
         if event.type == pygame.KEYDOWN:  # Check key down
             if event.key in [Input.A_LEFT, Input.LEFT]:  # Change directory to left
