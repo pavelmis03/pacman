@@ -29,6 +29,7 @@ class Ghost(DrawableObject):
     g_rect: pygame.Rect
     target: Vec
     speed: float
+    lvl_speed: float
     state: GhostState
     next_state: GhostState
     behaviour_state: GhostState
@@ -66,7 +67,7 @@ class Ghost(DrawableObject):
         self.next_state = GhostState.waiting
         self.frightened_ticks = 0
         self.vel = Dir.left if self.ghost_type == GhostType.BLINKY else Dir.up
-        self.speed = GHOST_SPEED if self.game_object.level < 3 else nearest_divisor_of_num(GHOST_SPEED * 2, CELL_SIZE)
+        self.lvl_speed = GHOST_SPEED if self.game_object.level < 3 else GHOST_SPEED * 2
         self.f_pos = self.game_object.field.get_cell_from_position(Vec(self.g_rect.centerx, self.g_rect.centery)).f_pos
         self.waiting_time = WAITING_TIME[self.ghost_type]
         self.spawned_time = pygame.time.get_ticks()
@@ -352,7 +353,7 @@ class Ghost(DrawableObject):
                         self.next_state = self.state
                 # Frightened state
                 if self.state == GhostState.frightened:
-                    self.speed = GHOST_SPEED // 2 if GHOST_SPEED > 1 else 1  # Set ghost speed
+                    self.speed = max(self.lvl_speed // 2, 1)  # Set ghost speed
                     # Stop Frightening
                     if pygame.time.get_ticks() - self.frightened_ticks > FRIGHTENED_TICKS_LIMIT:
                         self.state = self.behaviour_state
@@ -362,7 +363,7 @@ class Ghost(DrawableObject):
 
                 # Eaten state
                 elif self.state == GhostState.eaten:
-                    self.speed = GHOST_SPEED * 2  # Set ghost speed
+                    self.speed = self.lvl_speed * 2  # Set ghost speed
                     p_pos = self.game_object.gh_start_poses[GhostType.PINKY]
                     b_pos = self.game_object.gh_start_poses[GhostType.BLINKY]
                     if self.ghost_type == GhostType.BLINKY and self.f_pos == b_pos:
@@ -376,7 +377,7 @@ class Ghost(DrawableObject):
                         self.state = self.behaviour_state
                         self.next_state = self.state
                 else:
-                    self.speed = GHOST_SPEED  # Set ghost speed
+                    self.speed = self.lvl_speed  # Set ghost speed
 
                 # Movement (Ghost on center)=====================================================================
                 cell = self.game_object.field.get_cell_from_position(Vec(self.g_rect.centerx, self.g_rect.centery))

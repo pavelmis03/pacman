@@ -55,12 +55,12 @@ class Game:
 
         self.reset()
 
-    def reset(self, diplay_menu=True):
+    def reset(self, hard_reset=True):
         self.game_over = False
         self.start_game = False
 
         # Display main menu
-        if diplay_menu:
+        if hard_reset:
             # Start Main menu First
             self.init_menu()
 
@@ -68,11 +68,14 @@ class Game:
             while not self.start_game:
                 self.menu.menu_loop()
             del self.menu
-        print('Your level: ', self.level)
+
+            # Drop mechanics variables
+            self.lives = PACMAN_MAX_LIVES
+            self.scores = 0
+        # Set window caption
+        pygame.display.set_caption('SHP Pacman, Level ' + str(self.level))
         # Setup vars
         self.eated_food = 0
-        self.lives = PACMAN_MAX_LIVES
-        self.scores = 0
         self.objects = []
         self.gh_start_poses = {'BLINKY': Vec(999), 'PINKY': Vec(999), 'INKY': Vec(999), 'CLYDE': Vec(999)}
         self.map_spec_cells = []

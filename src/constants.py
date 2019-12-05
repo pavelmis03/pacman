@@ -62,6 +62,7 @@ class SZ:
         self.SCREEN_HEIGHT = size.y
         self.SCREEN_CENTER = (size.x // 2, size.y // 2)
 
+
 size = SZ()
 SCORE_FOR_DOT = 10
 SCORE_FOR_ENERGIZER = 50
@@ -96,7 +97,6 @@ MAPS_DIR = 'maps/'
 
 # region Sound mixer constants
 DEBUG_MIXER = False
-MIXER_OFF = False
 MIXER_VOLUME = 0.5
 MAX_MENU_MUSIC = 6
 SOUNDLIB = {

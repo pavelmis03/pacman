@@ -19,7 +19,7 @@ class SoundMixer:
     # Can play sound at any time
     def play_sound(self, sound, loops_count=1, ad_volume=1):
         self.sounds[sound].set_volume(0 if MUTE_AUDIO else self.volume * ad_volume)
-        if not MIXER_OFF:
+        if not MUTE_AUDIO:
             self.sounds[sound].play(loops=loops_count - 1)  # For some reason plays 1 repeat more
         if DEBUG_MIXER:
             print("Plays sound: " + sound)
