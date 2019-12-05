@@ -98,10 +98,14 @@ MAPS_DIR = 'maps/'
 DEBUG_MIXER = False
 MIXER_OFF = False
 MIXER_VOLUME = 0.5
+MAX_MENU_MUSIC = 6
 SOUNDLIB = {
     'MENU1': SOUNDS_DIR + 'menu1.wav',
     'MENU2': SOUNDS_DIR + 'menu2.wav',
     'MENU3': SOUNDS_DIR + 'menu3.wav',
+    'MENU4': SOUNDS_DIR + 'menu4.wav',
+    'MENU5': SOUNDS_DIR + 'menu5.wav',
+    'MENU6': SOUNDS_DIR + 'menu6.wav',
     'START': SOUNDS_DIR + 'intro.wav',
     'SIREN': SOUNDS_DIR + 'siren.wav',
     'CHOMP': SOUNDS_DIR + 'chomp.wav',
@@ -140,10 +144,6 @@ DEFAULT_MAP_FILE = 'def_map.ini'
 FRIGHTENED_TICKS_LIMIT = 8000  # 8 seconds
 SLOW_MO_TICKS_LIMIT = 600  # 0.5 seconds
 DEATH_TICKS_LIMIT = 1900  # 1.9 seconds
-BLINKY_S_TARGET = Vec(999, -4)
-PINKY_S_TARGET = Vec(2, -4)
-INKY_S_TARGETT = Vec(999, 999)
-CLYDE_S_TARGETT = Vec(0, 999)
 PACMAN_SPAWN_POS = Vec(14, 23)
 PAC_SPRITE_LIB = {
     'OPEN': PACMAN_DIR + 'pacman1.png',
@@ -189,8 +189,8 @@ GHOSTS_SPRITE_LIB = {
 
 WAITING_TIME = {GhostType.BLINKY: 0,
                 GhostType.PINKY: 100,
-                GhostType.INKY: 7000,
-                GhostType.CLYDE: 17000}
+                GhostType.INKY: 99999999,
+                GhostType.CLYDE: 99999999}
 SC_CH_TURNS = { 'LVL1': [7000, 20000, 7000, 20000, 5000, 20000, 5000, 999999999],
                 'LVL2-4': [7000, 20000, 7000, 20000, 5000, 1033, 16, 999999999],
                 'LVL5+': [5000, 20000, 5000, 20000, 5000, 1037, 16, 999999999]}

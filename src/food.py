@@ -30,12 +30,14 @@ class Food(DrawableObject):
         if self.type == FoodType.ENERGIZER:
             self.game_object.mixer.play_sound('ENERGIZER')
             self.game_object.scores += SCORE_FOR_ENERGIZER
+            self.game_object.eated_food += 1
             # Set all ghosts to frightened if they aren't eaten
             for ghost in self.game_object.ghosts:
                 ghost.set_frightened_state()
         # DOT
         if self.type == FoodType.DOT:
             self.game_object.scores += SCORE_FOR_DOT
+            self.game_object.eated_food += 1
 
         # Del our instance of class from Cell class and from game list
         self.game_object.field.get_cell_from_position(Vec(self.x, self.y)).food = None

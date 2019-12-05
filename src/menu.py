@@ -1,7 +1,7 @@
 import sys
 import pygame
 from src.constants import *
-from src.ui_elements import Slider
+from src.ui_elements import *
 
 
 class UI_Button:
@@ -46,6 +46,8 @@ class MainMenu:
         self.logo_effect_counter = 1
         self.a_slider = Slider(game_object, 'Звуки', self.game_object.mixer.volume, 0, 1,
                                (size.SCREEN_WIDTH - 75, size.SCREEN_HEIGHT - 60, 150, 60))
+        self.btn_next_musix = Button(self.game_object, (size.SCREEN_WIDTH - 180, size.SCREEN_HEIGHT - 30, 20, 20),
+                                     Color.DOTS_COLOR, Color.BLACK, '>')
 
         # Init font engine
         pygame.font.init()
@@ -78,6 +80,7 @@ class MainMenu:
             self.logo_shift *= -1
         self.logo_rect.y += self.logo_shift
         self.a_slider.process_logic()
+        self.btn_next_musix.process_logic()
         self.game_object.mixer.volume = self.a_slider.val
         for sound in self.game_object.mixer.sounds:
             self.game_object.mixer.sounds[sound].set_volume(self.game_object.mixer.volume)
@@ -106,6 +109,7 @@ class MainMenu:
                 item.procedure_events(event)
             # Slider
             self.a_slider.process_event(event)
+            self.btn_next_musix.process_event(event)
 
     def process_draw(self):
         self.game_object.screen.fill(BG_COLOR)  # Заливка цветом
@@ -125,6 +129,7 @@ class MainMenu:
                                           self.logo_rect.height + self.logo_rect.y // 2))
         # Slider
         self.a_slider.process_draw()
+        self.btn_next_musix.process_draw()
         pygame.display.flip()  # Double buffering
         pygame.time.wait(SCREEN_RESPONSE)  # Ждать 10 миллисекунд
 
@@ -147,14 +152,14 @@ def menu_action_play(menu):
 
 def menu_action_controls(menu):
     menu.curr_click_act = 'CONTROLS'
-    menu.setup_elements(['НАЗАД'], ['menu_action_back(self.page)'], x0=35, y0=SCREEN_HEIGHT - 100)
+    menu.setup_elements(['НАЗАД'], ['menu_action_back(self.page)'], x0=35, y0=size.SCREEN_HEIGHT - 100)
     menu.additional_text = None
     display_data(menu, PATH_CONTROLS, 'r', True, 50, 50, 'KEY', 'VALUE')
     menu.display_logo = False
 
 
 def menu_action_highscores(menu):
-    menu.setup_elements(['НАЗАД'], ['menu_action_back(self.page)'], x0=35, y0=SCREEN_HEIGHT - 100)
+    menu.setup_elements(['НАЗАД'], ['menu_action_back(self.page)'], x0=35, y0=size.SCREEN_HEIGHT - 100)
     menu.additional_text = None
     display_data(menu, PATH_HIGHSCORES, 'r', True, 50, 50, 'NAME', 'SCORE')
     menu.display_logo = False
@@ -162,7 +167,7 @@ def menu_action_highscores(menu):
 
 def menu_action_credits(menu):
     menu.curr_click_act = 'CREDITS'
-    menu.setup_elements(['НАЗАД'], ['menu_action_back(self.page)'], x0=35, y0=SCREEN_HEIGHT - 100)
+    menu.setup_elements(['НАЗАД'], ['menu_action_back(self.page)'], x0=35, y0=size.SCREEN_HEIGHT - 100)
     menu.additional_text = None
     display_data(menu, PATH_CREDITS, 'r', False, 50, 50, '', '')
     menu.display_logo = False

@@ -21,6 +21,10 @@ class Dir:
 # Base class of Ghost
 class Ghost(DrawableObject):
     old_f_pos: Vec
+    blinky_target: Vec
+    pinky_target: Vec
+    inky_target: Vec
+    clyde_target: Vec
     f_pos: Vec
     g_rect: pygame.Rect
     target: Vec
@@ -62,10 +66,16 @@ class Ghost(DrawableObject):
         self.next_state = GhostState.waiting
         self.frightened_ticks = 0
         self.vel = Dir.left if self.ghost_type == GhostType.BLINKY else Dir.up
-        self.speed = nearest_divisor_of_num(GHOST_SPEED, CELL_SIZE)
+        self.speed = GHOST_SPEED if self.game_object.level < 3 else nearest_divisor_of_num(GHOST_SPEED * 2, CELL_SIZE)
         self.f_pos = self.game_object.field.get_cell_from_position(Vec(self.g_rect.centerx, self.g_rect.centery)).f_pos
         self.waiting_time = WAITING_TIME[self.ghost_type]
         self.spawned_time = pygame.time.get_ticks()
+
+        # Targets
+        self.blinky_target = Vec(len(self.game_object.field.field[0]) - 1, -2)
+        self.pinky_target = Vec(0, -2)
+        self.inky_target = Vec(len(self.game_object.field.field[0]) - 1, len(self.game_object.field.field) + 1)
+        self.clyde_target = Vec(0, len(self.game_object.field.field) + 1)
 
         # Find Blinky reference for inky
         self.ref_to_blinky = None
@@ -115,6 +125,7 @@ class Ghost(DrawableObject):
         return out  # Prioritets: up, left, down, right
 
     def get_vec_of_move(self, g_type: GhostType, ways: []):
+        # Positions
         res_way = Vec(0, 0)
         p_pos = self.game_object.gh_start_poses[GhostType.PINKY]
         b_pos = self.game_object.gh_start_poses[GhostType.BLINKY]
@@ -127,7 +138,7 @@ class Ghost(DrawableObject):
         # Calculate behavior of BLINKY
         if g_type == GhostType.BLINKY:
             if self.state in [GhostState.chase, GhostState.scatter]:  # Go fast to point
-                self.target = self.game_object.pacman.f_pos if self.state == GhostState.chase else BLINKY_S_TARGET
+                self.target = self.game_object.pacman.f_pos if self.state == GhostState.chase else self.blinky_target
                 res_way = self.choose_way_by_dist(ways)
             if self.state == GhostState.eaten:
                 self.target = b_pos
@@ -142,7 +153,7 @@ class Ghost(DrawableObject):
                     if self.game_object.pacman.vel == Dir.up:
                         self.target += Vec(-4, 0)
                 else:
-                    self.target = PINKY_S_TARGET
+                    self.target = self.pinky_target
                 res_way = self.choose_way_by_dist(ways)
         # Calculate behavior of INKY
         if g_type == GhostType.INKY:
@@ -161,7 +172,7 @@ class Ghost(DrawableObject):
                     else:
                         self.find_ref_to_blinky()
                 else:
-                    self.target = INKY_S_TARGETT
+                    self.target = self.inky_target
                 res_way = self.choose_way_by_dist(ways)
         # Calculate behavior of CLYDE
         if g_type == GhostType.CLYDE:
@@ -172,9 +183,9 @@ class Ghost(DrawableObject):
                     if self.clyde_out_8_cells():
                         self.target = self.game_object.pacman.f_pos
                     else:
-                        self.target = CLYDE_S_TARGETT
+                        self.target = self.clyde_target
                 else:
-                    self.target = CLYDE_S_TARGETT
+                    self.target = self.clyde_target
                 res_way = self.choose_way_by_dist(ways)
         # Frightened state is the same for all types of ghosts
         if self.state == GhostState.frightened:
@@ -189,9 +200,9 @@ class Ghost(DrawableObject):
             b_pos = self.game_object.gh_start_poses[GhostType.BLINKY]
             self.target = p_pos
             b_pos = b_pos
-            if self.f_pos in [b_pos, b_pos + Vec(-1, 0)]:
+            if self.f_pos == b_pos:
                 ways += [Dir.down]  # Now ghost can enter the house
-            if self.f_pos in [p_pos, p_pos + Vec(-1, 0)]:
+            if self.f_pos == p_pos:
                 ways = [Dir.up]
             res_way = self.choose_way_by_dist(ways)
 
@@ -285,7 +296,11 @@ class Ghost(DrawableObject):
             self.next_state = self.state
 
         if self.state == GhostState.waiting and pygame.time.get_ticks() - self.spawned_time < self.waiting_time:
-            pass
+            if self.ghost_type == GhostType.INKY and self.game_object.eated_food > 30:
+                self.state = self.behaviour_state
+            if self.ghost_type == GhostType.CLYDE and \
+                    self.game_object.eated_food > (self.game_object.eated_food + len(self.game_object.food)) // 3:
+                self.state = self.behaviour_state
         else:
             if self.state == GhostState.waiting:
                 self.state = self.behaviour_state

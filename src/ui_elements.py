@@ -18,7 +18,7 @@ class Slider(DrawableObject):
         self.holder = pygame.Surface((20, 20))
         self.holder_rect = self.holder.get_rect()
 
-        font = pygame.font.SysFont(FONT_PATH, 25)
+        font = pygame.font.Font(FONT_PATH, 15)
         self.text = font.render(title, 1, Color.WHITE)
         self.txt_rect = self.text.get_rect(center=(self.rect.width // 2, self.text.get_rect().height))
 
@@ -61,3 +61,39 @@ class Slider(DrawableObject):
                 self.val = self.mini
             if self.val > self.maxi:
                 self.val = self.maxi
+
+
+class Button(DrawableObject):
+    def __init__(self, game_object, rect, b_clr=Color.CYAN, t_clr=Color.WHITE, text=' '):
+        super().__init__(game_object)
+        # Color
+        self.b_color = b_clr
+        self.t_color = t_clr
+        # Rect
+        self.rect = pygame.Rect(rect)
+        # Text
+        self.text = text
+        self.font_size = self.rect.height * 4 // 5
+        self.font = pygame.font.Font(FONT_PATH, self.font_size)
+        self.d_text = self.font.render(self.text, 1, self.t_color)
+
+    def on_click(self):
+        self.game_object.change_music()
+
+    def process_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos[0], event.pos[1]):
+                self.on_click()
+
+    def process_draw(self):
+        # Text
+        self.d_text = self.font.render(self.text, 1, self.t_color)
+        text_rect = pygame.Rect(self.rect.centerx - self.d_text.get_width() // 2,
+                                self.rect.centery - self.d_text.get_height() // 2,
+                                self.d_text.get_width() * 2, self.d_text.get_height() * 2)
+        # Btn
+        pygame.draw.rect(self.game_object.screen, self.b_color, self.rect, 0)
+        pygame.draw.rect(self.game_object.screen, self.t_color, (self.rect.x - 1, self.rect.y - 1,
+                                                                 self.rect.width + 2, self.rect.height + 2), 2)
+        # Draw
+        self.game_object.screen.blit(self.d_text, text_rect)

@@ -34,6 +34,8 @@ class Game:
     pacman: Pacman
     lives: int
     scores: int
+    music_choice: int
+    eated_food: int
     change_level: bool
     game_over: bool
     start_game: bool
@@ -68,6 +70,7 @@ class Game:
             del self.menu
         print('Your level: ', self.level)
         # Setup vars
+        self.eated_food = 0
         self.lives = PACMAN_MAX_LIVES
         self.scores = 0
         self.objects = []
@@ -77,12 +80,18 @@ class Game:
         self.change_level = False
         self.main_loop()
 
+    def change_music(self):
+        self.music_choice = ((self.music_choice + 1) % MAX_MENU_MUSIC) + 1
+        self.mixer.stop_all_sounds()
+        self.mixer.play_sound('MENU' + str(self.music_choice), 0)
+
     def init_menu(self):
         # Set menu resolution
         size.resize(Vec(size.DEF_SCREEN_SIZE.x, size.DEF_SCREEN_SIZE.y))
         pygame.display.set_mode((size.DEF_SCREEN_SIZE.x, size.DEF_SCREEN_SIZE.y))
         # Play menu default music
-        self.mixer.play_sound(random.choice(['MENU1', 'MENU2', 'MENU3']), 0)
+        self.music_choice = random.randint(1, MAX_MENU_MUSIC)
+        self.change_music()
 
         # Start Main menu First
         self.menu = MainMenu(self)
