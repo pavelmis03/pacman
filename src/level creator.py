@@ -69,6 +69,7 @@ class Button(DrawableObject):
         self.font = pygame.font.Font(FONT_PATH, self.font_size)
         self.d_text = self.font.render(self.text, 1, self.t_color)
         self.code = code
+        self.switched = True
 
     def set_image(self, img: str):
         self.img = pygame.transform.scale(pygame.image.load(img), (self.rect.width, self.rect.height))
@@ -79,9 +80,12 @@ class Button(DrawableObject):
         self.game_object.on_button_click(self)
 
     def process_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN or pygame.mouse.get_pressed()[0] and not self.switched:
             if self.rect.collidepoint(event.pos[0], event.pos[1]):
                 self.on_click()
+                self.switched = True
+            else:
+                self.switched = False
 
     def process_draw(self):
         self.d_text = self.font.render(self.text, 1, self.t_color)
