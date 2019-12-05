@@ -26,6 +26,7 @@ class Food(DrawableObject):
             self.game_object.mixer.play_sound('FRUIT')
             self.game_object.scores += SCORE_FOR_FRUIT[self.fruit_type]
             self.game_object.pacman.eat_ghost_fruit(self)
+            self.game_object.fruit = None  # Delete fruit ref
         # ENERGIZER
         if self.type == FoodType.ENERGIZER:
             self.game_object.mixer.play_sound('ENERGIZER')
@@ -65,7 +66,6 @@ class Food(DrawableObject):
         self.a_nrjzer.add_tick()
 
     def process_draw(self):
-        # Почему-то создаются копии всей еды на карте, скорее всего это связанно с конструктором копирования
         if self in self.game_object.food:
             if self.type == FoodType.DOT:
                 self.draw_dot()
