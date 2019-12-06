@@ -53,7 +53,7 @@ class MainMenu:
         pygame.font.init()
         self.font_menu = pygame.font.Font(FONT_PATH, TITLE_SIZE)
         self.menu_items = []
-        self.logo = pygame.image.load(PATH_LOGO);
+        self.logo = pygame.image.load(PATH_LOGO)
         self.logo_rect = self.logo.get_rect()
         self.display_logo = True
 

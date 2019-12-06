@@ -37,7 +37,7 @@ class Field(DrawableObject):
         # MAP_SIZE IS 28x31
         super().__init__(game_object)
         if not position:
-            position = Vec(0, 50)
+            position = Vec(0, CELL_SIZE * 3)
         self.cell_size = cell_size
         self.offset = position
         self.pacman_pos = PACMAN_SPAWN_POS  # If 'decoder' find PACMAN_CODE on map, it put coordinates to this variable
@@ -54,9 +54,20 @@ class Field(DrawableObject):
         # Create map
         self.decode_map_to_field()
 
+    @staticmethod
+    def colorize_cell(cell: Cell, curr_clr, next_clr):
+        pixels = pygame.PixelArray(cell.img)
+        pixels.replace(curr_clr, next_clr)
+        cell.img = pixels.make_surface()
+
+    def colorize_field(self, curr_clr, next_clr):
+        for row in self.field:
+            for cell in row:
+                if cell.img:
+                    self.colorize_cell(cell, curr_clr, next_clr)
+
     # Loads current map from map_direction
     def load_map(self):
-        c_map = []
         with open(MAPS_DIR + self.map_name, 'r') as file:
             info = file.readlines()
             info = [row.replace('\n', '') for row in info]

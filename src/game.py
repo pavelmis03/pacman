@@ -1,5 +1,4 @@
 import sys
-from cmath import inf
 
 import pygame
 from os import environ
@@ -55,7 +54,6 @@ class Game:
         self.level = 1
         self.fruit = None
         self.fruit_lifetimer = 0
-
         self.reset()
 
     def change_music(self):
@@ -64,8 +62,21 @@ class Game:
         self.mixer.play_sound('MENU' + str(self.music_choice), 0)
 
     def save_records(self, name):
-        with open(PATH_HIGHSCORES, 'a') as records:
-            records.write(str(name) + ':' + str(self.scores) + '\n')
+        # Read
+        with open(PATH_HIGHSCORES, 'r') as records:
+            cur_table = dict()
+            for line in records.readlines():
+                cur_table[line.split(':')[0]] = int(line.split(':')[1])
+        # Add
+        if list(cur_table.keys()).count(str(name)) > 0:
+            cur_table[str(name)] = self.scores if self.scores > cur_table[str(name)] else cur_table[str(name)]
+        else:
+            cur_table[str(name)] = self.scores
+
+        # Write
+        with open(PATH_HIGHSCORES, 'w') as records:
+            for rec in cur_table.items():
+                records.write(str(rec[0]) + ':' + str(rec[1]) + '\n')
 
     def update_lvl_bonus(self):
         #  Try to spawn bonus
@@ -107,7 +118,7 @@ class Game:
             self.lives = PACMAN_MAX_LIVES
             self.scores = 0
         # Set window caption
-        pygame.display.set_caption('SHP Pacman, Level ' + str(self.level))
+        pygame.display.set_caption('SHP Pacman')
         # Setup vars
         self.eated_food = 0
         self.objects = []
@@ -136,7 +147,7 @@ class Game:
         # Create hud, food, field
         self.field = Field(self, CELL_SIZE, l_map=self.current_map)
         size.resize(Vec(CELL_SIZE * len(self.field.field[0]),
-                         (CELL_SIZE * len(self.field.field) + 100)))
+                         (CELL_SIZE * len(self.field.field) + CELL_SIZE * 5)))
         pygame.display.set_mode((size.SCREEN_WIDTH, size.SCREEN_HEIGHT))
 
         self.hud = HUD(self)
@@ -250,13 +261,16 @@ class Game:
         print('BUG')
 
     def game_update(self):
-        self.mixer.process_query_of_sounds()  # need to process the query of sounds if it used
-        self.process_events()
-        self.process_logic()
-        self.process_draw()
+        if pygame.time.get_ticks() % 16 == 0:
+            self.mixer.process_query_of_sounds()  # need to process the query of sounds if it used
+            self.process_events()
+            self.process_logic()
+            self.process_draw()
 
     # SCREENS
     def display_ready_screen(self):
+        # Colorize screen
+        self.field.colorize_field(Color.WHITE, Color.DBLUE)
         # Draw
         self.screen.fill(BG_COLOR)  # Заливка цветом
         self.process_draw()
@@ -297,8 +311,18 @@ class Game:
         # Some delay (pacman and field is visible)
         self.mixer.stop_all_sounds()
         delay_time = pygame.time.get_ticks()
-        while pygame.time.get_ticks() - delay_time < 1500:  # 1.5 sec
+        color_changer = True
+        while pygame.time.get_ticks() - delay_time < 2000:  # 1.5 sec
             self.screen.fill(BG_COLOR)  # Заливка цветом
+            # Ticker
+            if (pygame.time.get_ticks() // 200) % 2 == 1:
+                color_changer = False
+            if (pygame.time.get_ticks() // 200) % 2 == 0:
+                color_changer = True
+            if color_changer:
+                self.field.colorize_field(Color.WHITE, Color.DBLUE)
+            else:
+                self.field.colorize_field(Color.DBLUE, Color.WHITE)
             self.field.process_draw()  # Рисуем поле
             self.pacman.process_draw()  # Рисуем пакмана
             self.hud.process_draw()  # Рисуем HUD
@@ -323,21 +347,21 @@ class Game:
             b_speed = 0
             cutscene_time = pygame.time.get_ticks()
             while pygame.time.get_ticks() - cutscene_time < self.mixer.sounds['CUTSCENE'].get_length() * 1000:
-                self.screen.fill(BG_COLOR)
-                # FAKE PACMAN
-                pacman.a_eat.add_tick()
-                pacman.p_rect.x += Dir.left.x
-                pacman.pacman_img = self.pacman_sprites[pacman.a_eat.curr_sprite]  # Переключаем спрайт
-                pacman.pacman_img = pygame.transform.rotate(pacman.images[pacman.a_eat.curr_sprite], 180)
-                pacman.process_draw()
-                # FAKE GHOST
-                blinky.a_move.add_tick()
-                blinky.set_body()
-                b_speed += 1
-                blinky.g_rect.x += Dir.left.x - (1 if b_speed % 30 == 0 else 0)
-                blinky.process_draw()
-                pygame.display.flip()
-                pygame.time.wait(SCREEN_RESPONSE * 2)  # Ждать SCREEN_RESPONCE миллисекунд
+                if pygame.time.get_ticks() % 16 == 0:
+                    self.screen.fill(BG_COLOR)
+                    # FAKE PACMAN
+                    pacman.a_eat.add_tick()
+                    pacman.p_rect.x += Dir.left.x
+                    pacman.pacman_img = self.pacman_sprites[pacman.a_eat.curr_sprite]  # Переключаем спрайт
+                    pacman.pacman_img = pygame.transform.rotate(pacman.images[pacman.a_eat.curr_sprite], 180)
+                    pacman.process_draw()
+                    # FAKE GHOST
+                    blinky.a_move.add_tick()
+                    blinky.set_body()
+                    b_speed += 1
+                    blinky.g_rect.x += Dir.left.x - (1 if b_speed % 30 == 0 else 0)
+                    blinky.process_draw()
+                    pygame.display.flip()
 
             # Play cutscene Pacman > Ghost
             pacman = Pacman(self, 0, 10)
@@ -350,25 +374,25 @@ class Game:
             p_speed = 0
             cutscene_time = pygame.time.get_ticks()
             while pygame.time.get_ticks() - cutscene_time < self.mixer.sounds['CUTSCENE'].get_length() * 1000:
-                self.screen.fill(BG_COLOR)
-                # FAKE PACMAN
-                pacman.a_eat.add_tick()
-                p_speed += 1
-                pacman.p_rect.x += Dir.right.x + (1 if p_speed % 10 == 0 else 0)
-                pacman.pacman_img = self.pacman_sprites[pacman.a_eat.curr_sprite]  # Переключаем спрайт
-                pacman.pacman_img = pygame.transform.scale2x(pacman.images[pacman.a_eat.curr_sprite])
-                pacman.process_draw()
-                # FAKE GHOST
-                blinky.vel = Dir.right
-                blinky.a_move.add_tick()
-                blinky.state = GhostState.frightened
-                blinky.set_body()
-                blinky.set_eyes()
-                blinky.g_rect.x += Dir.right.x
-                blinky.process_draw()
-                pygame.display.flip()
-                pygame.time.wait(SCREEN_RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
-                pygame.display.flip()
+                if (pygame.time.get_ticks() // 10) % 5 == 0:
+                    self.screen.fill(BG_COLOR)
+                    # FAKE PACMAN
+                    pacman.a_eat.add_tick()
+                    p_speed += 1
+                    pacman.p_rect.x += Dir.right.x + (1 if p_speed % 10 == 0 else 0)
+                    pacman.pacman_img = self.pacman_sprites[pacman.a_eat.curr_sprite]  # Переключаем спрайт
+                    pacman.pacman_img = pygame.transform.scale2x(pacman.images[pacman.a_eat.curr_sprite])
+                    pacman.process_draw()
+                    # FAKE GHOST
+                    blinky.vel = Dir.right
+                    blinky.a_move.add_tick()
+                    blinky.state = GhostState.frightened
+                    blinky.set_body()
+                    blinky.set_eyes()
+                    blinky.g_rect.x += Dir.right.x
+                    blinky.process_draw()
+                    pygame.display.flip()
+
         # Some delay (black field)
         delay_time = pygame.time.get_ticks()
         while pygame.time.get_ticks() - delay_time < 1500:  # 1.5 sec
