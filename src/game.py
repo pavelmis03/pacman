@@ -54,7 +54,6 @@ class Game:
         self.level = 1
         self.fruit = None
         self.fruit_lifetimer = 0
-
         self.reset()
 
     def change_music(self):

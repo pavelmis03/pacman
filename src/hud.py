@@ -26,7 +26,7 @@ class HUD(DrawableObject):
         self.reset()
 
     def reset(self):
-        # Title_tex
+        # Level_text
         self.title_text = self.font.render('LEVEL ' + str(self.game_object.level), 1, Color.WHITE)
         self.title_pos = self.title_text.get_rect()
         self.title_pos.centerx, self.title_pos.y = size.SCREEN_CENTER.x, 0
@@ -55,16 +55,8 @@ class HUD(DrawableObject):
     def process_logic(self):
         # Score text
         self.score_text = self.font.render(str(self.game_object.scores), 1, Color.WHITE)
-        self.score_pos = self.score_text.get_rect()
-        self.score_pos.x = CELL_SIZE * 5
-        self.score_pos.y = CELL_SIZE
 
     def process_draw(self):
-        # Update scores of pacman and position of text dependence of its length
-        map_text = self.font.render(str(self.game_object.current_map.split('.')[0]), 1, Color.WHITE)
-        map_pos = map_text.get_rect()
-        map_pos.x, map_pos.y = CELL_SIZE * 4, 0
-
         # Display on screen
         for live_obj in self.lives_hud:
             self.game_object.screen.blit(self.lives_hud_image, live_obj)

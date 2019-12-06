@@ -75,8 +75,8 @@ class Ghost(DrawableObject):
         self.spawned_time = pygame.time.get_ticks()
 
         # Targets
-        self.blinky_target = Vec(len(self.game_object.field.field[0]) - 1, -2)
-        self.pinky_target = Vec(0, -2)
+        self.blinky_target = Vec(len(self.game_object.field.field[0]) - 3, -2)
+        self.pinky_target = Vec(2, -2)
         self.inky_target = Vec(len(self.game_object.field.field[0]) - 1, len(self.game_object.field.field) + 1)
         self.clyde_target = Vec(0, len(self.game_object.field.field) + 1)
 
@@ -535,7 +535,7 @@ class Pacman(DrawableObject):
                 self.game_object.display_score_text(str(SCORE_FOR_FRUIT[obj.fruit_type]), Color.CYAN, text_pos, 15)
             # Флипаем экран
             pygame.display.flip()
-            
+
         # Add score if ghost(if fruit - scores added in food.py)
         if isinstance(obj, Ghost):
             self.game_object.scores += SCORE_FOR_GHOST[obj.eat_scores_num]
