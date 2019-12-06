@@ -6,18 +6,18 @@ from src.enums import *
 
 
 class Color:
-    BLACK = [0, 0, 0]
-    WHITE = [255, 255, 255]
-    RED = [253, 0, 0]
-    GREEN = [0, 255, 0]
-    CYAN = [0, 183, 235]
-    BLUE = [33, 33, 222]
-    DBLUE = [25, 25, 166]
-    YELLOW = [255, 255, 0]
-    DOTS_COLOR = [222, 161, 133]
-    GRAY = [40, 40, 40]
-    PINKY = [255, 203, 219]
-    ORANGE = [255, 184, 82]
+    BLACK = (0, 0, 0)
+    WHITE = (255, 255, 255)
+    RED = (253, 0, 0)
+    GREEN = (0, 255, 0)
+    CYAN = (0, 183, 235)
+    BLUE = (33, 33, 222)
+    DBLUE = (33, 33, 222)
+    YELLOW = (255, 255, 0)
+    DOTS_COLOR = (222, 161, 133)
+    GRAY = (40, 40, 40)
+    PINKY = (255, 203, 219)
+    ORANGE = (255, 184, 82)
 
 
 class Input:

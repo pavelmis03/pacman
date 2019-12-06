@@ -54,6 +54,18 @@ class Field(DrawableObject):
         # Create map
         self.decode_map_to_field()
 
+    @staticmethod
+    def colorize_cell(cell: Cell, curr_clr, next_clr):
+        pixels = pygame.PixelArray(cell.img)
+        pixels.replace(curr_clr, next_clr)
+        cell.img = pixels.make_surface()
+
+    def colorize_field(self, curr_clr, next_clr):
+        for row in self.field:
+            for cell in row:
+                if cell.img:
+                    self.colorize_cell(cell, curr_clr, next_clr)
+
     # Loads current map from map_direction
     def load_map(self):
         c_map = []

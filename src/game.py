@@ -310,8 +310,18 @@ class Game:
         # Some delay (pacman and field is visible)
         self.mixer.stop_all_sounds()
         delay_time = pygame.time.get_ticks()
-        while pygame.time.get_ticks() - delay_time < 1500:  # 1.5 sec
+        color_changer = True
+        while pygame.time.get_ticks() - delay_time < 2000:  # 1.5 sec
             self.screen.fill(BG_COLOR)  # Заливка цветом
+            # Ticker
+            if (pygame.time.get_ticks() // 200) % 2 == 1:
+                color_changer = False
+            if (pygame.time.get_ticks() // 200) % 2 == 0:
+                color_changer = True
+            if color_changer:
+                self.field.colorize_field(Color.WHITE, Color.DBLUE)
+            else:
+                self.field.colorize_field(Color.DBLUE, Color.WHITE)
             self.field.process_draw()  # Рисуем поле
             self.pacman.process_draw()  # Рисуем пакмана
             self.hud.process_draw()  # Рисуем HUD
@@ -408,7 +418,7 @@ class Game:
         # Spawn fruits
         self.update_lvl_bonus()
         # End level
-        if len(self.food) == 240:
+        if len(self.food) == 0:
             self.change_level = True
 
     def process_draw(self):
