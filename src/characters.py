@@ -34,6 +34,7 @@ class Ghost(DrawableObject):
     next_state: GhostState
     behaviour_state: GhostState
     frightened_ticks: int
+    eat_scores_num: int
     vel: Vec
     waiting_time: int
     spawned_time: int
@@ -66,6 +67,7 @@ class Ghost(DrawableObject):
         self.state = GhostState.waiting
         self.next_state = GhostState.waiting
         self.frightened_ticks = 0
+        self.eat_scores_num = 0
         self.vel = Dir.left if self.ghost_type == GhostType.BLINKY else Dir.up
         self.lvl_speed = GHOST_SPEED if self.game_object.level < 3 else GHOST_SPEED * 2
         self.f_pos = self.game_object.field.get_cell_from_position(Vec(self.g_rect.centerx, self.g_rect.centery)).f_pos
@@ -106,6 +108,7 @@ class Ghost(DrawableObject):
     def set_frightened_state(self):
         if self.state not in [GhostState.eaten, GhostState.waiting]:
             self.state = GhostState.frightened
+            self.eat_scores_num = 0
             self.frightened_ticks = pygame.time.get_ticks()
             self.game_object.mixer.stop_sound('SIREN')
             self.game_object.mixer.stop_sound('FRIGHTENING')
@@ -368,12 +371,15 @@ class Ghost(DrawableObject):
                     self.speed = self.lvl_speed * 2  # Set ghost speed
                     p_pos = self.game_object.gh_start_poses[GhostType.PINKY]
                     b_pos = self.game_object.gh_start_poses[GhostType.BLINKY]
+                    # Ghost in house
                     if self.ghost_type == GhostType.BLINKY and self.f_pos == b_pos:
+                        self.eat_scores_num = 0
                         self.game_object.mixer.stop_sound('GHOST_TO_HOME')
                         self.try_to_turn_f_sound(True)
                         self.state = self.behaviour_state
                         self.next_state = self.state
                     elif self.f_pos == p_pos:
+                        self.eat_scores_num = 0
                         self.game_object.mixer.stop_sound('GHOST_TO_HOME')
                         self.try_to_turn_f_sound(True)
                         self.state = self.behaviour_state
@@ -503,10 +509,12 @@ class Pacman(DrawableObject):
             self.pacman_img = pygame.transform.rotate(self.images[self.a_eat.curr_sprite], -90)
 
     # Eating ghost
-    def eat_ghost_fruit(self, obj):
+    def eat_ghost_fruit(self, obj):  # Obj is a ghoast or a fruit
+        # Sounds
         self.game_object.mixer.stop_sound('CHOMP')
         self.game_object.mixer.play_sound('GHOST' if isinstance(obj, Ghost) else 'FRUIT')
-        self.game_object.scores += SCORE_FOR_GHOST
+
+        # "Animation"
         slow_mo_ticks = pygame.time.get_ticks()  # Timer for slow mo
         limit = SLOW_MO_TICKS_LIMIT if isinstance(obj, Ghost) else SLOW_MO_TICKS_LIMIT * 2 // 3  # 2/3 of normal if fru
         while pygame.time.get_ticks() - slow_mo_ticks < limit:
@@ -522,11 +530,17 @@ class Pacman(DrawableObject):
             text_pos = Vec(self.p_rect.center[0], self.p_rect.center[1])
             # Рисуем очки
             if isinstance(obj, Ghost):
-                self.game_object.display_score_text(str(SCORE_FOR_GHOST), Color.CYAN, text_pos, 15)
+                self.game_object.display_score_text(str(SCORE_FOR_GHOST[obj.eat_scores_num]), Color.CYAN, text_pos, 15)
             if isinstance(obj, Food):
                 self.game_object.display_score_text(str(SCORE_FOR_FRUIT[obj.fruit_type]), Color.CYAN, text_pos, 15)
             # Флипаем экран
             pygame.display.flip()
+            
+        # Add score if ghost(if fruit - scores added in food.py)
+        if isinstance(obj, Ghost):
+            self.game_object.scores += SCORE_FOR_GHOST[obj.eat_scores_num]
+            for ghost in [g for g in self.game_object.ghosts if g.state == GhostState.frightened]:
+                ghost.eat_scores_num = (ghost.eat_scores_num + 1) % 4
 
     # return if pacman can move (there is no wall in the direction of movement)
     def check_position(self):

@@ -1,5 +1,4 @@
 import sys
-from cmath import inf
 
 import pygame
 from os import environ
