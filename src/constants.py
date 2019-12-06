@@ -45,7 +45,7 @@ PACMAN_DIR = SPRITES_DIR + 'pacman/'
 # region Customization
 SHOW_GHOSTS_TARGETS = False
 MUTE_AUDIO = False
-SKIP_CUTSCENES = True
+SKIP_CUTSCENES = False
 # endregion Customization
 
 
@@ -55,13 +55,13 @@ class SZ:
     SCREEN_SIZE = DEF_SCREEN_SIZE
     SCREEN_WIDTH = SCREEN_SIZE.x
     SCREEN_HEIGHT = SCREEN_SIZE.y
-    SCREEN_CENTER = (SCREEN_SIZE.x // 2, SCREEN_SIZE.y // 2)
+    SCREEN_CENTER = Vec(SCREEN_SIZE.x // 2, SCREEN_SIZE.y // 2)
 
     def resize(self, size: Vec):
         self.SCREEN_SIZE = size
         self.SCREEN_WIDTH = size.x
         self.SCREEN_HEIGHT = size.y
-        self.SCREEN_CENTER = (size.x // 2, size.y // 2)
+        self.SCREEN_CENTER = Vec(size.x // 2, size.y // 2)
 
 
 size = SZ()
@@ -70,7 +70,7 @@ SCORE_FOR_ENERGIZER = 50
 SCORE_FOR_GHOST = 200
 SCORE_FOR_FRUIT = [-999, 100, 300, 500, 700, 1000, 2000, 3000, 5000]  # 0 fruit is not existing!
 PACMAN_MAX_LIVES = 3
-SCREEN_RESPONSE = 3  # ms
+SCREEN_RESPONSE = 2  # ms
 PACMAN_SPEED = 2
 GHOST_SPEED = 1
 PATH_LOGO = IMAGES_DIR + 'logo.png'
@@ -127,10 +127,6 @@ SOUNDLIB = {
 }
 # endregion Sound mixer constants
 
-# HUD
-SCORES_HUD_FONT_SIZE = 24
-PATH_LIFE = IMAGES_DIR + 'life.png'
-
 # region FIELD
 CELL_SIZE = 20
 WALL_CODES = 'ABCDEFGHIJKLMNOPQRSTX'
@@ -142,6 +138,10 @@ PACMAN_CODE = '@'
 GHOSTS_CODES = {'BLINKY': 'b', 'PINKY': 'p', 'INKY': 'i', 'CLYDE': 'c'}
 DEFAULT_MAP_FILE = 'def_map.ini'
 # endregion FIELD
+
+# HUD
+SCORES_HUD_FONT_SIZE = CELL_SIZE
+PATH_LIFE = IMAGES_DIR + 'life.png'
 
 # region CHARACTERS
 FRIGHTENED_TICKS_LIMIT = 8000  # 8 seconds
@@ -198,12 +198,13 @@ SC_CH_TURNS = {'LVL1': [7000, 20000, 7000, 20000, 5000, 20000, 5000, 999999999],
                'LVL2-4': [7000, 20000, 7000, 20000, 5000, 1033, 16, 999999999],
                'LVL5+': [5000, 20000, 5000, 20000, 5000, 1037, 16, 999999999]}
 # (100% speed = 189.393940 pixels/sec)
+FULL_SPEED = 189
 REF_TABLE = [
     {}, # ZERO LEVEL DOESN'T EXISTS
-    {'FRUIT': 1, 'P_SPEED': 100, 'G_SPEED': 75, 'FR_TIME': 6000, 'FR_G_SPEED': 50, 'FR_P_SPEED': 90, 'TUN_G_SPEE': 40},
-    {'FRUIT': 2, 'P_SPEED': 100, 'G_SPEED': 85, 'FR_TIME': 5000, 'FR_G_SPEED': 55, 'FR_P_SPEED': 95, 'TUN_G_SPEE': 45},
-    {'FRUIT': 3, 'P_SPEED': 100, 'G_SPEED': 85, 'FR_TIME': 4000, 'FR_G_SPEED': 55, 'FR_P_SPEED': 95, 'TUN_G_SPEE': 45},
-    {'FRUIT': 3, 'P_SPEED': 100, 'G_SPEED': 85, 'FR_TIME': 3000, 'FR_G_SPEED': 55, 'FR_P_SPEED': 95, 'TUN_G_SPEE': 45},
+    {'FRUIT': 1, 'P_SPEED': 80, 'G_SPEED': 75, 'FR_TIME': 6000, 'FR_G_SPEED': 50, 'FR_P_SPEED': 90, 'TUN_G_SPEE': 40},
+    {'FRUIT': 2, 'P_SPEED': 90, 'G_SPEED': 85, 'FR_TIME': 5000, 'FR_G_SPEED': 55, 'FR_P_SPEED': 95, 'TUN_G_SPEE': 45},
+    {'FRUIT': 3, 'P_SPEED': 90, 'G_SPEED': 85, 'FR_TIME': 4000, 'FR_G_SPEED': 55, 'FR_P_SPEED': 95, 'TUN_G_SPEE': 45},
+    {'FRUIT': 3, 'P_SPEED': 90, 'G_SPEED': 85, 'FR_TIME': 3000, 'FR_G_SPEED': 55, 'FR_P_SPEED': 95, 'TUN_G_SPEE': 45},
     {'FRUIT': 4, 'P_SPEED': 100, 'G_SPEED': 95, 'FR_TIME': 2000, 'FR_G_SPEED': 60, 'FR_P_SPEED': 100, 'TUN_G_SPEE': 50},
     {'FRUIT': 4, 'P_SPEED': 100, 'G_SPEED': 95, 'FR_TIME': 5000, 'FR_G_SPEED': 60, 'FR_P_SPEED': 100, 'TUN_G_SPEE': 50},
     {'FRUIT': 5, 'P_SPEED': 100, 'G_SPEED': 95, 'FR_TIME': 2000, 'FR_G_SPEED': 60, 'FR_P_SPEED': 100, 'TUN_G_SPEE': 50},
@@ -220,7 +221,7 @@ REF_TABLE = [
     {'FRUIT': 8, 'P_SPEED': 100, 'G_SPEED': 95, 'FR_TIME': 1000, 'FR_G_SPEED': 60, 'FR_P_SPEED': 100, 'TUN_G_SPEE': 50},
     {'FRUIT': 8, 'P_SPEED': 100, 'G_SPEED': 95, 'FR_TIME': 0000, 'FR_G_SPEED': 60, 'FR_P_SPEED': 100, 'TUN_G_SPEE': 50},
     {'FRUIT': 8, 'P_SPEED': 100, 'G_SPEED': 95, 'FR_TIME': 0000, 'FR_G_SPEED': 60, 'FR_P_SPEED': 100, 'TUN_G_SPEE': 50},
-    {'FRUIT': 8, 'P_SPEED': 100, 'G_SPEED': 95, 'FR_TIME': 0000, 'FR_G_SPEED': 60, 'FR_P_SPEED': 100, 'TUN_G_SPEE': 50}
+    {'FRUIT': 8, 'P_SPEED': 90, 'G_SPEED': 95, 'FR_TIME': 0000, 'FR_G_SPEED': 60, 'FR_P_SPEED': 100, 'TUN_G_SPEE': 50}
 ]
 FRUIT_LIFETIME = choice([9333, 10000, 9750])
 

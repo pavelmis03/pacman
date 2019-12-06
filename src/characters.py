@@ -471,13 +471,21 @@ class Pacman(DrawableObject):
         self.eating = False
 
     def check_teleportations(self):
-        offset_x = self.game_object.field.offset.x
+        field = self.game_object.field
+        offset_y = field.offset.y
+
         # Check Left teleportation
         if self.p_rect.x < 0:
             self.p_rect.x = size.SCREEN_WIDTH - CELL_SIZE - self.speed
         # Check Right teleportation=
         elif self.p_rect.right > size.SCREEN_WIDTH - self.speed - 1:
             self.p_rect.x = 0
+        # Check Up teleportation
+        if self.p_rect.y < offset_y:
+            self.p_rect.bottom = offset_y + len(field.field) * CELL_SIZE - self.speed - 1
+        # Check Down teleportation=
+        elif self.p_rect.bottom > offset_y + len(field.field) * CELL_SIZE - self.speed - 1:
+            self.p_rect.y = offset_y
 
     # Check collision rect of pacman with other rext
     def check_collision_with(self, other: pygame.Rect):

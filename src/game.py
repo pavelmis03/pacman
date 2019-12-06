@@ -64,8 +64,21 @@ class Game:
         self.mixer.play_sound('MENU' + str(self.music_choice), 0)
 
     def save_records(self, name):
-        with open(PATH_HIGHSCORES, 'a') as records:
-            records.write(str(name) + ':' + str(self.scores) + '\n')
+        # Read
+        with open(PATH_HIGHSCORES, 'r') as records:
+            cur_table = dict()
+            for line in records.readlines():
+                cur_table[line.split(':')[0]] = int(line.split(':')[1])
+        # Add
+        if list(cur_table.keys()).count(str(name)) > 0:
+            cur_table[str(name)] = self.scores if self.scores > cur_table[str(name)] else cur_table[str(name)]
+        else:
+            cur_table[str(name)] = self.scores
+
+        # Write
+        with open(PATH_HIGHSCORES, 'w') as records:
+            for rec in cur_table.items():
+                records.write(str(rec[0]) + ':' + str(rec[1]) + '\n')
 
     def update_lvl_bonus(self):
         #  Try to spawn bonus
@@ -107,7 +120,7 @@ class Game:
             self.lives = PACMAN_MAX_LIVES
             self.scores = 0
         # Set window caption
-        pygame.display.set_caption('SHP Pacman, Level ' + str(self.level))
+        pygame.display.set_caption('SHP Pacman')
         # Setup vars
         self.eated_food = 0
         self.objects = []
@@ -136,7 +149,7 @@ class Game:
         # Create hud, food, field
         self.field = Field(self, CELL_SIZE, l_map=self.current_map)
         size.resize(Vec(CELL_SIZE * len(self.field.field[0]),
-                         (CELL_SIZE * len(self.field.field) + 100)))
+                         (CELL_SIZE * len(self.field.field) + CELL_SIZE * 5)))
         pygame.display.set_mode((size.SCREEN_WIDTH, size.SCREEN_HEIGHT))
 
         self.hud = HUD(self)

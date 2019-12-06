@@ -37,7 +37,7 @@ class Field(DrawableObject):
         # MAP_SIZE IS 28x31
         super().__init__(game_object)
         if not position:
-            position = Vec(0, 50)
+            position = Vec(0, CELL_SIZE * 3)
         self.cell_size = cell_size
         self.offset = position
         self.pacman_pos = PACMAN_SPAWN_POS  # If 'decoder' find PACMAN_CODE on map, it put coordinates to this variable
