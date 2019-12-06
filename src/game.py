@@ -336,21 +336,21 @@ class Game:
             b_speed = 0
             cutscene_time = pygame.time.get_ticks()
             while pygame.time.get_ticks() - cutscene_time < self.mixer.sounds['CUTSCENE'].get_length() * 1000:
-                self.screen.fill(BG_COLOR)
-                # FAKE PACMAN
-                pacman.a_eat.add_tick()
-                pacman.p_rect.x += Dir.left.x
-                pacman.pacman_img = self.pacman_sprites[pacman.a_eat.curr_sprite]  # Переключаем спрайт
-                pacman.pacman_img = pygame.transform.rotate(pacman.images[pacman.a_eat.curr_sprite], 180)
-                pacman.process_draw()
-                # FAKE GHOST
-                blinky.a_move.add_tick()
-                blinky.set_body()
-                b_speed += 1
-                blinky.g_rect.x += Dir.left.x - (1 if b_speed % 30 == 0 else 0)
-                blinky.process_draw()
-                pygame.display.flip()
-                pygame.time.wait(SCREEN_RESPONSE * 2)  # Ждать SCREEN_RESPONCE миллисекунд
+                if (pygame.time.get_ticks() // 10) % 5 == 0:
+                    self.screen.fill(BG_COLOR)
+                    # FAKE PACMAN
+                    pacman.a_eat.add_tick()
+                    pacman.p_rect.x += Dir.left.x
+                    pacman.pacman_img = self.pacman_sprites[pacman.a_eat.curr_sprite]  # Переключаем спрайт
+                    pacman.pacman_img = pygame.transform.rotate(pacman.images[pacman.a_eat.curr_sprite], 180)
+                    pacman.process_draw()
+                    # FAKE GHOST
+                    blinky.a_move.add_tick()
+                    blinky.set_body()
+                    b_speed += 1
+                    blinky.g_rect.x += Dir.left.x - (1 if b_speed % 30 == 0 else 0)
+                    blinky.process_draw()
+                    pygame.display.flip()
 
             # Play cutscene Pacman > Ghost
             pacman = Pacman(self, 0, 10)
@@ -363,25 +363,25 @@ class Game:
             p_speed = 0
             cutscene_time = pygame.time.get_ticks()
             while pygame.time.get_ticks() - cutscene_time < self.mixer.sounds['CUTSCENE'].get_length() * 1000:
-                self.screen.fill(BG_COLOR)
-                # FAKE PACMAN
-                pacman.a_eat.add_tick()
-                p_speed += 1
-                pacman.p_rect.x += Dir.right.x + (1 if p_speed % 10 == 0 else 0)
-                pacman.pacman_img = self.pacman_sprites[pacman.a_eat.curr_sprite]  # Переключаем спрайт
-                pacman.pacman_img = pygame.transform.scale2x(pacman.images[pacman.a_eat.curr_sprite])
-                pacman.process_draw()
-                # FAKE GHOST
-                blinky.vel = Dir.right
-                blinky.a_move.add_tick()
-                blinky.state = GhostState.frightened
-                blinky.set_body()
-                blinky.set_eyes()
-                blinky.g_rect.x += Dir.right.x
-                blinky.process_draw()
-                pygame.display.flip()
-                pygame.time.wait(SCREEN_RESPONSE)  # Ждать SCREEN_RESPONCE миллисекунд
-                pygame.display.flip()
+                if (pygame.time.get_ticks() // 10) % 5 == 0:
+                    self.screen.fill(BG_COLOR)
+                    # FAKE PACMAN
+                    pacman.a_eat.add_tick()
+                    p_speed += 1
+                    pacman.p_rect.x += Dir.right.x + (1 if p_speed % 10 == 0 else 0)
+                    pacman.pacman_img = self.pacman_sprites[pacman.a_eat.curr_sprite]  # Переключаем спрайт
+                    pacman.pacman_img = pygame.transform.scale2x(pacman.images[pacman.a_eat.curr_sprite])
+                    pacman.process_draw()
+                    # FAKE GHOST
+                    blinky.vel = Dir.right
+                    blinky.a_move.add_tick()
+                    blinky.state = GhostState.frightened
+                    blinky.set_body()
+                    blinky.set_eyes()
+                    blinky.g_rect.x += Dir.right.x
+                    blinky.process_draw()
+                    pygame.display.flip()
+
         # Some delay (black field)
         delay_time = pygame.time.get_ticks()
         while pygame.time.get_ticks() - delay_time < 1500:  # 1.5 sec
@@ -408,7 +408,7 @@ class Game:
         # Spawn fruits
         self.update_lvl_bonus()
         # End level
-        if len(self.food) == 0:
+        if len(self.food) == 240:
             self.change_level = True
 
     def process_draw(self):
