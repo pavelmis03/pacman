@@ -68,7 +68,6 @@ class Field(DrawableObject):
 
     # Loads current map from map_direction
     def load_map(self):
-        c_map = []
         with open(MAPS_DIR + self.map_name, 'r') as file:
             info = file.readlines()
             info = [row.replace('\n', '') for row in info]

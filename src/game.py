@@ -270,6 +270,8 @@ class Game:
 
     # SCREENS
     def display_ready_screen(self):
+        # Colorize screen
+        self.field.colorize_field(Color.WHITE, Color.DBLUE)
         # Draw
         self.screen.fill(BG_COLOR)  # Заливка цветом
         self.process_draw()
