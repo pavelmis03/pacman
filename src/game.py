@@ -119,6 +119,8 @@ class Game:
             self.scores = 0
         # Set window caption
         pygame.display.set_caption('SHP Pacman')
+        # Init Timers
+        pygame.time.set_timer(GB_TIMER, REF_TABLE[self.level]['GM_SPEED'])
         # Setup vars
         self.eated_food = 0
         self.objects = []
@@ -261,14 +263,12 @@ class Game:
         print('BUG')
 
     def game_update(self):
-        self.mixer.process_query_of_sounds()  # need to process the query of sounds if it used
-        self.process_events()
-        self.process_logic()
-        self.process_draw()
-        if QUALITY == 'HIGH':
-            pygame.time.Clock().tick_busy_loop(60)
-        else:
-            pygame.time.Clock().tick(60)
+        # Process one frame
+        if len(pygame.event.get(GB_TIMER)) > 0:
+            self.mixer.process_query_of_sounds()  # need to process the query of sounds if it used
+            self.process_events()
+            self.process_logic()
+            self.process_draw()
 
     # SCREENS
     def display_ready_screen(self):
@@ -418,9 +418,9 @@ class Game:
         for item in self.objects:
             item.process_logic()
 
-        # Обработка общей логики игры
         # Spawn fruits
         self.update_lvl_bonus()
+
         # End level
         if len(self.food) == 0:
             self.change_level = True

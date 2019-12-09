@@ -59,7 +59,6 @@ class Ghost(DrawableObject):
         self.reset()
 
     def reset(self):
-
         # Get spawn pose
         spawn = self.game_object.field.get_cell_position(self.game_object.gh_start_poses[self.ghost_type])
         self.g_rect = pygame.Rect(spawn.x, spawn.y, CELL_SIZE, CELL_SIZE)
@@ -457,7 +456,7 @@ class Pacman(DrawableObject):
         self.pacman_img = pygame.transform.rotate(self.images['NORMAL'], -180)
         self.p_rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
         # Animations
-        self.a_eat = Anim(['NORMAL', 'OPEN', 'NORMAL', 'CLOSE'], 70)
+        self.a_eat = Anim(['NORMAL', 'OPEN', 'NORMAL', 'CLOSE'], 2, True)
         s_death_len = self.game_object.mixer.sounds['DEATH'].get_length() * 100
         self.a_death = Anim(['D' + str(i) for i in range(11)] + ['D10'] * 20, int(s_death_len // 11), True)
         # Setup default variables in reset
