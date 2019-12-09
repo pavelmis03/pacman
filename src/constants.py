@@ -33,7 +33,7 @@ class Input:
 # region Global Directories
 
 IMAGES_DIR = 'images/'
-SOUNDS_DIR = 'sounds/'
+SOUNDS_DIR = 'sounds/ogg/'
 MENU_DIR = 'menu/'
 WINDOW_ICON_PATH = IMAGES_DIR + 'icon.png'
 SPRITES_DIR = IMAGES_DIR + 'sprites/'
@@ -111,28 +111,29 @@ MAPS_DIR = 'maps/'
 DEBUG_MIXER = False
 MIXER_VOLUME = 0.5
 MAX_MENU_MUSIC = 6
+AUD_FORMAT = '.ogg'
 SOUNDLIB = {
-    'MENU1': SOUNDS_DIR + 'menu1.wav',
-    'MENU2': SOUNDS_DIR + 'menu2.wav',
-    'MENU3': SOUNDS_DIR + 'menu3.wav',
-    'MENU4': SOUNDS_DIR + 'menu4.wav',
-    'MENU5': SOUNDS_DIR + 'menu5.wav',
-    'MENU6': SOUNDS_DIR + 'menu6.wav',
-    'START': SOUNDS_DIR + 'intro.wav',
-    'SIREN': SOUNDS_DIR + 'siren.wav',
-    'CHOMP': SOUNDS_DIR + 'chomp.wav',
-    'ENERGIZER': SOUNDS_DIR + 'ate_ghost.wav',  # It's right
-    'DEATH': SOUNDS_DIR + 'death.wav',
-    'FRUIT': SOUNDS_DIR + 'ate_fruit.wav',
-    'GHOST': SOUNDS_DIR + 'ate_ghost.wav',
-    'CUTSCENE': SOUNDS_DIR + 'cutscene.wav',
-    'FRIGHTENING': SOUNDS_DIR + 'frightening.wav',
-    'SPRUT1': SOUNDS_DIR + 'spurt1.wav',
-    'SPRUT2': SOUNDS_DIR + 'spurt2.wav',
-    'SPRUT3': SOUNDS_DIR + 'spurt3.wav',
-    'SPRUT4': SOUNDS_DIR + 'spurt4.wav',
-    'GHOST_TO_HOME': SOUNDS_DIR + 'ghost_to_home.wav',
-    'EXTRA': SOUNDS_DIR + 'extra.wav'
+    'MENU1': SOUNDS_DIR + 'menu1' + AUD_FORMAT,
+    'MENU2': SOUNDS_DIR + 'menu2' + AUD_FORMAT,
+    'MENU3': SOUNDS_DIR + 'menu3' + AUD_FORMAT,
+    'MENU4': SOUNDS_DIR + 'menu4' + AUD_FORMAT,
+    'MENU5': SOUNDS_DIR + 'menu5' + AUD_FORMAT,
+    'MENU6': SOUNDS_DIR + 'menu6' + AUD_FORMAT,
+    'START': SOUNDS_DIR + 'intro' + AUD_FORMAT,
+    'SIREN': SOUNDS_DIR + 'siren' + AUD_FORMAT,
+    'CHOMP': SOUNDS_DIR + 'chomp' + AUD_FORMAT,
+    'ENERGIZER': SOUNDS_DIR + 'ate_ghost' + AUD_FORMAT,  # It's right
+    'DEATH': SOUNDS_DIR + 'death' + AUD_FORMAT,
+    'FRUIT': SOUNDS_DIR + 'ate_fruit' + AUD_FORMAT,
+    'GHOST': SOUNDS_DIR + 'ate_ghost' + AUD_FORMAT,
+    'CUTSCENE': SOUNDS_DIR + 'cutscene' + AUD_FORMAT,
+    'FRIGHTENING': SOUNDS_DIR + 'frightening' + AUD_FORMAT,
+    'SPRUT1': SOUNDS_DIR + 'spurt1' + AUD_FORMAT,
+    'SPRUT2': SOUNDS_DIR + 'spurt2' + AUD_FORMAT,
+    'SPRUT3': SOUNDS_DIR + 'spurt3' + AUD_FORMAT,
+    'SPRUT4': SOUNDS_DIR + 'spurt4' + AUD_FORMAT,
+    'GHOST_TO_HOME': SOUNDS_DIR + 'ghost_to_home' + AUD_FORMAT,
+    'EXTRA': SOUNDS_DIR + 'extra' + AUD_FORMAT
 }
 
 # endregion Sound mixer constants

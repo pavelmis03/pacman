@@ -330,6 +330,8 @@ class Ghost(DrawableObject):
             # Hit pacman
             if self.game_object.pacman.hit_ghost(self):
                 if GhostState.frightened in [self.state]:  # If hit pacman under energizer, pacman eat ghost
+                    self.g_rect.x = self.game_object.field.offset.x + (CELL_SIZE * self.f_pos.x)
+                    self.g_rect.y = self.game_object.field.offset.y + (CELL_SIZE * self.f_pos.y)
                     self.next_state = GhostState.eaten
                 if self.state in [GhostState.chase, GhostState.scatter]:
                     for ghost in self.game_object.ghosts:  # There was a bug with frightened ghosts in the house
