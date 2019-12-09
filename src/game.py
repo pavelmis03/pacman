@@ -261,11 +261,14 @@ class Game:
         print('BUG')
 
     def game_update(self):
-        if pygame.time.get_ticks() % REF_TABLE[self.level]['UPD_DIVIDER'] == 0:
-            self.mixer.process_query_of_sounds()  # need to process the query of sounds if it used
-            self.process_events()
-            self.process_logic()
-            self.process_draw()
+        self.mixer.process_query_of_sounds()  # need to process the query of sounds if it used
+        self.process_events()
+        self.process_logic()
+        self.process_draw()
+        if QUALITY == 'HIGH':
+            pygame.time.Clock().tick_busy_loop(60)
+        else:
+            pygame.time.Clock().tick(60)
 
     # SCREENS
     def display_ready_screen(self):

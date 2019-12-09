@@ -1,4 +1,3 @@
-import cmath
 from random import choice
 
 from src.helpers import *
@@ -31,7 +30,8 @@ class Input:
     A_DOWN = ord('Ē')
 
 
-# Global Directories
+# region Global Directories
+
 IMAGES_DIR = 'images/'
 SOUNDS_DIR = 'sounds/'
 MENU_DIR = 'menu/'
@@ -41,15 +41,20 @@ MAP_DIR = SPRITES_DIR + 'map/'
 FRUITS_DIR = SPRITES_DIR + 'fruits/'
 GHOSTS_DIR = SPRITES_DIR + 'ghosts/'
 PACMAN_DIR = SPRITES_DIR + 'pacman/'
+PATH_LOGO = IMAGES_DIR + 'logo.png'
+
+# endregion Global Directories
 
 # region Customization
+
 SHOW_GHOSTS_TARGETS = False
 MUTE_AUDIO = False
 SKIP_CUTSCENES = False
+
 # endregion Customization
 
-
 # region General
+
 class SZ:
     DEF_SCREEN_SIZE = Vec(560, 720)
     SCREEN_SIZE = DEF_SCREEN_SIZE
@@ -71,12 +76,14 @@ SCORE_FOR_GHOST = [200, 400, 800, 1600]
 SCORE_FOR_FRUIT = [-999, 100, 300, 500, 700, 1000, 2000, 3000, 5000]  # 0 fruit is not existing!
 PACMAN_MAX_LIVES = 3
 SCREEN_RESPONSE = 2  # ms
-PACMAN_SPEED = 2
-GHOST_SPEED = 1
-PATH_LOGO = IMAGES_DIR + 'logo.png'
+PACMAN_SPEED = 4
+GHOST_SPEED = 2
+QUALITY = 'HIGH'
+
 # endregion General
 
 # region User Interface(UI)
+
 BG_COLOR = [20, 20, 20]
 TEXT_COLOR = [30, 250, 250]
 TITLE_SIZE = 30
@@ -96,9 +103,11 @@ PATH_CREDITS = MENU_DIR + 'credits.ini'
 PATH_CONTROLS = MENU_DIR + 'controls.ini'
 CONFIG_PATH = 'config.ini'
 MAPS_DIR = 'maps/'
+
 # endregion User Interface(UI)
 
 # region Sound mixer constants
+
 DEBUG_MIXER = False
 MIXER_VOLUME = 0.5
 MAX_MENU_MUSIC = 6
@@ -125,9 +134,11 @@ SOUNDLIB = {
     'GHOST_TO_HOME': SOUNDS_DIR + 'ghost_to_home.wav',
     'EXTRA': SOUNDS_DIR + 'extra.wav'
 }
+
 # endregion Sound mixer constants
 
 # region FIELD
+
 CELL_SIZE = 20
 WALL_CODES = 'ABCDEFGHIJKLMNOPQRSTX'
 FRUIT_CODES = '12345678'
@@ -137,13 +148,27 @@ GHOSTS_ENTER_CODE = '-'
 PACMAN_CODE = '@'
 GHOSTS_CODES = {'BLINKY': 'b', 'PINKY': 'p', 'INKY': 'i', 'CLYDE': 'c'}
 DEFAULT_MAP_FILE = 'def_map.ini'
+
 # endregion FIELD
 
-# HUD
+# region HUD
+
 SCORES_HUD_FONT_SIZE = CELL_SIZE
 PATH_LIFE = IMAGES_DIR + 'life.png'
 
+# endregion HUD
+
+# region User Events
+
+USEREVENT = 24  # Constant from pygame
+PM_TIMER = USEREVENT + 1
+GH_TIMER = USEREVENT + 2
+GB_TIMER = USEREVENT + 3
+
+# endregion User Events
+
 # region CHARACTERS
+
 FRIGHTENED_TICKS_LIMIT = 8000  # 8 seconds
 SLOW_MO_TICKS_LIMIT = 600  # 0.5 seconds
 DEATH_TICKS_LIMIT = 1900  # 1.9 seconds

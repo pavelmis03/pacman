@@ -69,7 +69,7 @@ class Ghost(DrawableObject):
         self.frightened_ticks = 0
         self.eat_scores_num = 0
         self.vel = Dir.left if self.ghost_type == GhostType.BLINKY else Dir.up
-        self.lvl_speed = GHOST_SPEED if self.game_object.level < 3 else GHOST_SPEED * 2
+        self.lvl_speed = GHOST_SPEED
         self.f_pos = self.game_object.field.get_cell_from_position(Vec(self.g_rect.centerx, self.g_rect.centery)).f_pos
         self.waiting_time = WAITING_TIME[self.ghost_type]
         self.spawned_time = pygame.time.get_ticks()
@@ -467,7 +467,7 @@ class Pacman(DrawableObject):
     def reset(self):
         self.f_pos = self.game_object.field.pacman_pos
         pac_pos = self.game_object.field.get_cell_position(self.f_pos)
-        self.p_rect.x = pac_pos.x - CELL_SIZE // 2
+        self.p_rect.x = pac_pos.x
         self.p_rect.y = pac_pos.y
 
         self.speed = nearest_divisor_of_num(PACMAN_SPEED, CELL_SIZE)
