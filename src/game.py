@@ -261,7 +261,7 @@ class Game:
         print('BUG')
 
     def game_update(self):
-        if pygame.time.get_ticks() % 16 == 0:
+        if pygame.time.get_ticks() % REF_TABLE[self.level]['UPD_DIVIDER'] == 0:
             self.mixer.process_query_of_sounds()  # need to process the query of sounds if it used
             self.process_events()
             self.process_logic()

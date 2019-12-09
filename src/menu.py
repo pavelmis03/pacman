@@ -1,3 +1,4 @@
+import os
 import sys
 import pygame
 from src.constants import *
@@ -42,11 +43,12 @@ class MainMenu:
         self.curr_click_act = ''
         self.game_object = game_object
         self.additional_text = None
+        self.radio_list = []
         self.logo_shift = -1
         self.logo_effect_counter = 1
         self.a_slider = Slider(game_object, 'Звуки', self.game_object.mixer.volume, 0, 1,
                                (size.SCREEN_WIDTH - 75, size.SCREEN_HEIGHT - 60, 150, 60))
-        self.btn_next_musix = Button(self.game_object, (size.SCREEN_WIDTH - 180, size.SCREEN_HEIGHT - 30, 20, 20),
+        self.btn_next_music = Button(self.game_object, (size.SCREEN_WIDTH - 180, size.SCREEN_HEIGHT - 30, 20, 20),
                                      Color.DOTS_COLOR, Color.BLACK, '>')
 
         # Init font engine
@@ -56,6 +58,18 @@ class MainMenu:
         self.logo = pygame.image.load(PATH_LOGO)
         self.logo_rect = self.logo.get_rect()
         self.display_logo = True
+
+    def show_maps_menu(self):
+        self.maps_menu = True
+        i = 0
+        for file in os.listdir(MAPS_DIR):
+            i += 1
+            btn = Button(self.game_object, (size.SCREEN_CENTER.x - 150 // 2, 50 * i, 150, 30),
+                         Color.CYAN, Color.GRAY, file.split('.')[0], 0)
+            self.radio_list += [btn]
+            if self.game_object.current_map == file:
+                # Visual select button
+                btn.b_color = Color.DOTS_COLOR
 
     def setup_elements(self, menu_names=None, menu_actions=None, x0=size.SCREEN_CENTER[0] // 2, y0=300):
         # Add menu items(buttons)
@@ -74,23 +88,43 @@ class MainMenu:
             # Button position
             item.rect = pygame.Rect((x0, (UI_BTN_SIZE[1] + MENU_ITEM_SPACE) * item_num + y0), UI_BTN_SIZE)  # 1.2 - space
 
+    def process_btns(self):
+        # Next music button
+        if self.btn_next_music.click:
+            self.game_object.change_music()
+        self.btn_next_music.process_logic()
+
+        # Map menu buttons
+        for btn in self.radio_list:
+            if btn.click:
+                self.game_object.current_map = btn.text + '.ini'
+                # Visual select button
+                btn.b_color = Color.DOTS_COLOR
+                for o_btn in self.radio_list:
+                    if o_btn != btn:
+                        o_btn.b_color = Color.CYAN
+            btn.process_logic()
+
     def process_logic(self):
         self.logo_effect_counter += 1
         if not self.logo_effect_counter % 40:
             self.logo_shift *= -1
         self.logo_rect.y += self.logo_shift
         self.a_slider.process_logic()
-        self.btn_next_musix.process_logic()
+
+        self.process_btns()
+
         self.game_object.mixer.volume = self.a_slider.val
         for sound in self.game_object.mixer.sounds:
             self.game_object.mixer.sounds[sound].set_volume(self.game_object.mixer.volume)
 
     def menu_loop(self):
         #Start
-        self.setup_elements(['{:^10}'.format('ИГРАТЬ'), 'УПРАВЛЕНИЕ', '{:^10}'.format('РЕКОРДЫ'), '{:^10}'.format('СОЗДАТЕЛИ'), '{:^10}'.format('ВЫХОД')],
-                           ['menu_action_play(self.page)', 'menu_action_controls(self.page)',
-                            'menu_action_highscores(self.page)', 'menu_action_credits(self.page)',
-                            'menu_action_exit(self.page)'])
+        self.setup_elements(['{:^10}'.format('ИГРАТЬ'), '{:^10}'.format('КАРТЫ'), 'УПРАВЛЕНИЕ',
+                             '{:^10}'.format('РЕКОРДЫ'), '{:^10}'.format('СОЗДАТЕЛИ'), '{:^10}'.format('ВЫХОД')],
+                            ['menu_action_play(self.page)', 'menu_action_maps(self.page)',
+                             'menu_action_controls(self.page)', 'menu_action_highscores(self.page)',
+                             'menu_action_credits(self.page)', 'menu_action_exit(self.page)'])
 
         #Loop
         while self.curr_click_act not in ['PLAY', 'EXIT']:
@@ -105,16 +139,26 @@ class MainMenu:
                 self.game_object.start_game = True
                 self.game_object.game_over = True
                 sys.exit()
+            # Menu items
             for item in self.menu_items:
                 item.procedure_events(event)
             # Slider
             self.a_slider.process_event(event)
-            self.btn_next_musix.process_event(event)
+            self.btn_next_music.process_event(event)
+            # Map items
+            for btn in self.radio_list:
+                btn.process_event(event)
 
     def process_draw(self):
         self.game_object.screen.fill(BG_COLOR)  # Заливка цветом
+        # Menu items
         for item in self.menu_items:
             item.process_draw(self.game_object.screen)
+
+        # Radio List
+        if self.radio_list:
+            for item in self.radio_list:
+                item.process_draw()
 
         # Additional text
         if self.additional_text:
@@ -129,24 +173,35 @@ class MainMenu:
                                           self.logo_rect.height + self.logo_rect.y // 2))
         # Slider
         self.a_slider.process_draw()
-        self.btn_next_musix.process_draw()
+        self.btn_next_music.process_draw()
         pygame.display.flip()  # Double buffering
         pygame.time.wait(SCREEN_RESPONSE)  # Ждать 10 миллисекунд
 
 
 def menu_action_back(menu):
     menu.additional_text = None
-    menu.setup_elements(['{:^10}'.format('ИГРАТЬ'), 'УПРАВЛЕНИЕ', '{:^10}'.format('РЕКОРДЫ'), '{:^10}'.format('СОЗДАТЕЛИ'), '{:^10}'.format('ВЫХОД')],
-                       ['menu_action_play(self.page)', 'menu_action_controls(self.page)',
-                        'menu_action_highscores(self.page)', 'menu_action_credits(self.page)',
-                        'menu_action_exit(self.page)'])
+    menu.setup_elements(['{:^10}'.format('ИГРАТЬ'), '{:^10}'.format('КАРТЫ'), 'УПРАВЛЕНИЕ',
+                             '{:^10}'.format('РЕКОРДЫ'), '{:^10}'.format('СОЗДАТЕЛИ'), '{:^10}'.format('ВЫХОД')],
+                        ['menu_action_play(self.page)', 'menu_action_maps(self.page)',
+                             'menu_action_controls(self.page)', 'menu_action_highscores(self.page)',
+                             'menu_action_credits(self.page)', 'menu_action_exit(self.page)'])
     menu.display_logo = True
+    menu.maps_menu = False
+    menu.radio_list = []
 
 
 def menu_action_play(menu):
     menu.curr_click_act = 'PLAY'
     menu.additional_text = None
     menu.game_object.start_game = True
+    menu.display_logo = False
+
+
+def menu_action_maps(menu):
+    menu.curr_click_act = 'MAPS'
+    menu.additional_text = None
+    menu.setup_elements(['НАЗАД'], ['menu_action_back(self.page)'], x0=35, y0=size.SCREEN_HEIGHT - 100)
+    menu.show_maps_menu()
     menu.display_logo = False
 
 

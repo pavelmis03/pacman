@@ -86,6 +86,7 @@ class Button(DrawableObject):
     def on_click(self):
         self.click = True
         self.game_object.change_music()
+        print('CLICKED')
 
     def process_event(self, event):
         self.click = False
